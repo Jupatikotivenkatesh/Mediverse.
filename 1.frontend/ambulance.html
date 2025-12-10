@@ -5,245 +5,367 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RapidResponse | Ambulance Services</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- LeafletJS CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <style>
-        /* Custom Styles */
+        /* Custom Styles to supplement Bootstrap */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light blue-gray background */
+            background-color: #f0f4f8;
         }
 
-        /* Active tab style */
-        .tab-active {
-            border-bottom-color: #ef4444; /* red-500 */
-            color: #ef4444;
-            font-weight: 600;
+        /* Map Heights */
+        #map {
+            height: 320px;
+            width: 100%;
+            border-radius: 0.5rem;
         }
-        
-        /* Message box styling */
-        .message-box {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        #picker-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
         }
 
         /* Custom Leaflet Icons */
         .ambulance-map-icon {
-            color: #ef4444; /* red-500 */
+            color: #dc3545; /* Bootstrap danger color */
             font-size: 2.5rem;
             text-shadow: 0 0 8px rgba(0,0,0,0.5);
         }
         .hospital-map-icon {
-            color: #3b82f6; /* blue-500 */
+            color: #0d6efd; /* Bootstrap primary color */
             font-size: 2.5rem;
             text-shadow: 0 0 8px rgba(0,0,0,0.3);
         }
+
+        /* Floating Message Box */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100; /* Higher than modal */
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .message-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-btn:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body class="text-secondary">
 
-    <div id="app" class="max-w-4xl mx-auto min-h-screen bg-white shadow-2xl rounded-lg my-0 sm:my-8 overflow-hidden">
+    <div id="app" class="container my-md-5 my-0 p-0 bg-white shadow-lg rounded overflow-hidden" style="max-width: 900px; min-height: 100vh;">
         
-        <!-- Header -->
-        <header class="bg-gray-800 text-white p-4 flex items-center justify-between shadow-md">
-            <div class="flex items-center">
-                <i class="fas fa-ambulance text-3xl text-green-500 mr-3"></i>
-                <h1 class="text-xl md:text-2xl font-bold">Your Ambulance</h1>
+        <header class="bg-dark text-white p-3 d-flex justify-content-between align-items-center shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-ambulance fa-2x text-success me-3"></i>
+                <h1 class="h4 mb-0 fw-bold">Your Ambulance</h1>
             </div>
-            <button class="p-2 rounded-full hover:bg-gray-700 transition duration-300">
-                <i class="fas fa-user-circle text-2xl"></i>
+            <button class="btn btn-dark rounded-circle p-2">
+                <i class="fas fa-user-circle fa-2x"></i>
             </button>
         </header>
 
-        <!-- Main Content -->
-        <main class="p-4 sm:p-6 md:p-8">
+        <main class="p-4 p-md-5">
             
-            <!-- Navigation Tabs -->
-            <nav class="flex border-b-2 border-gray-200 mb-6">
-                <button data-tab="booking" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300 tab-active">
-                    <i class="fas fa-plus-circle mr-2"></i>Book
+            <nav class="d-flex border-bottom mb-4">
+                <button data-tab="booking" class="tab-button nav-btn btn flex-fill rounded-0 py-3 text-danger fw-bold border-bottom border-danger border-3">
+                    <i class="fas fa-plus-circle me-2"></i>Book
                 </button>
-                <button data-tab="tracking" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
-                    <i class="fas fa-map-marker-alt mr-2"></i>Track
+                <button data-tab="tracking" class="tab-button nav-btn btn flex-fill rounded-0 py-3 text-muted">
+                    <i class="fas fa-map-marker-alt me-2"></i>Track
                 </button>
-                <button data-tab="availability" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
-                    <i class="fas fa-check-circle mr-2"></i>Availability
+                <button data-tab="availability" class="tab-button nav-btn btn flex-fill rounded-0 py-3 text-muted">
+                    <i class="fas fa-check-circle me-2"></i>Availability
                 </button>
             </nav>
 
-            <!-- Content Sections -->
-            <!-- Booking Section -->
             <div id="booking" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-700">Book an Ambulance</h2>
-                    <p class="text-gray-500 mt-1">Fill in the details below for immediate assistance.</p>
+                <div class="text-center mb-4">
+                    <h2 class="h3 fw-bold text-dark">Book an Ambulance</h2>
+                    <p class="text-muted">Fill in the details below for immediate assistance.</p>
                 </div>
-                <form id="booking-form" class="space-y-4">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-600">Patient's Name</label>
-                        <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition">
+                <form id="booking-form">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-medium">Patient's Name</label>
+                        <input type="text" id="name" name="name" required class="form-control bg-light">
                     </div>
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-600">Contact Number</label>
-                        <input type="tel" id="phone" name="phone" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-medium">Contact Number</label>
+                        <input type="tel" id="phone" name="phone" required class="form-control bg-light">
                     </div>
-                    <div>
-                        <label for="location" class="block text-sm font-medium text-gray-600">Pickup Location</label>
-                        <div class="relative">
-                            <input type="text" id="location" name="location" placeholder="Enter address or detect automatically" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition pr-10">
-                            <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-red-500">
-                                <i class="fas fa-location-arrow"></i>
+                    
+                    <div class="mb-4">
+                        <label for="location" class="form-label fw-medium">Pickup Location</label>
+                        <div class="input-group">
+                            <input type="text" id="location" name="location" placeholder="Address or GPS coordinates" required class="form-control bg-light">
+                            
+                            <button type="button" id="btn-detect-location" class="btn btn-outline-primary" title="Detect My Location">
+                                <i class="fas fa-crosshairs"></i> Detect
+                            </button>
+                            
+                            <button type="button" id="btn-open-map" class="btn btn-outline-secondary" title="Pick on Map" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                <i class="fas fa-map-marked-alt"></i> Map
                             </button>
                         </div>
+                        <div class="form-text">Click 'Detect' for GPS or 'Map' to select manually.</div>
                     </div>
+                    
                     <div>
-                        <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300 transform hover:scale-105 shadow-lg">
+                        <button type="submit" class="btn btn-danger w-100 py-3 fw-bold shadow">
                             Confirm Booking
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Tracking Section (Initially Hidden) -->
-            <div id="tracking" class="tab-content hidden">
-                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-700">Live Ambulance Tracking</h2>
-                    <p class="text-gray-500 mt-1">Your help is on the way. ETA: <span id="eta" class="font-bold text-red-500">8 minutes</span></p>
+            <div id="tracking" class="tab-content d-none">
+                 <div class="text-center mb-4">
+                    <h2 class="h3 fw-bold text-dark">Live Ambulance Tracking</h2>
+                    <p class="text-muted">Your help is on the way. ETA: <span id="eta" class="fw-bold text-danger">8 minutes</span></p>
                 </div>
-                <!-- Map Container -->
-                <div id="map" class="w-full h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden shadow-inner z-0">
-                    <!-- The map will be rendered here by Leaflet.js -->
-                </div>
-                <!-- Driver Info -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-lg shadow-md">
-                    <h3 class="font-bold text-lg mb-3">Driver Information</h3>
-                    <div class="flex items-center space-x-4">
-                        <img src="https://placehold.co/64x64/d1d5db/374151?text=Driver" class="w-16 h-16 rounded-full" alt="Driver photo">
-                        <div>
-                            <p class="font-semibold text-gray-800">John Doe</p>
-                            <p class="text-sm text-gray-500">Vehicle: AP 03 Z 1234</p>
-                            <p class="text-sm text-gray-500">Rating: 4.8 <i class="fas fa-star text-yellow-400"></i></p>
-                        </div>
-                        <div class="flex-grow text-right">
-                             <a href="tel:1234567890" class="inline-block bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition shadow">
-                                <i class="fas fa-phone"></i>
-                            </a>
+                
+                <div id="map" class="mb-4 bg-light shadow-inner border"></div>
+
+                <div class="card bg-light border-0 shadow-sm">
+                    <div class="card-body">
+                        <h3 class="h5 fw-bold mb-3">Driver Information</h3>
+                        <div class="d-flex align-items-center">
+                            <img src="https://placehold.co/64x64/d1d5db/374151?text=Driver" class="rounded-circle me-3" width="64" height="64" alt="Driver photo">
+                            <div>
+                                <p class="mb-0 fw-bold text-dark">John Doe</p>
+                                <p class="mb-0 small text-muted">Vehicle: AP 03 Z 1234</p>
+                                <p class="mb-0 small text-muted">Rating: 4.8 <i class="fas fa-star text-warning"></i></p>
+                            </div>
+                            <div class="ms-auto">
+                                 <a href="tel:1234567890" class="btn btn-success rounded-circle p-3 shadow">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Availability Section (Initially Hidden) -->
-            <div id="availability" class="tab-content hidden">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-700">Nearby Ambulances</h2>
-                    <p class="text-gray-500 mt-1">Select an available ambulance to proceed with booking.</p>
+            <div id="availability" class="tab-content d-none">
+                <div class="text-center mb-4">
+                    <h2 class="h3 fw-bold text-dark">Nearby Ambulances</h2>
+                    <p class="text-muted">Select an available ambulance to proceed with booking.</p>
                 </div>
-                <div class="space-y-4">
-                    <!-- Cards remain the same -->
-                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
-                        <div class="flex items-center">
-                            <i class="fas fa-ambulance text-2xl text-green-600 mr-4"></i>
-                            <div>
-                                <p class="font-semibold">Basic Life Support (BLS)</p>
-                                <p class="text-sm text-gray-600">Approx. 5 mins away</p>
+                <div class="d-grid gap-3">
+                    <div class="card border-0 border-start border-4 border-success shadow-sm" style="background-color: #f0fdf4;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-ambulance fa-2x text-success me-4"></i>
+                                <div>
+                                    <p class="mb-0 fw-bold text-dark">Basic Life Support (BLS)</p>
+                                    <p class="mb-0 small text-muted">Approx. 5 mins away</p>
+                                </div>
                             </div>
+                            <button class="request-btn btn btn-success fw-bold">Request</button>
                         </div>
-                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
                     </div>
-                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
-                        <div class="flex items-center">
-                             <i class="fas fa-star-of-life text-2xl text-blue-600 mr-4"></i>
-                             <div>
-                                <p class="font-semibold">Advanced Life Support (ALS)</p>
-                                <p class="text-sm text-gray-600">Approx. 8 mins away</p>
+                    <div class="card border-0 border-start border-4 border-success shadow-sm" style="background-color: #f0fdf4;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                 <i class="fas fa-star-of-life fa-2x text-primary me-4"></i>
+                                 <div>
+                                    <p class="mb-0 fw-bold text-dark">Advanced Life Support (ALS)</p>
+                                    <p class="mb-0 small text-muted">Approx. 8 mins away</p>
+                                </div>
                             </div>
+                            <button class="request-btn btn btn-success fw-bold">Request</button>
                         </div>
-                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
-                    </div>
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
-                         <div class="flex items-center">
-                            <i class="fas fa-baby text-2xl text-yellow-600 mr-4"></i>
-                            <div>
-                                <p class="font-semibold">Neonatal Transport</p>
-                                <p class="text-sm text-gray-600">Approx. 12 mins away</p>
-                            </div>
-                        </div>
-                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
-                    </div>
-                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
-                         <div class="flex items-center">
-                            <i class="fas fa-heartbeat text-2xl text-red-600 mr-4"></i>
-                            <div>
-                                <p class="font-semibold">Cardiac Care Ambulance</p>
-                                <p class="text-sm text-gray-600">Not available in your area</p>
-                            </div>
-                        </div>
-                        <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded-md cursor-not-allowed" disabled>Request</button>
                     </div>
                 </div>
             </div>
 
         </main>
         
-        <!-- Footer -->
-        <footer class="bg-gray-100 p-4 text-center border-t">
-            <p class="text-gray-600 text-sm">Emergency Contact: <a href="tel:102" class="font-bold text-red-600">102</a></p>
-            <p class="text-xs text-gray-400 mt-2">&copy; 2025 RapidResponse Services. All Rights Reserved.</p>
+        <footer class="bg-light p-3 text-center border-top">
+            <p class="mb-1 text-muted small">Emergency Contact: <a href="tel:102" class="fw-bold text-danger text-decoration-none">102</a></p>
+            <p class="text-muted small mb-0">&copy; 2025 RapidResponse Services. All Rights Reserved.</p>
         </footer>
 
     </div>
 
-    <!-- Custom Message Box (hidden by default) -->
-    <div id="message-box" class="message-box fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10">
-        <p id="message-text"></p>
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">Select Pickup Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="picker-map"></div>
+                    <div class="alert alert-info mt-3 mb-0 py-2 small">
+                        <i class="fas fa-info-circle me-1"></i> Drag the blue marker to your exact location.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn-confirm-location" data-bs-dismiss="modal">Set Location</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- LeafletJS for Maps -->
+    <div id="message-box" class="message-box rounded shadow-lg p-3 text-white bg-success">
+        <p id="message-text" class="mb-0">Message goes here</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // -- Elements --
             const tabs = document.querySelectorAll('.tab-button');
             const contents = document.querySelectorAll('.tab-content');
             const bookingForm = document.getElementById('booking-form');
             const requestButtons = document.querySelectorAll('.request-btn');
-
-            let map = null;
+            const locationInput = document.getElementById('location');
+            const btnDetect = document.getElementById('btn-detect-location');
+            const btnConfirmLoc = document.getElementById('btn-confirm-location');
+            
+            // -- State --
+            let trackingMap = null;
+            let pickerMap = null;
+            let pickerMarker = null;
             let ambulanceMarker = null;
             let etaInterval = null;
+            let selectedCoords = null;
 
-            // Function to initialize and run the map
-            function initMap() {
-                // Prevent re-initialization
-                if (map) {
-                    setTimeout(() => map.invalidateSize(), 0); // Recalculate map size if it was hidden
+            // --- Geolocation Logic (Auto Detect) ---
+            btnDetect.addEventListener('click', () => {
+                if (navigator.geolocation) {
+                    // Change icon to loading spinner
+                    const icon = btnDetect.querySelector('i');
+                    icon.className = 'fas fa-spinner fa-spin';
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude } = position.coords;
+                            selectedCoords = { lat: latitude, lng: longitude };
+                            
+                            // Attempt to get address (Reverse Geocoding)
+                            fetchAddress(latitude, longitude);
+                            
+                            // Reset Icon
+                            icon.className = 'fas fa-crosshairs';
+                        },
+                        (error) => {
+                            showMessage('Could not get location. Please allow permissions.', 'error');
+                            icon.className = 'fas fa-crosshairs';
+                        }
+                    );
+                } else {
+                    showMessage('Geolocation is not supported by this browser.', 'error');
+                }
+            });
+
+            // Helper to fetch address from OpenStreetMap Nominatim
+            function fetchAddress(lat, lng) {
+                locationInput.value = `Locating... (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                
+                // Using OpenStreetMap Nominatim API (Free, requires User-Agent)
+                const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            locationInput.value = data.display_name;
+                            showMessage('Location detected!', 'success');
+                        } else {
+                            locationInput.value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                            showMessage('Location coords set.', 'success');
+                        }
+                    })
+                    .catch(err => {
+                        locationInput.value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                        showMessage('Location coords set (Offline mode).', 'success');
+                    });
+            }
+
+
+            // --- Map Picker Logic (Modal) ---
+            const mapModal = document.getElementById('mapModal');
+            
+            // Initialize Picker Map when Modal is shown
+            mapModal.addEventListener('shown.bs.modal', function () {
+                if (!pickerMap) {
+                    // Default center (e.g., Andhra Pradesh as per previous context) or user's current loc
+                    const center = selectedCoords ? [selectedCoords.lat, selectedCoords.lng] : [13.6288, 79.4192];
+                    
+                    pickerMap = L.map('picker-map').setView(center, 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(pickerMap);
+
+                    // Add Draggable Marker
+                    pickerMarker = L.marker(center, { draggable: true }).addTo(pickerMap);
+                    
+                    pickerMarker.on('dragend', function(event) {
+                        const position = pickerMarker.getLatLng();
+                        selectedCoords = { lat: position.lat, lng: position.lng };
+                    });
+
+                    // Click on map to move marker
+                    pickerMap.on('click', function(e) {
+                        pickerMarker.setLatLng(e.latlng);
+                        selectedCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+                    });
+                } else {
+                    // If map exists, just resize and recenter
+                    pickerMap.invalidateSize();
+                    if(selectedCoords) {
+                        const newLatLng = [selectedCoords.lat, selectedCoords.lng];
+                        pickerMap.setView(newLatLng);
+                        pickerMarker.setLatLng(newLatLng);
+                    }
+                }
+            });
+
+            // Handle "Set Location" from Modal
+            btnConfirmLoc.addEventListener('click', () => {
+                if (selectedCoords) {
+                    fetchAddress(selectedCoords.lat, selectedCoords.lng);
+                }
+            });
+
+
+            // --- Tracking Map Logic (Existing) ---
+            function initTrackingMap() {
+                if (trackingMap) {
+                    setTimeout(() => trackingMap.invalidateSize(), 0);
                     return;
                 }
                 
-                // --- Map setup ---
-                // Centered on a location in Andhra Pradesh, India
                 const patientLocation = [13.6288, 79.4192]; 
                 const hospitalLocation = [13.6510, 79.4320];
 
-                map = L.map('map').setView(patientLocation, 14);
+                trackingMap = L.map('map').setView(patientLocation, 14);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(trackingMap);
 
-                // --- Custom Icons ---
                 const ambulanceIcon = L.divIcon({
                     className: 'ambulance-map-icon',
                     html: '<i class="fas fa-ambulance fa-flip-horizontal"></i>',
@@ -258,23 +380,20 @@
                     iconAnchor: [20, 40]
                 });
 
-                // --- Markers ---
-                ambulanceMarker = L.marker(patientLocation, { icon: ambulanceIcon }).addTo(map).bindPopup('Ambulance is here.');
-                L.marker(hospitalLocation, { icon: hospitalIcon }).addTo(map).bindPopup('City General Hospital');
-                L.polyline([patientLocation, hospitalLocation], {color: 'blue', dashArray: '5, 5'}).addTo(map);
+                ambulanceMarker = L.marker(patientLocation, { icon: ambulanceIcon }).addTo(trackingMap).bindPopup('Ambulance is here.');
+                L.marker(hospitalLocation, { icon: hospitalIcon }).addTo(trackingMap).bindPopup('City General Hospital');
+                L.polyline([patientLocation, hospitalLocation], {color: 'blue', dashArray: '5, 5'}).addTo(trackingMap);
                 
-                map.fitBounds([patientLocation, hospitalLocation], { padding: [50, 50] });
+                trackingMap.fitBounds([patientLocation, hospitalLocation], { padding: [50, 50] });
 
-                // --- Movement Simulation ---
                 simulateAmbulanceMovement(patientLocation, hospitalLocation);
             }
 
             function simulateAmbulanceMovement(startPoint, endPoint) {
                 let currentStep = 0;
-                const totalSteps = 100; // Increase for smoother animation
-                const totalDuration = 8 * 60 * 1000; // 8 minutes in milliseconds
+                const totalSteps = 100;
+                const totalDuration = 8 * 60 * 1000;
                 const intervalTime = totalDuration / totalSteps;
-
                 const latStep = (endPoint[0] - startPoint[0]) / totalSteps;
                 const lngStep = (endPoint[1] - startPoint[1]) / totalSteps;
 
@@ -288,38 +407,36 @@
                         return;
                     }
                     currentStep++;
-                    
-                    const newLat = startPoint[0] + (latStep * currentStep);
-                    const newLng = startPoint[1] + (lngStep * currentStep);
-                    const newLatLng = [newLat, newLng];
-
+                    const newLatLng = [startPoint[0] + (latStep * currentStep), startPoint[1] + (lngStep * currentStep)];
                     ambulanceMarker.setLatLng(newLatLng);
-                    map.panTo(newLatLng); // Keep the ambulance centered
-
+                    trackingMap.panTo(newLatLng);
                     const remainingMinutes = Math.round(8 * (1 - (currentStep / totalSteps)));
                     document.getElementById('eta').textContent = `${remainingMinutes} minutes`;
-
                 }, intervalTime);
             }
 
-            // Function to switch tabs
+            // --- Tabs & UI Logic ---
             function switchTab(tabName) {
                 tabs.forEach(tab => {
-                    tab.classList.toggle('tab-active', tab.dataset.tab === tabName);
-                });
-                contents.forEach(content => {
-                    content.classList.toggle('hidden', content.id !== tabName);
+                    tab.classList.remove('text-danger', 'fw-bold', 'border-bottom', 'border-danger', 'border-3');
+                    tab.classList.add('text-muted');
+                    if (tab.dataset.tab === tabName) {
+                        tab.classList.remove('text-muted');
+                        tab.classList.add('text-danger', 'fw-bold', 'border-bottom', 'border-danger', 'border-3');
+                    }
                 });
 
-                // Clear simulation if navigating away from tracking tab
+                contents.forEach(content => {
+                    content.classList.toggle('d-none', content.id !== tabName);
+                });
+
                 if (tabName !== 'tracking' && etaInterval) {
                     clearInterval(etaInterval);
                     etaInterval = null;
                 }
 
-                // Initialize map when tracking tab is selected
                 if (tabName === 'tracking') {
-                    initMap();
+                    initTrackingMap();
                 }
             }
             
@@ -341,26 +458,19 @@
                 const messageBox = document.getElementById('message-box');
                 const messageText = document.getElementById('message-text');
                 messageText.textContent = text;
-                messageBox.className = 'message-box fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10';
                 
-                if (type === 'success') {
-                    messageBox.classList.add('bg-green-500');
-                } else {
-                    messageBox.classList.add('bg-red-500');
-                }
+                messageBox.className = 'message-box rounded shadow-lg p-3 text-white';
+                messageBox.classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
 
                 requestAnimationFrame(() => {
-                    messageBox.classList.remove('opacity-0', '-translate-y-10');
-                    messageBox.classList.add('opacity-100', 'translate-y-0');
+                    messageBox.classList.add('show');
                 });
                 
                 setTimeout(() => {
-                    messageBox.classList.remove('opacity-100', 'translate-y-0');
-                    messageBox.classList.add('opacity-0', '-translate-y-10');
+                    messageBox.classList.remove('show');
                 }, 3000);
             }
         });
     </script>
 </body>
 </html>
-
