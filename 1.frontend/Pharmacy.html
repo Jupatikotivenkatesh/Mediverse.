@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmaCare | Online Pharmacy</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,204 +14,236 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        /* Custom Styles */
+        /* Custom Styles to supplement Bootstrap */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* gray-100 */
+            background-color: #f3f4f6; /* gray-100 equivalent */
         }
 
-        /* Active tab style */
-        .tab-active {
-            border-bottom-color: #2563eb; /* blue-600 */
-            color: #2563eb;
+        /* Nav Tabs Customization */
+        .nav-pills .nav-link {
+            color: #6c757d; /* text-muted */
+            font-weight: 500;
+            border-radius: 0;
+            border-bottom: 2px solid transparent;
+            padding: 1rem;
+        }
+        
+        .nav-pills .nav-link.active {
+            color: #0d6efd; /* blue-600 */
+            background-color: transparent;
+            border-bottom-color: #0d6efd;
             font-weight: 600;
         }
         
-        /* Custom message box styling */
-        .message-box {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            z-index: 100;
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: #f8f9fa; /* gray-100 */
         }
 
-        /* Custom file input styling */
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-        .file-input-button {
+        /* File Input Styling */
+        .file-drop-zone {
             border: 2px dashed #d1d5db;
-            color: #4b5563;
             background-color: #f9fafb;
-            padding: 2.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
             transition: all 0.2s ease;
-            text-align: center;
-        }
-        .file-input-wrapper:hover .file-input-button {
-            background-color: #eff6ff;
-            border-color: #3b82f6;
-        }
-        .file-input-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
             cursor: pointer;
         }
         
-        /* Modal styles */
-        .modal-backdrop {
-            transition: opacity 0.3s ease;
+        .file-drop-zone:hover {
+            background-color: #eff6ff; /* blue-50 */
+            border-color: #3b82f6; /* blue-500 */
         }
-        .modal-content {
-            transition: transform 0.3s ease;
+
+        /* Message Box Animation */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        
+        .message-box.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Camera Modal Z-Index */
+        #camera-view {
+            z-index: 2000;
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body class="bg-light text-secondary">
 
-    <div id="app" class="max-w-4xl mx-auto min-h-screen bg-white shadow-2xl rounded-lg my-0 sm:my-8 overflow-hidden">
+    <div id="app" class="container my-md-5 my-0 p-0 bg-white shadow-lg rounded overflow-hidden" style="max-width: 900px; min-height: 100vh;">
         
-        <header class="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm sticky top-0 bg-opacity-90 backdrop-blur-sm z-50">
-            <div class="flex items-center">
-                <i class="fas fa-pills text-3xl text-blue-600 mr-3"></i>
-                <h1 class="text-xl md:text-2xl font-bold text-gray-800">PharmaCare</h1>
+        <header class="bg-white border-bottom p-3 d-flex align-items-center justify-content-between sticky-top shadow-sm" style="background-color: rgba(255,255,255,0.95);">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-pills fa-2x text-primary me-3"></i>
+                <h1 class="h4 fw-bold text-dark mb-0">PharmaCare</h1>
             </div>
-            <button class="p-2 rounded-full hover:bg-gray-100 transition duration-300">
-                <i class="fas fa-shopping-cart text-2xl text-gray-600"></i>
+            <button class="btn btn-light rounded-circle p-2">
+                <i class="fas fa-shopping-cart fa-lg text-secondary"></i>
             </button>
         </header>
 
-        <main class="p-4 sm:p-6 md:p-8">
+        <main class="p-4 p-md-5">
             
-            <nav class="flex border-b-2 border-gray-200 mb-6 flex-wrap">
-                <button data-tab="search" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300 tab-active">
-                    <i class="fas fa-search mr-2"></i>Search
-                </button>
-                <button data-tab="order" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
-                    <i class="fas fa-upload mr-2"></i>Order
-                </button>
-                <button data-tab="diseases" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
-                    <i class="fas fa-book-medical mr-2"></i>MedSearch
-                </button>
-            </nav>
+            <ul class="nav nav-pills nav-fill border-bottom mb-4" id="mainTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="search-tab" data-bs-toggle="pill" data-bs-target="#search" type="button" role="tab">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="order-tab" data-bs-toggle="pill" data-bs-target="#order" type="button" role="tab">
+                        <i class="fas fa-upload me-2"></i>Order
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="diseases-tab" data-bs-toggle="pill" data-bs-target="#diseases" type="button" role="tab">
+                        <i class="fas fa-book-medical me-2"></i>MedSearch
+                    </button>
+                </li>
+            </ul>
 
-            <div id="search" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-700">Find Medicines & Products</h2>
-                    <p class="text-gray-500 mt-1">Search for any medicine or health condition.</p>
-                </div>
-                <div class="relative mb-6">
-                    <input type="search" id="medicine-search" placeholder="e.g., Paracetamol, Diabetes..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-                <div id="search-results" class="space-y-3">
-                    <p class="text-center text-gray-400">Search results will appear here.</p>
-                </div>
-            </div>
-
-            <div id="order" class="tab-content hidden">
-                <div id="order-entry-view">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-700">Order with Prescription</h2>
-                        <p class="text-gray-500 mt-1">Upload a valid prescription to book your medicines.</p>
+            <div class="tab-content" id="mainTabContent">
+                
+                <div class="tab-pane fade show active" id="search" role="tabpanel">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 fw-bold text-dark">Find Medicines & Products</h2>
+                        <p class="text-muted">Search for any medicine or health condition.</p>
                     </div>
-                    <form id="order-form" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                            <div class="file-input-wrapper w-full h-full">
-                                <div id="file-label-upload" class="file-input-button flex flex-col justify-center items-center h-full">
-                                      <i class="fas fa-cloud-upload-alt text-4xl mb-2 text-gray-400"></i>
-                                      <p class="font-semibold">Upload from device</p>
-                                      <p class="text-sm text-gray-500">PNG, JPG, PDF</p>
+                    
+                    <div class="input-group input-group-lg mb-4 shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="search" id="medicine-search" class="form-control border-start-0" placeholder="e.g., Paracetamol, Diabetes...">
+                    </div>
+                    
+                    <div id="search-results" class="d-grid gap-3">
+                        <p class="text-center text-muted">Search results will appear here.</p>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="order" role="tabpanel">
+                    
+                    <div id="order-entry-view">
+                        <div class="text-center mb-4">
+                            <h2 class="h3 fw-bold text-dark">Order with Prescription</h2>
+                            <p class="text-muted">Upload a valid prescription to book your medicines.</p>
+                        </div>
+                        
+                        <form id="order-form">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="file-drop-zone rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 position-relative">
+                                        <div id="file-label-upload" class="text-center">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
+                                            <p class="fw-semibold mb-0 text-dark">Upload from device</p>
+                                            <p class="small text-muted mb-0">PNG, JPG, PDF</p>
+                                        </div>
+                                        <input type="file" id="prescription-file" class="position-absolute w-100 h-100 top-0 start-0 opacity-0" accept="image/png, image/jpeg, application/pdf" style="cursor: pointer;">
+                                    </div>
                                 </div>
-                                <input type="file" id="prescription-file" accept="image/png, image/jpeg, application/pdf">
+                                
+                                <div class="col-md-6">
+                                    <button type="button" id="open-camera-btn" class="btn btn-light w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 border border-2">
+                                        <i class="fas fa-camera fa-3x text-muted mb-2"></i>
+                                        <p class="fw-semibold mb-0 text-dark">Use Camera</p>
+                                        <p class="small text-muted mb-0">Capture a photo</p>
+                                    </button>
+                                </div>
                             </div>
-                            <button type="button" id="open-camera-btn" class="file-input-button flex flex-col justify-center items-center h-full hover:border-blue-500 hover:bg-blue-50">
-                                <i class="fas fa-camera text-4xl mb-2 text-gray-400"></i>
-                                <p class="font-semibold">Use Camera</p>
-                                <p class="text-sm text-gray-500">Capture a photo</p>
-                            </button>
-                        </div>
 
-                        <div id="file-preview-container" class="hidden w-full text-center">
-                            <p class="font-semibold text-gray-700 mb-2">Prescription Preview:</p>
-                            <img id="image-preview" class="max-h-48 mx-auto rounded-lg shadow-md mb-2" alt="Prescription Preview">
-                            <div class="flex items-center justify-center">
-                                <p id="file-name" class="text-sm text-gray-600 font-medium"></p>
-                                <button type="button" id="remove-file-btn" class="ml-2 text-red-500 hover:text-red-700 text-xs">&times; Remove</button>
+                            <div id="file-preview-container" class="d-none text-center mb-3">
+                                <p class="fw-semibold text-dark mb-2">Prescription Preview:</p>
+                                <img id="image-preview-order" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;" alt="Prescription Preview">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <p id="file-name" class="small text-muted fw-medium mb-0"></p>
+                                    <button type="button" id="remove-file-btn" class="btn btn-link btn-sm text-danger text-decoration-none ms-2">&times; Remove</button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-600">Delivery Address</label>
-                            <textarea id="address" name="address" rows="3" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
-                        </div>
-                          <div>
-                            <label for="order-notes" class="block text-sm font-medium text-gray-600">Notes (Optional)</label>
-                            <input type="text" id="order-notes" name="order-notes" class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition">
-                        </div>
-                        <div>
-                            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:scale-105 shadow-lg">
+                            <div class="mb-3">
+                                <label for="address" class="form-label fw-medium text-dark">Delivery Address</label>
+                                <textarea id="address" name="address" rows="3" required class="form-control bg-light"></textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="order-notes" class="form-label fw-medium text-dark">Notes (Optional)</label>
+                                <input type="text" id="order-notes" name="order-notes" class="form-control bg-light">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
                                 Proceed to Payment
                             </button>
+                        </form>
+                    </div>
+
+                    <div id="payment-view" class="d-none">
+                        <div class="text-center mb-4">
+                            <h2 class="h3 fw-bold text-dark">Complete Your Payment</h2>
+                            <p class="text-muted">Please review your order and proceed.</p>
                         </div>
-                    </form>
+                        
+                        <div class="card bg-light border mb-4">
+                            <div class="card-body">
+                                <h3 class="h5 fw-bold mb-3 text-dark">Order Summary</h3>
+                                <div class="d-flex justify-content-between mb-2"><span>Prescription Medicines</span><span>As per bill</span></div>
+                                <div class="d-flex justify-content-between mb-3"><span>Delivery Fee</span><span>₹50.00</span></div>
+                                <div class="d-flex justify-content-between fw-bold border-top pt-3 text-dark h5"><span>Estimated Total</span><span id="payment-total">₹550.00</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="pay-now-btn" class="btn btn-success fw-bold py-2 shadow-sm">
+                                <i class="fas fa-credit-card me-2"></i>Pay Now
+                            </button>
+                            <button type="button" id="cancel-payment-btn" class="btn btn-secondary fw-bold py-2">Go Back</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="payment-view" class="hidden">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-700">Complete Your Payment</h2>
-                        <p class="text-gray-500 mt-1">Please review your order and proceed.</p>
+                <div class="tab-pane fade" id="diseases" role="tabpanel">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 fw-bold text-dark">Health A-Z</h2>
+                        <p class="text-muted">Browse medicines by health condition.</p>
                     </div>
-                    <div class="bg-gray-50 p-6 rounded-lg border">
-                        <h3 class="font-bold text-lg mb-4">Order Summary</h3>
-                        <div class="space-y-2 text-gray-600">
-                            <div class="flex justify-between"><span>Prescription Medicines</span><span>As per bill</span></div>
-                            <div class="flex justify-between"><span>Delivery Fee</span><span>₹50.00</span></div>
-                            <div class="flex justify-between font-bold text-xl border-t pt-2 mt-2 text-gray-800"><span>Estimated Total</span><span id="payment-total">₹550.00</span></div>
+                    <div id="disease-list" class="d-grid gap-2">
                         </div>
-                    </div>
-                    <div class="mt-6">
-                        <button id="pay-now-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-lg">
-                            <i class="fas fa-credit-card mr-2"></i>Pay Now
-                        </button>
-                        <button type="button" id="cancel-payment-btn" class="w-full mt-2 bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-md hover:bg-gray-300 transition">Go Back</button>
-                    </div>
                 </div>
-            </div>
-            
-            <div id="diseases" class="tab-content hidden">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-700">Health A-Z</h2>
-                    <p class="text-gray-500 mt-1">Browse medicines by health condition.</p>
-                </div>
-                <div id="disease-list" class="space-y-3">
-                   </div>
+
             </div>
         </main>
     </div>
 
-    <div id="message-box" class="message-box fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10">
-        <p id="message-text"></p>
-    </div>
-    
-    <div id="medicine-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md p-6 transform scale-95">
-             </div>
+    <div id="message-box" class="message-box bg-success text-white py-2 px-4 rounded shadow">
+        <p id="message-text" class="mb-0 fw-medium"></p>
     </div>
 
-    <div id="camera-view" class="hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center p-4 z-[100]">
-        <video id="camera-stream" class="w-full max-w-lg h-auto rounded-lg" autoplay playsinline></video>
-        <canvas id="capture-canvas" class="hidden"></canvas>
-        <div class="mt-6 flex items-center space-x-4">
-            <button type="button" id="close-camera-btn" class="text-white text-lg bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center">&times;</button>
-            <button type="button" id="capture-btn" class="w-20 h-20 bg-white rounded-full border-4 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ring-offset-2 ring-offset-black"></button>
-            <div class="w-12 h-12"></div> </div>
+    <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body p-4" id="modal-content-body">
+                    </div>
+            </div>
+        </div>
     </div>
 
+    <div id="camera-view" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-90 d-flex flex-column align-items-center justify-content-center p-3">
+        <video id="camera-stream" class="w-100 h-auto rounded shadow" style="max-width: 500px;" autoplay playsinline></video>
+        <canvas id="capture-canvas" class="d-none"></canvas>
+        
+        <div class="mt-4 d-flex align-items-center gap-4">
+            <button type="button" id="close-camera-btn" class="btn btn-secondary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px; font-size: 1.5rem;">&times;</button>
+            <button type="button" id="capture-btn" class="btn btn-light rounded-circle border border-4 border-secondary p-0" style="width: 80px; height: 80px;"></button>
+            <div style="width: 48px;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -228,40 +260,37 @@
             const diseases = [...new Set(medicines.map(m => m.disease))].sort();
 
             // --- Element References ---
-            const tabs = document.querySelectorAll('.tab-button');
-            const contents = document.querySelectorAll('.tab-content');
             const searchInput = document.getElementById('medicine-search');
             const searchResultsContainer = document.getElementById('search-results');
             const diseaseListContainer = document.getElementById('disease-list');
             const orderForm = document.getElementById('order-form');
             const fileInput = document.getElementById('prescription-file');
-            const fileLabel = document.getElementById('file-label-upload').parentElement;
+            const fileLabel = document.getElementById('file-label-upload').parentElement; // div.file-drop-zone
             const filePreviewContainer = document.getElementById('file-preview-container');
-            const imagePreview = document.getElementById('image-preview');
+            const imagePreviewOrder = document.getElementById('image-preview-order');
             const fileNameDisplay = document.getElementById('file-name');
-            const modal = document.getElementById('medicine-modal');
-            const modalContent = document.getElementById('modal-content');
-            const openCameraButton = document.getElementById('open-camera-btn');
-            const cameraView = document.getElementById('camera-view');
-            const cameraStream = document.getElementById('camera-stream');
-            const captureButton = document.getElementById('capture-btn');
-            const closeCameraButton = document.getElementById('close-camera-btn');
-            const captureCanvas = document.getElementById('capture-canvas');
             const removeFileButton = document.getElementById('remove-file-btn');
+            
             const orderEntryView = document.getElementById('order-entry-view');
             const paymentView = document.getElementById('payment-view');
             const payNowBtn = document.getElementById('pay-now-btn');
             const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
             const paymentTotal = document.getElementById('payment-total');
 
-            let capturedImageBlob = null;
+            // Modal
+            const medicineModalElement = document.getElementById('medicineModal');
+            const medicineModal = new bootstrap.Modal(medicineModalElement);
+            const modalContentBody = document.getElementById('modal-content-body');
 
-            // --- Tab Switching Logic ---
-            function switchTab(tabName) {
-                tabs.forEach(tab => tab.classList.toggle('tab-active', tab.dataset.tab === tabName));
-                contents.forEach(content => content.classList.toggle('hidden', content.id !== tabName));
-            }
-            tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+            // Camera
+            const openCameraButton = document.getElementById('open-camera-btn');
+            const cameraView = document.getElementById('camera-view');
+            const cameraStream = document.getElementById('camera-stream');
+            const captureButton = document.getElementById('capture-btn');
+            const closeCameraButton = document.getElementById('close-camera-btn');
+            const captureCanvas = document.getElementById('capture-canvas');
+
+            let capturedImageBlob = null;
 
             // --- Search Functionality ---
             function renderSearchResults(query) {
@@ -274,19 +303,21 @@
                 );
 
                 if (results.length === 0) {
-                    searchResultsContainer.innerHTML = `<p class="text-center text-gray-500">No results found for "${query}".</p>`;
+                    searchResultsContainer.innerHTML = `<p class="text-center text-muted">No results found for "${query}".</p>`;
                     return;
                 }
 
                 results.forEach(med => {
                     const resultCard = document.createElement('div');
-                    resultCard.className = 'p-4 border rounded-lg hover:bg-gray-50 hover:shadow-md transition cursor-pointer flex justify-between items-center';
+                    resultCard.className = 'card border shadow-sm cursor-pointer hover-shadow'; // Bootstrap classes
                     resultCard.innerHTML = `
-                        <div>
-                            <p class="font-bold text-blue-700">${med.name}</p>
-                            <p class="text-sm text-gray-600">Used for: ${med.uses}</p>
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title text-primary fw-bold mb-1">${med.name}</h5>
+                                <p class="card-text text-muted small mb-0">Used for: ${med.uses}</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
                         </div>
-                        <i class="fas fa-chevron-right text-gray-400"></i>
                     `;
                     resultCard.addEventListener('click', () => showMedicineDetails(med.id));
                     searchResultsContainer.appendChild(resultCard);
@@ -299,48 +330,46 @@
                 const med = medicines.find(m => m.id === medicineId);
                 if (!med) return;
 
-                modalContent.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-2xl font-bold text-gray-800">${med.name}</h3>
-                        <button id="close-modal" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                modalContentBody.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h3 class="h4 fw-bold text-dark mb-0">${med.name}</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="space-y-3">
-                        <p><strong class="font-medium text-gray-600">Primary Use:</strong> <span class="text-blue-600 font-semibold">${med.disease}</span></p>
-                        <p><strong class="font-medium text-gray-600">Common Uses:</strong> ${med.uses}</p>
-                        <p class="text-gray-600">${med.description}</p>
-                        <p class="text-xl font-bold text-right text-green-600">₹${med.price.toFixed(2)}</p>
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <p class="mb-0"><strong class="fw-medium text-dark">Primary Use:</strong> <span class="text-primary fw-semibold">${med.disease}</span></p>
+                        <p class="mb-0"><strong class="fw-medium text-dark">Common Uses:</strong> ${med.uses}</p>
+                        <p class="text-muted mb-0">${med.description}</p>
+                        <p class="h4 fw-bold text-end text-success mt-2">₹${med.price.toFixed(2)}</p>
                     </div>
-                    <button class="w-full mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Add to Cart</button>
+                    <button class="btn btn-primary w-100 fw-bold">Add to Cart</button>
                 `;
-                modal.classList.remove('hidden');
-                requestAnimationFrame(() => {
-                    modal.classList.remove('opacity-0');
-                    modalContent.classList.remove('scale-95');
-                });
-                document.getElementById('close-modal').addEventListener('click', hideMedicineDetails);
+                medicineModal.show();
             }
-
-            function hideMedicineDetails() {
-                modal.classList.add('opacity-0');
-                modalContent.classList.add('scale-95');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-            modal.addEventListener('click', (e) => {
-                if(e.target === modal) hideMedicineDetails();
-            });
 
             // --- Disease A-Z List ---
             function renderDiseaseList() {
                 diseaseListContainer.innerHTML = '';
                 diseases.forEach(disease => {
                     const diseaseCard = document.createElement('div');
-                    diseaseCard.className = 'p-4 border rounded-lg hover:bg-blue-50 transition cursor-pointer';
-                    diseaseCard.innerHTML = `<p class="font-semibold text-gray-700">${disease}</p>`;
+                    diseaseCard.className = 'card border shadow-sm p-3 cursor-pointer';
+                    // Custom hover effect for Bootstrap cards can be done via CSS or utility if available, 
+                    // here we use inline style or class for simplicity in interaction
+                    diseaseCard.style.cursor = 'pointer';
+                    diseaseCard.innerHTML = `<p class="fw-semibold text-dark mb-0">${disease}</p>`;
+                    
                     diseaseCard.addEventListener('click', () => {
-                        switchTab('search');
+                        // Switch tab programmatically using Bootstrap API
+                        const triggerEl = document.querySelector('#search-tab');
+                        const tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
+                        tab.show();
+                        
                         searchInput.value = disease;
                         renderSearchResults(disease);
                     });
+                    
+                    diseaseCard.addEventListener('mouseenter', () => diseaseCard.classList.add('bg-light'));
+                    diseaseCard.addEventListener('mouseleave', () => diseaseCard.classList.remove('bg-light'));
+
                     diseaseListContainer.appendChild(diseaseCard);
                 });
             }
@@ -350,9 +379,9 @@
                 orderForm.reset();
                 fileInput.value = '';
                 capturedImageBlob = null;
-                filePreviewContainer.classList.add('hidden');
-                fileLabel.parentElement.parentElement.classList.remove('hidden');
-                imagePreview.src = '';
+                filePreviewContainer.classList.add('d-none');
+                fileLabel.classList.remove('d-none'); // Show drop zone content
+                imagePreviewOrder.src = '';
                 fileNameDisplay.textContent = '';
             }
 
@@ -361,16 +390,16 @@
             function handleFile(file) {
                 if (!file) return;
                 capturedImageBlob = null;
-                fileLabel.parentElement.parentElement.classList.add('hidden');
-                filePreviewContainer.classList.remove('hidden');
+                fileLabel.classList.add('d-none'); // Hide drop zone content
+                filePreviewContainer.classList.remove('d-none');
                 fileNameDisplay.textContent = file.name;
 
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (e) => { imagePreview.src = e.target.result; };
+                    reader.onload = (e) => { imagePreviewOrder.src = e.target.result; };
                     reader.readAsDataURL(file);
                 } else {
-                    imagePreview.src = `https://placehold.co/200x150/e2e8f0/64748b?text=PDF`;
+                    imagePreviewOrder.src = `https://placehold.co/200x150/e2e8f0/64748b?text=PDF`;
                 }
             }
             
@@ -382,28 +411,28 @@
                     showMessage('Please upload or capture a prescription.', 'error');
                     return;
                 }
-                orderEntryView.classList.add('hidden');
-                paymentView.classList.remove('hidden');
+                orderEntryView.classList.add('d-none');
+                paymentView.classList.remove('d-none');
                 const randomAmount = Math.floor(Math.random() * 1000) + 100;
                 paymentTotal.textContent = `₹${(randomAmount + 50).toFixed(2)}`;
             });
 
             cancelPaymentBtn.addEventListener('click', () => {
-                paymentView.classList.add('hidden');
-                orderEntryView.classList.remove('hidden');
+                paymentView.classList.add('d-none');
+                orderEntryView.classList.remove('d-none');
             });
 
             payNowBtn.addEventListener('click', () => {
                 payNowBtn.disabled = true;
-                payNowBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Processing...`;
+                payNowBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...`;
 
                 setTimeout(() => {
-                    paymentView.classList.add('hidden');
-                    orderEntryView.classList.remove('hidden');
+                    paymentView.classList.add('d-none');
+                    orderEntryView.classList.remove('d-none');
                     showMessage('Payment successful! Your order has been placed.', 'success');
                     resetFileInput();
                     payNowBtn.disabled = false;
-                    payNowBtn.innerHTML = `<i class="fas fa-credit-card mr-2"></i>Pay Now`;
+                    payNowBtn.innerHTML = `<i class="fas fa-credit-card me-2"></i>Pay Now`;
                 }, 2500);
             });
 
@@ -413,7 +442,7 @@
                     try {
                         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                         cameraStream.srcObject = stream;
-                        cameraView.classList.remove('hidden');
+                        cameraView.classList.remove('d-none');
                     } catch (err) {
                         console.error("Camera Error:", err);
                         showMessage('Could not access the camera. Please check permissions.', 'error');
@@ -430,7 +459,7 @@
                     tracks.forEach(track => track.stop());
                     cameraStream.srcObject = null;
                 }
-                cameraView.classList.add('hidden');
+                cameraView.classList.add('d-none');
             }
 
             function captureImage() {
@@ -456,16 +485,24 @@
                 const messageBox = document.getElementById('message-box');
                 const messageText = document.getElementById('message-text');
                 messageText.textContent = text;
-                messageBox.className = 'message-box fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10';
                 
-                messageBox.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+                // Reset classes
+                messageBox.className = 'message-box py-2 px-4 rounded shadow text-white';
+                
+                if(type === 'success') {
+                    messageBox.classList.add('bg-success');
+                } else {
+                    messageBox.classList.add('bg-danger');
+                }
 
+                // Show
                 requestAnimationFrame(() => {
-                    messageBox.classList.remove('opacity-0', '-translate-y-10');
+                    messageBox.classList.add('show');
                 });
                 
+                // Hide after delay
                 setTimeout(() => {
-                    messageBox.classList.add('opacity-0', '-translate-y-10');
+                    messageBox.classList.remove('show');
                 }, 3000);
             }
 

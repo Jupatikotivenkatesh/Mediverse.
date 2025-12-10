@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediScan - Medicine Identifier</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
     <style>
-        /* Custom Styles */
+        /* Custom Styles to complement Bootstrap */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* A light blue-gray background */
+            background-color: #f0f4f8;
         }
 
         .action-button {
@@ -28,118 +28,137 @@
             background-color: #eef2ff;
             color: #4338ca;
             transition: all 0.3s ease;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
         }
         .action-button:hover {
             border-style: solid;
             background-color: #e0e7ff;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            color: #4338ca;
+        }
+        .action-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
         }
 
-        #results-container .detail-item {
-            border-bottom: 1px solid #e5e7eb;
+        .detail-item {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
         }
-        #results-container .detail-item:last-child {
+        .detail-item:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
 
-        /* Spinner Animation */
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            animation: spin 1s linear infinite;
+        /* Camera Modal Overlay */
+        #camera-view {
+            z-index: 2000;
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body class="text-secondary">
 
-    <div id="app" class="max-w-2xl mx-auto min-h-screen bg-white shadow-lg my-0 sm:my-8 rounded-lg overflow-hidden">
+    <div id="app" class="container my-sm-5 bg-white shadow rounded overflow-hidden p-0" style="max-width: 672px; min-height: 100vh;">
         
-        <!-- Header -->
-        <header class="bg-indigo-600 text-white p-5 text-center shadow-md">
-            <div class="flex items-center justify-center">
-                <i class="fas fa-camera-retro text-3xl mr-3"></i>
-                <h1 class="text-2xl font-bold">MediScan</h1>
+        <header class="bg-primary text-white p-4 text-center shadow-sm" style="background-color: #4f46e5 !important;"> 
+            <div class="d-flex align-items-center justify-content-center mb-1">
+                <i class="fas fa-camera-retro fa-2x me-2"></i>
+                <h1 class="h3 fw-bold mb-0">MediScan</h1>
             </div>
-            <p class="text-indigo-200 text-sm mt-1">Get instant medicine information from a photo</p>
+            <p class="text-white-50 small mb-0">Get instant medicine information from a photo</p>
         </header>
 
-        <!-- Main Content -->
-        <main class="p-4 sm:p-6 md:p-8">
+        <main class="p-4 p-md-5">
 
-            <!-- Initial State: Upload/Capture Options -->
+            <div id="model-loading" class="alert alert-info text-center py-2 mb-4">
+                <div class="spinner-border spinner-border-sm text-info me-2" role="status"></div>
+                <small>Initializing Object Detection AI...</small>
+            </div>
+
             <div id="initial-state">
-                <div class="text-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-700">Scan Your Medicine</h2>
-                    <p class="text-gray-500 mt-1">Upload or take a picture of the medicine strip or box.</p>
+                <div class="text-center mb-4">
+                    <h2 class="h5 fw-semibold text-dark">Scan Your Medicine</h2>
+                    <p class="text-muted small">Upload or take a picture of the medicine strip or box.</p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- File Upload Button -->
-                    <label for="image-upload-input" class="action-button w-full p-8 rounded-lg cursor-pointer text-center">
-                        <i class="fas fa-upload text-4xl mb-3"></i>
-                        <span class="block font-semibold">Upload Image</span>
-                    </label>
-                    <input type="file" id="image-upload-input" class="hidden" accept="image/*">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label id="upload-label" class="action-button w-100 p-4 rounded text-center h-100 d-flex flex-column align-items-center justify-content-center disabled">
+                            <i class="fas fa-upload fa-2x mb-2"></i>
+                            <span class="fw-semibold d-block">Upload Image</span>
+                        </label>
+                        <input type="file" id="image-upload-input" class="d-none" accept="image/*" disabled>
+                    </div>
                     
-                    <!-- Camera Button -->
-                    <button id="open-camera-btn" class="action-button w-full p-8 rounded-lg text-center">
-                        <i class="fas fa-camera text-4xl mb-3"></i>
-                        <span class="block font-semibold">Use Camera</span>
-                    </button>
+                    <div class="col-md-6">
+                        <button id="open-camera-btn" class="action-button w-100 p-4 rounded text-center h-100 d-flex flex-column align-items-center justify-content-center border-0 disabled" disabled>
+                            <i class="fas fa-camera fa-2x mb-2"></i>
+                            <span class="fw-semibold d-block">Use Camera</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="error-alert" class="alert alert-danger mt-4 d-none" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i> <span id="error-msg"></span>
                 </div>
             </div>
 
-            <!-- Analysis State: Preview & Results -->
-            <div id="analysis-state" class="hidden">
+            <div id="analysis-state" class="d-none">
                 
-                <!-- Image Preview -->
-                <div id="image-preview-container" class="mb-6 text-center">
-                     <p class="font-semibold text-gray-600 mb-2">Your Image:</p>
-                     <img id="image-preview" src="" alt="Medicine Preview" class="max-h-60 mx-auto rounded-lg shadow-md border-4 border-white">
+                <div id="image-preview-container" class="mb-4 text-center">
+                     <p class="fw-semibold text-muted mb-2 small">Your Image:</p>
+                     <img id="image-preview" src="" alt="Medicine Preview" class="img-fluid rounded shadow border border-4 border-white" style="max-height: 240px;">
                 </div>
 
-                <!-- Results Section -->
-                <div class="bg-gray-50 p-5 rounded-lg border">
-                    <!-- Loading State -->
-                    <div id="loading-state" class="text-center text-gray-500 py-8">
-                        <i class="fas fa-spinner fa-spin text-4xl text-indigo-500 spinner"></i>
-                        <p class="mt-3 font-semibold">Analyzing Image...</p>
-                        <p class="text-sm">Please wait a moment.</p>
+                <div class="bg-light p-4 rounded border">
+                    <div id="loading-state" class="text-center text-muted py-4">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem; color: #6366f1 !important;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="fw-semibold mb-0 text-dark">Analyzing Medicine...</p>
+                        <p class="small">Processing text and identifying packaging.</p>
                     </div>
 
-                    <!-- Results Display -->
-                    <div id="results-container" class="hidden">
-                        <h3 class="text-2xl font-bold text-center mb-4 text-indigo-700" id="med-name"></h3>
-                        <div class="space-y-4">
-                            <div class="detail-item pb-3">
-                                <label class="font-semibold text-gray-500 text-sm">Active Ingredients</label>
-                                <p id="med-ingredients" class="text-gray-800"></p>
+                    <div id="results-container" class="d-none">
+                        <h3 class="h4 fw-bold text-center mb-4 text-primary" id="med-name" style="color: #4338ca !important;"></h3> 
+                        
+                        <div class="d-flex flex-column">
+                            <div class="detail-item">
+                                <label class="fw-semibold text-muted small d-block mb-1">Active Ingredients</label>
+                                <p id="med-ingredients" class="text-dark mb-0"></p>
                             </div>
-                             <div class="detail-item pb-3">
-                                <label class="font-semibold text-gray-500 text-sm">Common Uses</label>
-                                <p id="med-uses" class="text-gray-800"></p>
+                             <div class="detail-item">
+                                <label class="fw-semibold text-muted small d-block mb-1">Common Uses</label>
+                                <p id="med-uses" class="text-dark mb-0"></p>
                             </div>
-                             <div class="detail-item pb-3">
-                                <label class="font-semibold text-gray-500 text-sm">Dosage Information</label>
-                                <p id="med-dosage" class="text-gray-800"></p>
+                             <div class="detail-item">
+                                <label class="fw-semibold text-muted small d-block mb-1">Dosage Information</label>
+                                <p id="med-dosage" class="text-dark mb-0"></p>
                             </div>
-                             <div class="detail-item pb-3">
-                                <label class="font-semibold text-gray-500 text-sm">Potential Side Effects</label>
-                                <p id="med-side-effects" class="text-gray-800"></p>
+                             <div class="detail-item">
+                                <label class="fw-semibold text-muted small d-block mb-1">Potential Side Effects</label>
+                                <p id="med-side-effects" class="text-dark mb-0"></p>
                             </div>
-                            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg">
-                                <h4 class="font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Warnings & Precautions</h4>
-                                <p id="med-warnings" class="mt-1 text-sm"></p>
+                            
+                            <div class="alert alert-warning border-start border-4 border-warning rounded-end mb-0 mt-2" role="alert">
+                                <h4 class="h6 fw-bold alert-heading mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Warnings & Precautions</h4>
+                                <p id="med-warnings" class="small mb-0"></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 text-center">
-                     <button id="reset-btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-md hover:bg-indigo-700 transition shadow-lg">
-                        <i class="fas fa-redo-alt mr-2"></i>Scan Another Medicine
+                <div class="mt-4 text-center">
+                     <button id="reset-btn" class="btn btn-primary btn-lg fw-bold px-4 shadow" style="background-color: #4f46e5; border-color: #4f46e5;">
+                        <i class="fas fa-redo-alt me-2"></i>Scan Another Medicine
                     </button>
                 </div>
 
@@ -147,112 +166,183 @@
         </main>
     </div>
 
-    <!-- Camera View Modal -->
-    <div id="camera-view" class="hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center p-4 z-[100]">
-        <video id="camera-stream" class="w-full max-w-lg h-auto rounded-lg" autoplay playsinline></video>
-        <canvas id="capture-canvas" class="hidden"></canvas>
-        <div class="mt-6 flex items-center space-x-4">
-            <button type="button" id="close-camera-btn" class="text-white text-lg bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center">&times;</button>
-            <button type="button" id="capture-btn" class="w-20 h-20 bg-white rounded-full border-4 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ring-offset-2 ring-offset-black"></button>
-            <div class="w-12 h-12"></div> <!-- Spacer -->
+    <div id="camera-view" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-90 d-flex flex-column align-items-center justify-content-center p-3">
+        <img id="temp-img" style="display: none;" crossorigin="anonymous">
+        
+        <video id="camera-stream" class="w-100 h-auto rounded shadow" style="max-width: 500px;" autoplay playsinline></video>
+        <canvas id="capture-canvas" class="d-none"></canvas>
+        
+        <div class="mt-4 d-flex align-items-center gap-4">
+            <button type="button" id="close-camera-btn" class="btn btn-secondary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px; font-size: 1.5rem;">&times;</button>
+            <button type="button" id="capture-btn" class="btn btn-light rounded-circle border border-4 border-secondary p-0" style="width: 80px; height: 80px;"></button>
+            <div style="width: 48px;"></div> 
         </div>
+        <p id="cam-status" class="text-white mt-3 fw-bold"></p>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Mock Medicine Database ---
-            // In a real app, this would come from an API after image analysis.
-            const mockMedicineData = [
-                {
-                    name: 'Rosuvastatin 10mg',
-                    ingredients: 'Rosuvastatin Calcium',
-                    uses: 'Lowering high cholesterol and triglycerides, preventing cardiovascular disease.',
-                    dosage: 'As prescribed by the doctor. Typically one tablet daily.',
-                    sideEffects: 'Headache, muscle pain, nausea, stomach pain, weakness.',
-                    warnings: 'Do not take if you are pregnant, have liver disease, or are allergic to the medication. Consult your doctor about all other medications you are taking.'
-                },
-                {
-                    name: 'Metformin 500mg',
-                    ingredients: 'Metformin Hydrochloride',
-                    uses: 'To control high blood sugar in people with type 2 diabetes.',
-                    dosage: 'Usually taken with meals, one or two times a day. Follow your doctor\'s instructions.',
-                    sideEffects: 'Nausea, vomiting, stomach upset, diarrhea, weakness.',
-                    warnings: 'Avoid drinking alcohol. Stop taking this medication and call your doctor right away if you have symptoms of lactic acidosis, such as unusual muscle pain, trouble breathing, or feeling very weak.'
-                },
-                {
-                    name: 'Amlodipine 5mg',
-                    ingredients: 'Amlodipine Besylate',
-                    uses: 'To treat high blood pressure (hypertension) and chest pain (angina).',
-                    dosage: 'Typically taken once daily. Your doctor may adjust the dose as needed.',
-                    sideEffects: 'Swelling of legs or ankles, dizziness, flushing, headache.',
-                    warnings: 'Inform your doctor if you have a history of heart or liver problems. Rise slowly from a sitting or lying position to prevent dizziness.'
-                },
-                {
-                    name: 'Paracetamol 500mg',
-                    ingredients: 'Paracetamol (Acetaminophen)',
-                    uses: 'To relieve mild to moderate pain (headaches, muscle aches, etc.) and to reduce fever.',
-                    dosage: '1 to 2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours.',
-                    sideEffects: 'Rare when taken at recommended doses. Allergic reactions like skin rash can occur.',
-                    warnings: 'Overdose can cause severe liver damage. Avoid taking with other products containing paracetamol.'
-                },
-                {
-                    name: 'Amoxicillin 250mg',
-                    ingredients: 'Amoxicillin Trihydrate',
-                    uses: 'A prescription antibiotic for treating bacterial infections like chest infections, dental abscesses, and UTIs.',
-                    dosage: 'Strictly as prescribed by a doctor. Complete the full course of treatment.',
-                    sideEffects: 'Nausea, diarrhea, skin rash. Seek immediate medical help for severe allergic reactions.',
-                    warnings: 'Only for bacterial infections. Do not use if you have a penicillin allergy. This is a prescription-only medicine.'
-                },
-                {
-                    name: 'Pantoprazole 40mg',
-                    ingredients: 'Pantoprazole Sodium',
-                    uses: 'To treat acid reflux, heartburn, and stomach ulcers by reducing stomach acid.',
-                    dosage: 'Typically one tablet per day, usually taken in the morning. Follow medical advice.',
-                    sideEffects: 'Headache, diarrhea, stomach pain, nausea, and flatulence.',
-                    warnings: 'Consult a doctor for long-term use or if symptoms do not improve. May interact with other medications.'
-                }
-            ];
-
-            // --- Element References ---
+            // --- Elements ---
             const initialState = document.getElementById('initial-state');
             const analysisState = document.getElementById('analysis-state');
             const fileInput = document.getElementById('image-upload-input');
+            const uploadLabel = document.getElementById('upload-label');
             const openCameraButton = document.getElementById('open-camera-btn');
             const imagePreview = document.getElementById('image-preview');
             const loadingState = document.getElementById('loading-state');
             const resultsContainer = document.getElementById('results-container');
             const resetBtn = document.getElementById('reset-btn');
+            const errorAlert = document.getElementById('error-alert');
+            const errorMsg = document.getElementById('error-msg');
+            const modelLoadingInfo = document.getElementById('model-loading');
 
-            // Camera elements
             const cameraView = document.getElementById('camera-view');
             const cameraStreamEl = document.getElementById('camera-stream');
             const captureButton = document.getElementById('capture-btn');
             const closeCameraButton = document.getElementById('close-camera-btn');
             const captureCanvas = document.getElementById('capture-canvas');
+            const tempImg = document.getElementById('temp-img');
+            const camStatus = document.getElementById('cam-status');
+
+            // --- AI Object Detection Setup ---
+            let objectDetector = null;
+            // List of objects that should trigger a warning
+            const forbiddenClasses = ['person', 'cat', 'dog', 'bird', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe'];
+
+            async function loadModel() {
+                try {
+                    // Load COCO-SSD model
+                    objectDetector = await cocoSsd.load();
+                    console.log('Model Loaded');
+                    
+                    // Enable buttons
+                    modelLoadingInfo.classList.add('d-none');
+                    fileInput.disabled = false;
+                    openCameraButton.disabled = false;
+                    uploadLabel.classList.remove('disabled');
+                    openCameraButton.classList.remove('disabled');
+                } catch (error) {
+                    console.error("Failed to load model", error);
+                    errorMsg.textContent = "Failed to load AI system. Please refresh.";
+                    errorAlert.classList.remove('d-none');
+                }
+            }
+            
+            // Start loading model immediately
+            loadModel();
+
+            // --- Object Validation Logic ---
+            async function validateObject(imgSource) {
+                if (!objectDetector) return false;
+
+                try {
+                    camStatus.textContent = "Analysing object...";
+                    const predictions = await objectDetector.detect(imgSource);
+                    console.log('Predictions:', predictions);
+
+                    // Check if any forbidden class is detected with high confidence
+                    const foundForbidden = predictions.find(p => 
+                        forbiddenClasses.includes(p.class) && p.score > 0.60
+                    );
+
+                    if (foundForbidden) {
+                        return { 
+                            valid: false, 
+                            reason: `Detected a ${foundForbidden.class}. Please capture only medicine packaging or prescriptions.` 
+                        };
+                    }
+                    
+                    return { valid: true };
+
+                } catch (error) {
+                    console.error(error);
+                    return { valid: true }; // Fail open if detection errors, assume it's okay for demo
+                }
+            }
+
+            // --- Mock Medicine Database ---
+            const mockMedicineData = [
+                {
+                    name: 'Paracetamol 500mg',
+                    ingredients: 'Paracetamol (Acetaminophen)',
+                    uses: 'To relieve mild to moderate pain and reduce fever.',
+                    dosage: '1-2 tablets every 4-6 hours. Max 8 tablets in 24 hours.',
+                    sideEffects: 'Rare. Allergic reactions possible.',
+                    warnings: 'Overdose can cause liver damage.'
+                },
+                {
+                    name: 'Amoxicillin 250mg',
+                    ingredients: 'Amoxicillin Trihydrate',
+                    uses: 'Treats bacterial infections (chest, dental, UTI).',
+                    dosage: 'Prescribed by doctor. Complete full course.',
+                    sideEffects: 'Nausea, diarrhea, rash.',
+                    warnings: 'Do not use if allergic to penicillin.'
+                }
+            ];
 
             // --- State Management ---
-            function showAnalysisState(imageSrc) {
-                initialState.classList.add('hidden');
-                analysisState.classList.remove('hidden');
-                loadingState.classList.remove('hidden');
-                resultsContainer.classList.add('hidden');
-                imagePreview.src = imageSrc;
+            function showError(msg) {
+                errorMsg.textContent = msg;
+                errorAlert.classList.remove('d-none');
+                setTimeout(() => {
+                    errorAlert.classList.add('d-none');
+                }, 5000);
+            }
+
+            async function handleImageProcessing(imageSource) {
+                // 1. Show processing UI (spinner)
+                initialState.classList.add('d-none');
+                analysisState.classList.remove('d-none');
+                loadingState.classList.remove('d-none');
+                resultsContainer.classList.add('d-none');
+                
+                // 2. Set Preview
+                if (typeof imageSource === 'string') {
+                    imagePreview.src = imageSource;
+                    tempImg.src = imageSource;
+                } else {
+                    // It's a video element
+                    // We need to draw it to canvas to get a data URL for the preview img
+                    const context = captureCanvas.getContext('2d');
+                    captureCanvas.width = imageSource.videoWidth;
+                    captureCanvas.height = imageSource.videoHeight;
+                    context.drawImage(imageSource, 0, 0);
+                    imagePreview.src = captureCanvas.toDataURL('image/jpeg');
+                    tempImg.src = imagePreview.src;
+                }
+
+                // Wait for image to load in DOM before detection
+                await new Promise(r => setTimeout(r, 500));
+
+                // 3. AI Validation (Is it a person?)
+                const validation = await validateObject(imagePreview); // Use the preview img element
+
+                if (!validation.valid) {
+                    // Reset UI and show error
+                    resetToInitialState();
+                    showError(validation.reason);
+                    camStatus.textContent = "";
+                    return;
+                }
+
+                // 4. Simulate Medicine Analysis
                 simulateAnalysis();
             }
 
             function resetToInitialState() {
-                analysisState.classList.add('hidden');
-                initialState.classList.remove('hidden');
-                fileInput.value = ''; // Clear file input
+                analysisState.classList.add('d-none');
+                initialState.classList.remove('d-none');
+                fileInput.value = ''; 
+                camStatus.textContent = "";
             }
 
-            // --- Main Logic ---
             function simulateAnalysis() {
                 setTimeout(() => {
-                    // Pick a random medicine from the mock database
                     const medicine = mockMedicineData[Math.floor(Math.random() * mockMedicineData.length)];
                     displayResults(medicine);
-                }, 2500); // Simulate a 2.5-second network/analysis delay
+                }, 2000); 
             }
 
             function displayResults(data) {
@@ -263,17 +353,17 @@
                 document.getElementById('med-side-effects').textContent = data.sideEffects;
                 document.getElementById('med-warnings').textContent = data.warnings;
 
-                loadingState.classList.add('hidden');
-                resultsContainer.classList.remove('hidden');
+                loadingState.classList.add('d-none');
+                resultsContainer.classList.remove('d-none');
             }
 
-            // --- Event Listeners ---
+            // --- File Upload Listener ---
             fileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        showAnalysisState(e.target.result);
+                        handleImageProcessing(e.target.result);
                     };
                     reader.readAsDataURL(file);
                 }
@@ -286,10 +376,10 @@
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                     cameraStreamEl.srcObject = stream;
-                    cameraView.classList.remove('hidden');
+                    cameraView.classList.remove('d-none');
                 } catch (err) {
                     console.error("Camera Error:", err);
-                    alert('Could not access the camera. Please check permissions and try again.');
+                    alert('Could not access camera.');
                 }
             }
 
@@ -298,25 +388,32 @@
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                 }
-                cameraView.classList.add('hidden');
+                cameraView.classList.add('d-none');
+                camStatus.textContent = "";
             }
 
-            function captureImage() {
-                const context = captureCanvas.getContext('2d');
-                captureCanvas.width = cameraStreamEl.videoWidth;
-                captureCanvas.height = cameraStreamEl.videoHeight;
-                context.drawImage(cameraStreamEl, 0, 0, captureCanvas.width, captureCanvas.height);
+            // --- Main Camera Capture Logic ---
+            captureButton.addEventListener('click', async () => {
+                // Pause video to grab frame
+                cameraStreamEl.pause();
                 
-                const imageDataUrl = captureCanvas.toDataURL('image/jpeg');
-                showAnalysisState(imageDataUrl);
-                stopCamera();
-            }
+                // Perform validation directly on the video element before closing
+                const validation = await validateObject(cameraStreamEl);
+
+                if (!validation.valid) {
+                    alert(validation.reason); // Show alert immediately on camera screen
+                    cameraStreamEl.play(); // Resume video
+                    camStatus.textContent = "";
+                } else {
+                    // Valid object, proceed to process
+                    handleImageProcessing(cameraStreamEl);
+                    stopCamera();
+                }
+            });
 
             openCameraButton.addEventListener('click', startCamera);
             closeCameraButton.addEventListener('click', stopCamera);
-            captureButton.addEventListener('click', captureImage);
         });
     </script>
 </body>
 </html>
-

@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Appointment Management </title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Bootstrap bg-light equivalent */
         }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -25,127 +31,157 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        .tab-btn {
+
+        /* Custom Tab Styling to mimic the original clean look */
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
             padding: 0.75rem 1.25rem;
-            cursor: pointer;
-            font-weight: 500;
-            color: #6b7280; /* text-gray-500 */
             border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-            margin-bottom: -2px; /* Align with border */
+            margin-bottom: -1px;
+            cursor: pointer;
         }
-        .tab-btn.active-tab {
-            color: #2563eb; /* text-blue-600 */
-            border-bottom-color: #2563eb; /* border-blue-600 */
+        
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #495057;
+            background-color: rgba(0,0,0,0.03);
         }
-        .action-btn {
-            padding: 0.25rem 0.75rem; /* py-1 px-3 */
-            border-radius: 0.5rem; /* rounded-lg */
-            font-size: 0.875rem; /* text-sm */
-            font-weight: 500;
-            transition: all 0.2s;
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd; /* Bootstrap Primary */
+            border-bottom: 3px solid #0d6efd;
+            background: transparent;
         }
-        .action-btn:hover {
-            opacity: 0.9;
+
+        /* Toast Animation */
+        #successMessage {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            transition: transform 0.5s ease-in-out;
+            transform: translateX(150%); /* Start off-screen */
+        }
+        
+        #successMessage.show {
+            transform: translateX(0);
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+    <div class="container py-4 py-lg-5">
+        <div class="row g-4">
 
-        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="col-lg-5">
+                <div class="d-flex flex-column gap-4">
+                    
+                    <div class="card shadow border-0 rounded-4">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="text-center mb-4">
+                                <h1 class="h3 fw-bold text-dark">Appointment Management</h1>
+                                <p class="text-secondary">Book a new appointment.</p>
+                            </div>
 
-            <div class="lg:w-5/12 flex-shrink-0 space-y-8">
-                
-                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-                    <div class="p-6 sm:p-8 md:p-12">
-                        <div class="text-center mb-8">
-                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Appointment Management</h1>
-                            <p class="text-gray-500 mt-2">Book a new appointment.</p>
+                            <form id="addAppointmentForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="fullName" class="form-label fw-medium">Patient Full Name</label>
+                                        <input type="text" id="fullName" name="fullName" placeholder="e.g., John Doe" class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="contact" class="form-label fw-medium">Contact Number</label>
+                                        <input type="tel" id="contact" name="contact" placeholder="e.g., +1 234 567 890" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="appointmentDate" class="form-label fw-medium">Appointment Date</label>
+                                        <input type="date" id="appointmentDate" name="appointmentDate" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="appointmentTime" class="form-label fw-medium">Appointment Time</label>
+                                        <input type="time" id="appointmentTime" name="appointmentTime" class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <label for="doctor" class="form-label fw-medium">Assign Doctor</label>
+                                        <select id="doctor" name="doctor" class="form-select" required>
+                                            <option value="" disabled selected>Select a Doctor</option>
+                                            <option value="dr_smith">Dr. Alan Smith (Cardiology)</option>
+                                            <option value="dr_jones">Dr. Carol Jones (Neurology)</option>
+                                            <option value="dr_williams">Dr. Ben Williams (Pediatrics)</option>
+                                            <option value="dr_davis">Dr. Susan Davis (General Medicine)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="reason" class="form-label fw-medium">Reason for Appointment</label>
+                                        <textarea id="reason" name="reason" rows="3" placeholder="Briefly describe the reason for your visit." class="form-control" required></textarea>
+                                    </div>
+
+                                    <div class="col-12 text-center pt-3">
+                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 w-100 w-md-auto shadow-sm">
+                                            Book Appointment
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
+                    </div>
 
-                        <form id="addAppointmentForm" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Patient Full Name</label>
-                                    <input type="text" id="fullName" name="fullName" placeholder="e.g., John Doe" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="contact" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                                    <input type="tel" id="contact" name="contact" placeholder="e.g., +1 234 567 890" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-
-                                <div>
-                                    <label for="appointmentDate" class="block text-sm font-medium text-gray-700 mb-1">Appointment Date</label>
-                                    <input type="date" id="appointmentDate" name="appointmentDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-
-                                <div>
-                                    <label for="appointmentTime" class="block text-sm font-medium text-gray-700 mb-1">Appointment Time</label>
-                                    <input type="time" id="appointmentTime" name="appointmentTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label for="doctor" class="block text-sm font-medium text-gray-700 mb-1">Assign Doctor</label>
-                                <select id="doctor" name="doctor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                    <option value="" disabled selected>Select a Doctor</option>
-                                    <option value="dr_smith">Dr. Alan Smith (Cardiology)</option>
-                                    <option value="dr_jones">Dr. Carol Jones (Neurology)</option>
-                                    <option value="dr_williams">Dr. Ben Williams (Pediatrics)</option>
-                                    <option value="dr_davis">Dr. Susan Davis (General Medicine)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Appointment</label>
-                                <textarea id="reason" name="reason" rows="3" placeholder="Briefly describe the reason for your visit." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
-                            </div>
-
-                            <div class="text-center pt-4">
-                                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
-                                    Book Appointment
-                                </button>
-                            </div>
-                        </form>
+                    <div class="card shadow border-0 rounded-4">
+                        <div class="card-body p-4 text-center">
+                            <h2 class="h4 fw-bold text-dark">Book by Phone</h2>
+                            <p class="text-secondary mt-2">Prefer to talk to someone? Call us to book your appointment.</p>
+                            <p class="h3 fw-bold text-primary mt-3">
+                                <a href="tel:+916303370137" class="text-decoration-none text-primary">+91-6303370137</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-                    <div class="p-6 sm:p-8 md:p-10 text-center">
-                        <h2 class="text-2xl font-bold text-gray-800">Book by Phone</h2>
-                        <p class="text-gray-500 mt-2">Prefer to talk to someone? Call us to book your appointment.</p>
-                        <p class="text-3xl font-bold text-blue-600 mt-4">
-                            <a href="tel:+1-800-123-4567" class="hover:underline">+91-6303370137</a>
-                        </p>
-                    </div>
-                </div>
-            </div> <div class="lg:w-7/12">
-                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden h-full">
-                    <div class="p-6 sm:p-8 md:p-12">
-                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">Appointment History</h2>
+            <div class="col-lg-7">
+                <div class="card shadow border-0 rounded-4 h-100">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="h3 fw-bold text-dark mb-4 text-center">Appointment History</h2>
                         
-                        <div class="flex border-b border-gray-200 mb-6">
-                            <button class="tab-btn active-tab" data-tab="upcoming">Upcoming</button>
-                            <button class="tab-btn" data-tab="in-process">In Process</button>
-                            <button class="tab-btn" data-tab="past">Past</button>
-                            <button class="tab-btn" data-tab="cancelled">Cancelled</button>
-                        </div>
+                        <ul class="nav nav-tabs mb-4 border-bottom">
+                            <li class="nav-item">
+                                <a class="nav-link active tab-btn" data-tab="upcoming">Upcoming</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link tab-btn" data-tab="in-process">In Process</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link tab-btn" data-tab="past">Past</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link tab-btn" data-tab="cancelled">Cancelled</a>
+                            </li>
+                        </ul>
                         
-                        <div id="appointmentListContainer" class="space-y-4 min-h-[100px] relative">
-                            <p id="emptyMessage" class="text-gray-500 text-center absolute inset-0 flex items-center justify-center">
+                        <div id="appointmentListContainer" class="d-flex flex-column gap-3 position-relative" style="min-height: 100px;">
+                            <p id="emptyMessage" class="text-secondary text-center position-absolute w-100 top-50 translate-middle-y">
                                 No appointments in this category.
                             </p>
                         </div>
                     </div>
                 </div>
-            </div> </div> </div>
+            </div>
 
-    <div id="successMessage" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-500">
+        </div>
+    </div>
+
+    <div id="successMessage" class="bg-success text-white py-2 px-4 rounded shadow-lg">
         Appointment booked successfully!
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const form = document.getElementById('addAppointmentForm');
@@ -159,43 +195,48 @@
         let appointmentIdCounter = 0; 
 
         function renderAppointments() {
+            // Clear current list content (except empty message if it exists in DOM, though we rebuild)
             listContainer.innerHTML = '';
+            listContainer.appendChild(emptyMessage);
             
             const filteredAppointments = allAppointments.filter(app => app.status === currentTab);
 
             if (filteredAppointments.length === 0) {
-                emptyMessage.classList.remove('hidden');
-                listContainer.appendChild(emptyMessage);
+                emptyMessage.classList.remove('d-none');
             } else {
-                emptyMessage.classList.add('hidden');
+                emptyMessage.classList.add('d-none');
                 
                 filteredAppointments.forEach(app => {
                     const appointmentCard = document.createElement('div');
-                    appointmentCard.className = 'border rounded-lg p-4 bg-gray-50 flex flex-col sm:flex-row justify-between sm:items-center shadow-sm';
+                    // Replaced Tailwind classes with Bootstrap classes
+                    appointmentCard.className = 'card border bg-light shadow-sm p-3';
                     
                     let buttonsHtml = '';
                     if (app.status === 'upcoming') {
                         buttonsHtml = `
-                            <button class="action-btn bg-green-500 text-white" data-id="${app.id}" data-action="start">Start</button>
-                            <button class="action-btn bg-red-500 text-white mt-2 sm:mt-0 sm:ml-2" data-id="${app.id}" data-action="cancel">Cancel</button>
+                            <button class="btn btn-sm btn-success action-btn mb-2 mb-sm-0 me-sm-2" data-id="${app.id}" data-action="start">Start</button>
+                            <button class="btn btn-sm btn-danger action-btn" data-id="${app.id}" data-action="cancel">Cancel</button>
                         `;
                     } else if (app.status === 'in-process') {
                         buttonsHtml = `
-                            <button class="action-btn bg-blue-500 text-white" data-id="${app.id}" data-action="complete">Complete</button>
+                            <button class="btn btn-sm btn-primary action-btn" data-id="${app.id}" data-action="complete">Complete</button>
                         `;
                     } else {
-                        buttonsHtml = `<span class="text-sm font-medium text-gray-400 capitalize">${app.status}</span>`;
+                        // Badge styling for status text
+                        buttonsHtml = `<span class="badge bg-secondary text-capitalize">${app.status}</span>`;
                     }
 
                     appointmentCard.innerHTML = `
-                        <div>
-                            <p class="font-bold text-lg text-gray-800">${app.fullName}</p>
-                            <p class="text-sm text-gray-600">${app.doctorText}</p>
-                            <p class="text-sm text-gray-600">${app.appointmentDate} at ${app.appointmentTime}</p>
-                            <p class="text-sm text-gray-500 mt-1"><strong>Reason:</strong> ${app.reason}</p>
-                        </div>
-                        <div class="mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
-                            ${buttonsHtml}
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <p class="h5 fw-bold text-dark mb-1">${app.fullName}</p>
+                                <p class="small text-secondary mb-0">${app.doctorText}</p>
+                                <p class="small text-secondary mb-1">${app.appointmentDate} at ${app.appointmentTime}</p>
+                                <p class="small text-muted mb-0"><strong>Reason:</strong> ${app.reason}</p>
+                            </div>
+                            <div class="mt-3 mt-sm-0 text-sm-end">
+                                ${buttonsHtml}
+                            </div>
                         </div>
                     `;
                     listContainer.appendChild(appointmentCard);
@@ -215,19 +256,28 @@
 
             allAppointments.push(appointmentData);
             
-            successMessage.classList.remove('translate-x-full');
+            // Show toast
+            successMessage.classList.add('show');
             form.reset();
             setTimeout(() => {
-                successMessage.classList.add('translate-x-full');
+                successMessage.classList.remove('show');
             }, 3000);
+            
+            // If user adds an appointment, auto-switch to upcoming tab to show it
+            if(currentTab !== 'upcoming') {
+                document.querySelector('.tab-btn.active').classList.remove('active');
+                document.querySelector('[data-tab="upcoming"]').classList.add('active');
+                currentTab = 'upcoming';
+            }
 
             renderAppointments();
         });
 
         tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelector('.tab-btn.active-tab').classList.remove('active-tab');
-                btn.classList.add('active-tab');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default anchor behavior
+                document.querySelector('.tab-btn.active').classList.remove('active');
+                btn.classList.add('active');
                 currentTab = btn.dataset.tab;
                 renderAppointments();
             });

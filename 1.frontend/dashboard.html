@@ -4,164 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediSync - Hospital Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f9ff; /* Light blue background */
+            color: #333;
         }
+
+        /* --- Custom Animations to match original feel --- */
+        
+        /* Quick Action Cards */
         .quick-action-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none; /* Remove underline from anchor tags */
+            color: inherit;
         }
         .quick-action-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; /* Bootstrap shadow-lg equivalent */
         }
+
+        /* Main Section Cards */
         .main-section-card {
-             transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
         }
         .main-section-card:hover {
             transform: scale(1.03);
-            background-color: #e0f2fe;
+            background-color: #e0f2fe; /* Slightly darker blue on hover */
+        }
+
+        /* Icon Circle Utility */
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 1.25rem auto;
+        }
+
+        /* Navbar Tweaks */
+        .nav-link {
+            font-weight: 500;
+            color: #4b5563; /* Gray-600 */
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d6efd; /* Bootstrap Primary */
+        }
+        .nav-link.active {
+            border-bottom: 2px solid #0d6efd;
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body>
 
-    <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68b82df3346154aecb7ba8ef/c965d882a_logo.png" alt="MediSync Logo" class="h-8 w-auto">
-                <h1 class="text-2xl font-bold text-gray-800">MediSync</h1>
-            </div>
-            <nav class="hidden md:flex space-x-6">
-                <a href="index.html" class="text-blue-600 font-semibold border-b-2 border-blue-600">Home</a>
-                <a href="patient.html" class="text-gray-600 hover:text-blue-600">Patients</a>
-                <a href="doctor.html" class="text-gray-600 hover:text-blue-600">Doctors</a>
-                <a href="appointment.html" class="text-gray-600 hover:text-blue-600">Appointments</a>
-            </nav>
-            <button class="md:hidden">
-                 <i class="fas fa-bars text-2xl text-gray-600"></i>
+    <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm sticky-top">
+        <div class="container px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68b82df3346154aecb7ba8ef/c965d882a_logo.png" alt="MediSync Logo" height="32" class="d-inline-block align-text-top">
+                <span class="fw-bold fs-4 text-dark">MediSync</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars text-secondary fs-4"></i>
             </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="patient.html">Patients</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="doctor.html">Doctors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="appointment.html">Appointments</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-12">
+    <main class="container py-5 px-4">
 
-        <!-- Welcome Section -->
-        <section class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-3">Welcome to MediSync Dashboard</h2>
-            <p class="text-lg text-gray-600">Your centralized solution for efficient hospital management.</p>
+        <section class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark mb-3">Welcome to MediSync Dashboard</h2>
+            <p class="lead text-secondary">Your centralized solution for efficient hospital management.</p>
         </section>
 
-        <!-- Quick Actions Section -->
-        <section class="mb-16">
-            <h3 class="text-2xl font-semibold text-gray-700 mb-6 border-l-4 border-blue-500 pl-4">Quick Actions</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                <!-- Add New Patient -->
-                <a href="patient.html" class="quick-action-card bg-white rounded-xl shadow-lg overflow-hidden block">
-                    <div class="p-8">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mx-auto mb-5">
-                            <i class="fas fa-user-plus text-2xl"></i>
+        <section class="mb-5">
+            <h3 class="h4 fw-semibold text-secondary mb-4 border-start border-4 border-primary ps-3">Quick Actions</h3>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <a href="patient.html" class="card quick-action-card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 p-lg-5 text-center">
+                            <div class="icon-circle bg-primary-subtle text-primary">
+                                <i class="fas fa-user-plus fa-2x"></i>
+                            </div>
+                            <h4 class="h5 fw-bold text-dark">Add New Patient</h4>
+                            <p class="text-secondary small mb-0">Quickly register a new patient into the system.</p>
                         </div>
-                        <h4 class="text-xl font-bold text-center text-gray-800">Add New Patient</h4>
-                        <p class="text-gray-500 text-center mt-2">Quickly register a new patient into the system.</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
 
-                <!-- Add New Appointment -->
-                <a href="appointment.html" class="quick-action-card bg-white rounded-xl shadow-lg overflow-hidden block">
-                     <div class="p-8">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mx-auto mb-5">
-                            <i class="fas fa-calendar-check text-2xl"></i>
+                <div class="col-md-6 col-lg-4">
+                    <a href="appointment.html" class="card quick-action-card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 p-lg-5 text-center">
+                            <div class="icon-circle bg-success-subtle text-success">
+                                <i class="fas fa-calendar-check fa-2x"></i>
+                            </div>
+                            <h4 class="h5 fw-bold text-dark">New Appointment</h4>
+                            <p class="text-secondary small mb-0">Schedule a new appointment for a patient.</p>
                         </div>
-                        <h4 class="text-xl font-bold text-center text-gray-800">New Appointment</h4>
-                        <p class="text-gray-500 text-center mt-2">Schedule a new appointment for a patient.</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
 
-                <!-- Medicine Scanner (MedScan) -->
-                <a href="medscan.html" class="quick-action-card bg-white rounded-xl shadow-lg overflow-hidden block">
-                    <div class="p-8">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600 mx-auto mb-5">
-                            <i class="fas fa-camera-retro text-2xl"></i>
+                <div class="col-md-6 col-lg-4">
+                    <a href="medscan.html" class="card quick-action-card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 p-lg-5 text-center">
+                            <div class="icon-circle bg-info-subtle text-info-emphasis"> <i class="fas fa-camera-retro fa-2x"></i>
+                            </div>
+                            <h4 class="h5 fw-bold text-dark">Medicine Scanner</h4>
+                            <p class="text-secondary small mb-0">Instantly identify medicine with MedScan.</p>
                         </div>
-                        <h4 class="text-xl font-bold text-center text-gray-800">Medicine Scanner</h4>
-                        <p class="text-gray-500 text-center mt-2">Instantly identify medicine with MedScan.</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
         </section>
 
-        <!-- Main Modules Section -->
         <section>
-            <h3 class="text-2xl font-semibold text-gray-700 mb-6 border-l-4 border-blue-500 pl-4">Management Modules</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Patient Records -->
-                <a href="patient.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-users text-3xl text-blue-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">Patient Records</h4>
-                        <p class="text-sm text-gray-600">Manage all patient information.</p>
-                    </div>
-                </a>
-                <!-- Doctor Profiles -->
-                <a href="doctor.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-user-doctor text-3xl text-green-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">Doctor Profiles</h4>
-                        <p class="text-sm text-gray-600">View and manage doctor details.</p>
-                    </div>
-                </a>
-                <!-- Appointments -->
-                <a href="appointment.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-calendar-alt text-3xl text-purple-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">Appointments</h4>
-                        <p class="text-sm text-gray-600">Schedule and view appointments.</p>
-                    </div>
-                </a>
-                <!-- Pharmacy -->
-                <a href="pharmacy.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-pills text-3xl text-red-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">Pharmacy</h4>
-                        <p class="text-sm text-gray-600">Manage medicine inventory.</p>
-                    </div>
-                </a>
-                 <!-- MedScan -->
-                <a href="medscan.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-barcode text-3xl text-indigo-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">MedScan</h4>
-                        <p class="text-sm text-gray-600">Scan and identify medicines.</p>
-                    </div>
-                </a>
-                 <!-- Diet Plans -->
-                <a href="diet.html" class="main-section-card bg-white p-6 rounded-lg shadow-sm flex items-center space-x-4">
-                    <i class="fas fa-utensils text-3xl text-yellow-500"></i>
-                    <div>
-                        <h4 class="font-bold text-lg">Diet Plans</h4>
-                        <p class="text-sm text-gray-600">Create and manage patient diets.</p>
-                    </div>
-                </a>
+            <h3 class="h4 fw-semibold text-secondary mb-4 border-start border-4 border-primary ps-3">Management Modules</h3>
+            
+            <div class="row g-4">
+                <div class="col-sm-6 col-lg-4">
+                    <a href="patient.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">Patient Records</h4>
+                                <p class="small text-secondary mb-0">Manage all patient information.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-lg-4">
+                    <a href="doctor.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-user-doctor fa-2x text-success"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">Doctor Profiles</h4>
+                                <p class="small text-secondary mb-0">View and manage doctor details.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-lg-4">
+                    <a href="appointment.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-calendar-alt fa-2x text-secondary"></i> <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">Appointments</h4>
+                                <p class="small text-secondary mb-0">Schedule and view appointments.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-lg-4">
+                    <a href="pharmacy.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-pills fa-2x text-danger"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">Pharmacy</h4>
+                                <p class="small text-secondary mb-0">Manage medicine inventory.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-lg-4">
+                    <a href="medscan.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-barcode fa-2x text-info"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">MedScan</h4>
+                                <p class="small text-secondary mb-0">Scan and identify medicines.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-lg-4">
+                    <a href="diet.html" class="main-section-card card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <i class="fas fa-utensils fa-2x text-warning"></i>
+                            <div>
+                                <h4 class="h6 fw-bold mb-1 text-dark">Diet Plans</h4>
+                                <p class="small text-secondary mb-0">Create and manage patient diets.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-16">
-        <div class="container mx-auto px-6 py-4 text-center">
-            <p>&copy; 2024 MediSync Hospital Management. All rights reserved.</p>
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0 small">&copy; 2024 MediSync Hospital Management. All rights reserved.</p>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
-

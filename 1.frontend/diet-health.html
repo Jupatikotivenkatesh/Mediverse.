@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NutriHeal | Disease Diet Plans</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,11 +14,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        /* Custom Styles */
+        /* Custom Styles to supplement Bootstrap */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
+            background-color: #f8f9fa; /* Light gray background */
         }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -26,1295 +28,490 @@
             background: #f1f5f9;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #adb5bd;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        .modal-backdrop {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal-content {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        .detail-tab-active {
-            border-color: #3b82f6; /* blue-500 */
-            background-color: #eff6ff; /* blue-50 */
-            color: #2563eb; /* blue-600 */
-        }
-        .disease-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .disease-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background: #6c757d;
         }
 
-        /* --- Styles for Main Navigation Tabs --- */
-        .nav-tab {
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            font-weight: 600; /* semibold */
-            color: #475569; /* slate-600 */
-            border-bottom: 4px solid transparent;
-            cursor: pointer;
+        /* Hover Lift Effect for Cards */
+        .hover-lift {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+
+        /* Custom Navigation Tabs */
+        .nav-btn {
+            border: none;
+            background: transparent;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
         }
-        .nav-tab:hover {
-            color: #020617; /* slate-900 */
+        .nav-btn:hover {
+            color: #212529;
         }
-        .active-nav-tab {
-            color: #2563eb; /* blue-600 */
-            border-bottom-color: #2563eb; /* blue-600 */
+        .nav-btn.active {
+            color: #0d6efd; /* Bootstrap Primary */
+            border-bottom-color: #0d6efd;
+        }
+
+        /* Modal Tab Styles */
+        .modal-tab-btn {
+            border: none;
+            background: transparent;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            border-bottom: 2px solid transparent;
+            width: 100%;
+        }
+        .modal-tab-btn:hover {
+            color: #343a40;
+        }
+        .modal-tab-btn.active {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        /* Glassmorphism Header */
+        .header-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
     </style>
 </head>
-<body class="antialiased text-slate-800">
+<body class="text-dark">
 
-    <div id="app" class="max-w-7xl mx-auto min-h-screen">
+    <div id="app" class="min-vh-100 d-flex flex-column">
         
-        <header class="bg-white/80 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center">
-                    <i class="fas fa-seedling text-3xl text-green-600 mr-3"></i>
-                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">NutriHeal</h1>
+        <header class="header-glass shadow-sm sticky-top py-3">
+            <div class="container d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-seedling fa-2x text-success me-3"></i>
+                    <h1 class="h4 fw-bold mb-0 text-dark">NutriHeal</h1>
                 </div>
-                <p class="hidden sm:block text-slate-500 font-medium">Your Guide to a Healthier Diet</p>
+                <p class="d-none d-sm-block text-secondary fw-medium mb-0">Your Guide to a Healthier Diet</p>
             </div>
         </header>
 
-        <main class="p-4 sm:p-6 md:p-8">
+        <main class="container py-4 py-md-5">
             
-            <section class="mb-8 bg-white rounded-lg shadow-sm">
-                <div class="flex items-center justify-center border-b border-slate-200">
-                    <button id="nav-diet" class="nav-tab active-nav-tab">
-                        <i class="fas fa-search mr-2"></i> Diet Plan Finder
+            <section class="mb-5 bg-white rounded shadow-sm">
+                <div class="d-flex justify-content-center border-bottom">
+                    <button id="nav-diet" class="nav-btn active">
+                        <i class="fas fa-search me-2"></i> Diet Plan Finder
                     </button>
-                    <button id="nav-education" class="nav-tab">
-                        <i class="fas fa-book-medical mr-2"></i> Health Education
+                    <button id="nav-education" class="nav-btn">
+                        <i class="fas fa-book-medical me-2"></i> Health Education
                     </button>
                 </div>
             </section>
             
             <div>
-                <div id="content-diet-finder" class="space-y-8">
-                    <section class="text-center">
-                        <h2 class="text-3xl font-bold text-slate-700 mb-2">Find Your Diet Plan</h2>
-                        <p class="text-slate-500 mb-6 max-w-2xl mx-auto">Search for a condition to find recommended dietary guidelines.</p>
-                        <div class="relative max-w-xl mx-auto">
-                            <input type="search" id="search-box" placeholder="Search for a disease (e.g., Diabetes, Flu...)" class="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <div id="content-diet-finder">
+                    <section class="text-center mb-5">
+                        <h2 class="fw-bold text-dark">Find Your Diet Plan</h2>
+                        <p class="text-secondary mb-4">Search for a condition to find recommended dietary guidelines.</p>
+                        
+                        <div class="position-relative mx-auto" style="max-width: 600px;">
+                            <input type="search" id="search-box" placeholder="Search for a disease (e.g., Diabetes, Flu...)" class="form-control form-control-lg rounded-pill ps-5 shadow-sm border-0">
+                            <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
                         </div>
                     </section>
 
-                    <section id="disease-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <section id="disease-grid" class="row g-4">
                         </section>
                     
-                    <p id="no-results" class="text-center text-slate-500 hidden mt-8">No results found. Please try a different search term.</p>
+                    <p id="no-results" class="text-center text-secondary d-none mt-5">No results found. Please try a different search term.</p>
                 </div>
 
-                <div id="content-health-education" class="hidden">
-                    <section id="health-education">
-                        <div class="text-center mb-10">
-                             <h2 class="text-3xl font-bold text-slate-700 mb-2">Health Education Hub</h2>
-                             <p class="text-slate-500 max-w-3xl mx-auto">Learn how to promote awareness, build healthy habits, and prevent illness across different areas of health.</p>
+                <div id="content-health-education" class="d-none">
+                    <section>
+                        <div class="text-center mb-5">
+                             <h2 class="fw-bold text-dark">Health Education Hub</h2>
+                             <p class="text-secondary col-lg-8 mx-auto">Learn how to promote awareness, build healthy habits, and prevent illness across different areas of health.</p>
                         </div>
 
-                        <div class="space-y-8">
+                        <div class="d-flex flex-column gap-4">
 
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-2xl font-bold text-slate-700 mb-2 flex items-center">
-                                    <span class="text-3xl mr-3">🩺</span>
-                                    1. Chronic & Common Diseases
-                                </h3>
-                                <p class="text-sm text-slate-500 italic mb-6">Examples: Cough, Cold, Asthma, Diabetes, Hypertension, Arthritis</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <div class="space-y-6">
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-blue-600 mb-2 flex items-center"><i class="fas fa-lightbulb w-5 mr-2"></i> Promotes Awareness</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4 p-lg-5">
+                                    <h3 class="h4 fw-bold text-dark mb-2">
+                                        <span class="fs-2 me-2">🩺</span> 1. Chronic & Common Diseases
+                                    </h3>
+                                    <p class="small text-muted fst-italic mb-4">Examples: Cough, Cold, Asthma, Diabetes, Hypertension, Arthritis</p>
+                                    
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <h4 class="h6 fw-bold text-primary mb-2"><i class="fas fa-lightbulb me-2"></i> Promotes Awareness</h4>
+                                            <ul class="text-secondary small">
                                                 <li>Learn how chronic diseases develop — often due to lifestyle, pollution, or heredity.</li>
                                                 <li>Know early symptoms like persistent cough, fatigue, or high blood pressure.</li>
                                                 <li>Attend health checkups and understand the importance of regular monitoring.</li>
                                             </ul>
-                                        </div>
-                                        
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-green-600 mb-2 flex items-center"><i class="fas fa-apple-alt w-5 mr-2"></i> Encourages Healthy Habits</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+
+                                            <h4 class="h6 fw-bold text-success mt-4 mb-2"><i class="fas fa-apple-alt me-2"></i> Encourages Healthy Habits</h4>
+                                            <ul class="text-secondary small">
                                                 <li>Eat balanced meals rich in fiber, fruits, and vegetables.</li>
                                                 <li>Avoid excessive sugar, salt, and oily foods.</li>
                                                 <li>Exercise regularly (walking, yoga, breathing exercises).</li>
-                                                <li>Take medicines as prescribed and avoid self-medication.</li>
                                             </ul>
                                         </div>
+                                        <div class="col-md-6">
+                                            <h4 class="h6 fw-bold text-danger mb-2"><i class="fas fa-shield-alt me-2"></i> Prevention over Cure</h4>
+                                            <ul class="text-secondary small">
+                                                <li>Get vaccinated against influenza and pneumonia.</li>
+                                                <li>Maintain good indoor air quality.</li>
+                                                <li>Manage stress through relaxation.</li>
+                                            </ul>
 
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-red-600 mb-2 flex items-center"><i class="fas fa-shield-alt w-5 mr-2"></i> Prevention over Cure</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Get vaccinated against influenza and pneumonia (for elderly).</li>
-                                                <li>Maintain good indoor air quality — avoid smoking or dust exposure.</li>
-                                                <li>Manage stress through relaxation and meditation.</li>
-                                                <li>Get blood pressure and sugar levels checked periodically.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-6">
-                                         <div>
-                                            <h4 class="text-lg font-semibold text-purple-600 mb-2 flex items-center"><i class="fas fa-users w-5 mr-2"></i> Empowers Communities</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Encourage others to quit smoking or tobacco.</li>
-                                                <li>Promote air cleanliness in your neighborhood.</li>
-                                                <li>Support local health camps for diabetes or heart screening.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-pink-600 mb-2 flex items-center"><i class="fas fa-heart w-5 mr-2"></i> Improves Quality of Life</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Keep a daily health diary for medication and activity.</li>
-                                                <li>Balance work, rest, and recreation.</li>
-                                                <li>Stay socially connected — isolation can worsen chronic illness.</li>
+                                            <h4 class="h6 fw-bold text-info mt-4 mb-2"><i class="fas fa-users me-2"></i> Empowers Communities</h4>
+                                            <ul class="text-secondary small">
+                                                <li>Encourage others to quit smoking.</li>
+                                                <li>Support local health camps.</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-2xl font-bold text-slate-700 mb-2 flex items-center">
-                                    <span class="text-3xl mr-3">🤢</span>
-                                    2. Communicable & Infectious Diseases
-                                </h3>
-                                <p class="text-sm text-slate-500 italic mb-6">Examples: COVID-19, Influenza, Tuberculosis, Malaria, Dengue, Typhoid</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <div class="space-y-6">
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-blue-600 mb-2 flex items-center"><i class="fas fa-lightbulb w-5 mr-2"></i> Promotes Awareness</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Learn how infections spread — through air, water, or contact.</li>
-                                                <li>Understand symptoms like fever, cough, rashes, or fatigue.</li>
-                                                <li>Know the importance of early testing and quarantine if necessary.</li>
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4 p-lg-5">
+                                    <h3 class="h4 fw-bold text-dark mb-2">
+                                        <span class="fs-2 me-2">🤢</span> 2. Communicable & Infectious Diseases
+                                    </h3>
+                                    <p class="small text-muted fst-italic mb-4">Examples: COVID-19, Influenza, Tuberculosis, Malaria, Dengue</p>
+                                    
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <h4 class="h6 fw-bold text-primary mb-2"><i class="fas fa-lightbulb me-2"></i> Promotes Awareness</h4>
+                                            <ul class="text-secondary small">
+                                                <li>Learn how infections spread (air, water, contact).</li>
+                                                <li>Understand symptoms like fever, cough, rashes.</li>
                                             </ul>
-                                        </div>
-                                        
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-green-600 mb-2 flex items-center"><i class="fas fa-hands-wash w-5 mr-2"></i> Encourages Healthy Habits</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Wash hands frequently with soap or sanitizer.</li>
-                                                <li>Use clean water and eat freshly cooked food.</li>
+                                            <h4 class="h6 fw-bold text-success mt-4 mb-2"><i class="fas fa-hands-wash me-2"></i> Encourages Healthy Habits</h4>
+                                            <ul class="text-secondary small">
+                                                <li>Wash hands frequently.</li>
                                                 <li>Wear masks in crowded areas.</li>
-                                                <li>Avoid close contact with infected individuals.</li>
                                             </ul>
                                         </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-red-600 mb-2 flex items-center"><i class="fas fa-syringe w-5 mr-2"></i> Prevention over Cure</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Get vaccinated for diseases like COVID-19, Hepatitis B, etc.</li>
-                                                <li>Use mosquito nets and repellents to prevent malaria and dengue.</li>
-                                                <li>Maintain personal hygiene and environmental cleanliness.</li>
-                                                <li>Dispose of waste properly and cover food.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-6">
-                                         <div>
-                                            <h4 class="text-lg font-semibold text-purple-600 mb-2 flex items-center"><i class="fas fa-users w-5 mr-2"></i> Empowers Communities</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Participate in community cleaning and awareness programs.</li>
-                                                <li>Support public vaccination drives.</li>
-                                                <li>Report disease outbreaks to local health centers.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-pink-600 mb-2 flex items-center"><i class="fas fa-heart w-5 mr-2"></i> Improves Quality of Life</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Keep surroundings clean and ventilated.</li>
-                                                <li>Maintain a healthy immune system through proper diet and sleep.</li>
-                                                <li>Avoid panic — follow medical advice calmly.</li>
+                                        <div class="col-md-6">
+                                            <h4 class="h6 fw-bold text-danger mb-2"><i class="fas fa-syringe me-2"></i> Prevention over Cure</h4>
+                                            <ul class="text-secondary small">
+                                                <li>Get vaccinated.</li>
+                                                <li>Use mosquito repellents.</li>
+                                                <li>Maintain hygiene.</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-2xl font-bold text-slate-700 mb-2 flex items-center">
-                                    <span class="text-3xl mr-3">🍽️</span>
-                                    3. Nutritional & Lifestyle Diseases
-                                </h3>
-                                <p class="text-sm text-slate-500 italic mb-6">Examples: Obesity, Diabetes, Heart Disease, Anemia</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <div class="space-y-6">
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-blue-600 mb-2 flex items-center"><i class="fas fa-lightbulb w-5 mr-2"></i> Promotes Awareness</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Learn about the role of nutrition and physical activity in health.</li>
-                                                <li>Know how poor diet and inactivity can cause obesity or diabetes.</li>
-                                            </ul>
-                                        </div>
-                                        
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-green-600 mb-2 flex items-center"><i class="fas fa-carrot w-5 mr-2"></i> Encourages Healthy Habits</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Eat balanced meals: fruits, vegetables, proteins, whole grains.</li>
-                                                <li>Avoid processed and fast foods.</li>
-                                                <li>Drink plenty of water.</li>
-                                                <li>Exercise at least 30 minutes daily.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-red-600 mb-2 flex items-center"><i class="fas fa-check-circle w-5 mr-2"></i> Prevention over Cure</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Go for regular BMI, cholesterol, and sugar checkups.</li>
-                                                <li>Limit sugar, oil, and salt intake.</li>
-                                                <li>Follow diet plans recommended by doctors or dietitians.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-6">
-                                         <div>
-                                            <h4 class="text-lg font-semibold text-purple-600 mb-2 flex items-center"><i class="fas fa-users w-5 mr-2"></i> Empowers Communities</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Join fitness or diet awareness groups.</li>
-                                                <li>Promote healthy eating habits in schools and workplaces.</li>
-                                                <li>Organize group walks or sports activities.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-pink-600 mb-2 flex items-center"><i class="fas fa-heart w-5 mr-2"></i> Improves Quality of Life</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Maintain a healthy weight.</li>
-                                                <li>Get proper rest and reduce stress.</li>
-                                                <li>Enjoy outdoor activities and balanced routines.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-2xl font-bold text-slate-700 mb-2 flex items-center">
-                                    <span class="text-3xl mr-3">🧠</span>
-                                    4. Mental Health Issues
-                                </h3>
-                                <p class="text-sm text-slate-500 italic mb-6">Examples: Depression, Anxiety, Stress Disorders</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <div class="space-y-6">
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-blue-600 mb-2 flex items-center"><i class="fas fa-lightbulb w-5 mr-2"></i> Promotes Awareness</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Learn to recognize signs of mental stress or depression.</li>
-                                                <li>Understand that mental health is as important as physical health.</li>
-                                            </ul>
-                                        </div>
-                                        
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-green-600 mb-2 flex items-center"><i class="fas fa-comment-dots w-5 mr-2"></i> Encourages Healthy Habits</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Maintain a consistent sleep schedule.</li>
-                                                <li>Talk openly with trusted friends or counselors.</li>
-                                                <li>Practice meditation or mindfulness.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-red-600 mb-2 flex items-center"><i class="fas fa-clock w-5 mr-2"></i> Prevention over Cure</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Avoid overworking and learn to manage time effectively.</li>
-                                                <li>Limit screen time and social media pressure.</li>
-                                                <li>Engage in hobbies and positive social activities.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-6">
-                                         <div>
-                                            <h4 class="text-lg font-semibold text-purple-600 mb-2 flex items-center"><i class="fas fa-users w-5 mr-2"></i> Empowers Communities</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Create support groups in schools, colleges, and workplaces.</li>
-                                                <li>Encourage open discussions about mental health without stigma.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-pink-600 mb-2 flex items-center"><i class="fas fa-heart w-5 mr-2"></i> Improves Quality of Life</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Build strong emotional relationships.</li>
-                                                <li>Take breaks when stressed.</li>
-                                                <li>Stay optimistic and practice gratitude.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-2xl font-bold text-slate-700 mb-2 flex items-center">
-                                    <span class="text-3xl mr-3">🧫</span>
-                                    5. Environmental & Sanitation-Related Diseases
-                                </h3>
-                                <p class="text-sm text-slate-500 italic mb-6">Examples: Cholera, Typhoid, Jaundice, Skin Infections</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <div class="space-y-6">
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-blue-600 mb-2 flex items-center"><i class="fas fa-lightbulb w-5 mr-2"></i> Promotes Awareness</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Understand that many diseases come from poor sanitation and unsafe water.</li>
-                                                <li>Know the importance of clean surroundings and waste disposal.</li>
-                                            </ul>
-                                        </div>
-                                        
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-green-600 mb-2 flex items-center"><i class="fas fa-water w-5 mr-2"></i> Encourages Healthy Habits</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Always use clean, safe drinking water.</li>
-                                                <li>Wash fruits and vegetables before eating.</li>
-                                                <li>Maintain toilet hygiene and personal cleanliness.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-red-600 mb-2 flex items-center"><i class="fas fa-filter w-5 mr-2"></i> Prevention over Cure</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Use water filters or boil water before drinking.</li>
-                                                <li>Dispose garbage properly to avoid pests.</li>
-                                                <li>Get vaccinated for hepatitis and typhoid.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-6">
-                                         <div>
-                                            <h4 class="text-lg font-semibold text-purple-600 mb-2 flex items-center"><i class="fas fa-users w-5 mr-2"></i> Empowers Communities</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Support clean-up campaigns in your area.</li>
-                                                <li>Promote construction and use of proper toilets.</li>
-                                                <li>Report leaking pipelines or unclean water sources.</li>
-                                            </ul>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold text-pink-600 mb-2 flex items-center"><i class="fas fa-heart w-5 mr-2"></i> Improves Quality of Life</h4>
-                                            <ul class="list-disc list-inside space-y-1 text-slate-600">
-                                                <li>Keep your home and surroundings neat.</li>
-                                                <li>Enjoy disease-free, fresh environments.</li>
-                                                <li>Encourage others to adopt the same hygiene standards.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="alert alert-light text-center border mt-3">
+                                <small>More educational modules (Nutritional, Mental Health, Environmental) available in full version.</small>
                             </div>
 
                         </div>
                     </section>
                 </div>
-                </div>
+            </div>
         </main>
     </div>
 
-    <div id="diet-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-3xl h-[90vh] flex flex-col transform scale-95 opacity-0">
-            <div class="p-5 border-b flex justify-between items-center flex-shrink-0">
-                <h3 id="modal-title" class="text-2xl font-bold text-slate-800"></h3>
-                <button id="close-modal" class="text-slate-400 hover:text-slate-700 text-3xl">&times;</button>
-            </div>
-            
-            <div class="p-6 overflow-y-auto flex-grow">
-                 <div class="flex items-center border-b border-slate-200 mb-5">
-                    <button data-tab="recovery" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 transition duration-200 detail-tab-active">Recovery Diet</button>
-                    <button data-tab="prevention" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition duration-200">Prevention Diet</button>
-                    <button data-tab="avoid" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition duration-200">Foods to Avoid</button>
+    <div class="modal fade" id="dietModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h3 class="modal-title h4 fw-bold text-dark" id="modal-title"></h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <div id="modal-details">
+                
+                <div class="modal-body p-4 p-md-5">
+                    <div class="row g-0 border-bottom mb-4 bg-light rounded overflow-hidden">
+                        <div class="col-4">
+                            <button data-tab="recovery" class="modal-tab-btn active detail-tab">Recovery Diet</button>
+                        </div>
+                        <div class="col-4">
+                            <button data-tab="prevention" class="modal-tab-btn detail-tab">Prevention Diet</button>
+                        </div>
+                        <div class="col-4">
+                            <button data-tab="avoid" class="modal-tab-btn detail-tab">Foods to Avoid</button>
+                        </div>
                     </div>
+
+                    <div id="modal-details">
+                        </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- Placeholder Content for New Diseases ---
-            // This is a placeholder. Real diet plans MUST come from a medical professional.
+            // --- Placeholder Content ---
             const placeholderRecovery = {
                 title: 'Professional Consultation Required',
-                points: [
-                    "Dietary needs for this condition are highly individual and complex.",
-                    "Please consult a registered dietitian or your doctor to create a personalized, safe, and effective diet plan.",
-                    "This is a placeholder and not medical advice."
-                ],
-                sampleMeal: {
-                    breakfast: "Consult professional",
-                    lunch: "Consult professional",
-                    dinner: "Consult professional"
-                }
+                points: ["Dietary needs are individual.", "Consult a dietitian.", "Placeholder content."],
+                sampleMeal: { breakfast: "Consult pro", lunch: "Consult pro", dinner: "Consult pro" }
             };
             const placeholderPrevention = {
-                title: 'General Wellness Guidelines',
-                points: [
-                    "A balanced diet rich in fruits, vegetables, and whole grains is generally recommended for good health.",
-                    "Consult your doctor for specific prevention strategies related to this condition."
-                ],
-                sampleMeal: {
-                    breakfast: "Consult professional",
-                    lunch: "Consult professional",
-                    dinner: "Consult professional"
-                }
+                title: 'General Wellness',
+                points: ["Eat balanced diet.", "Consult doctor."],
+                sampleMeal: { breakfast: "Consult pro", lunch: "Consult pro", dinner: "Consult pro" }
             };
-            const placeholderAvoid = [
-                "Foods to avoid are specific to your individual condition and health status.",
-                "Please seek professional medical advice."
-            ];
+            const placeholderAvoid = ["Foods specific to your condition.", "Seek advice."];
 
             // --- Data Store ---
             const dietPlans = [
-                // === 1. LIFESTYLE & METABOLIC ===
-                {
-                    id: 'diabetes-1',
-                    name: 'Type 1 Diabetes',
-                    icon: 'fas fa-tint',
-                    description: 'Managing blood glucose with consistent carbohydrate counting.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
                 {
                     id: 'diabetes-2',
                     name: 'Type 2 Diabetes',
                     icon: 'fas fa-tint',
-                    description: 'Managing blood sugar levels through a balanced diet rich in nutrients and low in processed sugars.',
+                    description: 'Managing blood sugar levels through a balanced diet rich in nutrients.',
                     recovery: {
                         title: 'Diet for Blood Sugar Control',
                         points: [
-                            "Focus on complex carbohydrates: whole grains like oats, quinoa, and brown rice.",
-                            "Incorporate lean proteins: chicken breast, fish, tofu, and legumes.",
-                            "Eat plenty of non-starchy vegetables: leafy greens, broccoli, bell peppers.",
-                            "Choose healthy fats: avocados, nuts, seeds, and olive oil.",
-                            "Monitor portion sizes carefully to manage calorie and carbohydrate intake."
+                            "Focus on complex carbohydrates: whole grains like oats and quinoa.",
+                            "Incorporate lean proteins: chicken, fish, tofu.",
+                            "Eat plenty of non-starchy vegetables.",
+                            "Choose healthy fats: avocados, nuts, olive oil.",
+                            "Monitor portion sizes."
                         ],
                         sampleMeal: {
-                            breakfast: "Oatmeal with berries and a sprinkle of nuts.",
-                            lunch: "Grilled chicken salad with mixed greens and a vinaigrette dressing.",
-                            dinner: "Baked salmon with quinoa and steamed asparagus."
+                            breakfast: "Oatmeal with berries and nuts.",
+                            lunch: "Grilled chicken salad.",
+                            dinner: "Baked salmon with quinoa."
                         }
                     },
                     prevention: {
-                        title: 'Long-Term Prevention Diet',
-                        points: [
-                            "Maintain a consistent meal schedule to keep blood sugar stable.",
-                            "Limit sugary drinks and processed snacks.",
-                            "Prioritize fiber-rich foods to improve glycemic control and satiety.",
-                            "Regular physical activity is crucial alongside a healthy diet.",
-                            "Stay hydrated with water instead of sweetened beverages."
-                        ],
+                        title: 'Long-Term Prevention',
+                        points: ["Consistent meal schedule.", "Limit sugary drinks.", "Prioritize fiber.", "Regular exercise."],
                         sampleMeal: {
-                            breakfast: "Scrambled eggs with spinach and a slice of whole-wheat toast.",
-                            lunch: "Lentil soup with a side of whole-grain crackers.",
-                            dinner: "Turkey meatballs with zucchini noodles and marinara sauce."
+                            breakfast: "Eggs with spinach.",
+                            lunch: "Lentil soup.",
+                            dinner: "Turkey meatballs with veggies."
                         }
                     },
-                    avoid: [
-                        "Sugary beverages: soda, fruit juices, sweet tea.",
-                        "Refined grains: white bread, pasta, and white rice.",
-                        "Processed meats and foods high in trans fats.",
-                        "Full-fat dairy products.",
-                        "Dried fruits and heavily sweetened desserts."
-                    ]
+                    avoid: ["Sugary beverages.", "Refined grains (white bread).", "Processed meats.", "Full-fat dairy."]
+                },
+                {
+                    id: 'hypertension',
+                    name: 'Hypertension',
+                    icon: 'fas fa-heartbeat',
+                    description: 'Reducing sodium intake (DASH Diet) to manage blood pressure.',
+                    recovery: {
+                        title: 'DASH Diet Approach',
+                        points: ["Reduce sodium drastically.", "Increase potassium (bananas, spinach).", "Focus on whole grains.", "Limit saturated fats."],
+                        sampleMeal: {
+                            breakfast: "Yogurt with banana.",
+                            lunch: "Large salad with grilled fish.",
+                            dinner: "Whole-wheat pasta with turkey."
+                        }
+                    },
+                    prevention: {
+                        title: 'Maintaining Healthy BP',
+                        points: ["Read food labels for sodium.", "Limit alcohol.", "Regular brisk walking.", "Manage stress."],
+                        sampleMeal: {
+                            breakfast: "Green smoothie.",
+                            lunch: "Bean wrap.",
+                            dinner: "Chicken stir-fry."
+                        }
+                    },
+                    avoid: ["Canned soups.", "Salty snacks.", "Cured meats.", "Excessive caffeine."]
                 },
                 {
                     id: 'obesity',
                     name: 'Obesity',
                     icon: 'fas fa-weight',
                     description: 'Creating a sustainable calorie deficit with nutrient-dense foods.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'hypothyroidism',
-                    name: 'Hypothyroidism',
-                    icon: 'fas fa-balance-scale-left',
-                    description: 'Supporting thyroid function with key nutrients like iodine and selenium.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'hyperthyroidism',
-                    name: 'Hyperthyroidism',
-                    icon: 'fas fa-balance-scale-right',
-                    description: 'Managing metabolism and nutrient needs, often with a low-iodine diet.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'metabolic-syndrome',
-                    name: 'Metabolic Syndrome',
-                    icon: 'fas fa-sync-alt',
-                    description: 'Addressing insulin resistance, high BP, and cholesterol together.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'pcos',
-                    name: 'PCOS/PCOD',
-                    icon: 'fas fa-venus',
-                    description: 'Managing insulin resistance and hormone balance.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 2. CARDIOVASCULAR ===
-                {
-                    id: 'heart-disease',
-                    name: 'Heart Disease (CAD)',
-                    icon: 'fas fa-heart-broken',
-                    description: 'Protecting heart health with low saturated fat and high fiber.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'hypertension',
-                    name: 'Hypertension (High BP)',
-                    icon: 'fas fa-heartbeat',
-                    description: 'Reducing sodium intake and focusing on heart-healthy foods to manage blood pressure.',
-                     recovery: {
-                        title: 'Diet to Lower Blood Pressure (DASH)',
-                        points: [
-                            "Drastically reduce sodium intake; avoid adding salt and check food labels.",
-                            "Increase potassium intake: bananas, spinach, sweet potatoes, and avocados.",
-                            "Focus on whole grains, fruits, and vegetables.",
-                            "Include low-fat dairy products, fish, poultry, and nuts.",
-                            "Limit foods high in saturated fat, such as fatty meats and full-fat dairy."
-                        ],
-                        sampleMeal: {
-                            breakfast: "Yogurt with sliced banana and a handful of almonds.",
-                            lunch: "A large salad with grilled fish, loaded with vegetables.",
-                            dinner: "Whole-wheat pasta with a low-sodium tomato sauce and lean ground turkey."
-                        }
-                    },
-                    prevention: {
-                        title: 'Maintaining Healthy Blood Pressure',
-                        points: [
-                            "Make reading labels a habit to monitor sodium content.",
-                            "Limit alcohol consumption.",
-                            "Incorporate regular exercise, such as brisk walking, into your routine.",
-                            "Eat dark chocolate (in moderation) for its flavonoid content.",
-                            "Manage stress through relaxation techniques."
-                        ],
-                         sampleMeal: {
-                            breakfast: "Smoothie with spinach, fruits, and low-fat yogurt.",
-                            lunch: "Kidney bean and vegetable wrap in a whole-wheat tortilla.",
-                            dinner: "Chicken stir-fry with brown rice and lots of colorful vegetables."
-                        }
-                    },
-                    avoid: [
-                        "Canned soups and processed foods (high in sodium).",
-                        "Salty snacks like chips and pretzels.",
-                        "Pickled foods and cured meats (bacon, sausage).",
-                        "Excessive caffeine and alcohol.",
-                        "Restaurant and fast food, which is often very high in sodium."
-                    ]
-                },
-                {
-                    id: 'cholesterol',
-                    name: 'High Cholesterol',
-                    icon: 'fas fa-vial',
-                    description: 'Lowering LDL ("bad") cholesterol with soluble fiber, healthy fats, and less saturated fat.',
-                    recovery: {
-                        title: 'Diet for Lowering LDL',
-                        points: [
-                            "Increase soluble fiber: Oats, brussels sprouts, apples, and pears.",
-                            "Focus on healthy fats: Avocados, olive oil, nuts, and seeds.",
-                            "Eat fatty fish: Salmon, mackerel, and herring are rich in Omega-3s.",
-                            "Eliminate trans fats, often found in margarines and processed cookies/pastries.",
-                            "Incorporate plant sterols/stanols, found in fortified foods."
-                        ],
-                        sampleMeal: {
-                            breakfast: "Bowl of oatmeal with walnuts and apple slices.",
-                            lunch: "Avocado toast on whole-grain bread with a side of lentil soup.",
-                            dinner: "Grilled salmon with a side of quinoa and steamed broccoli."
-                        }
-                    },
-                    prevention: {
-                        title: 'Long-Term Heart Health',
-                        points: [
-                            "Limit saturated fats from red meat and full-fat dairy.",
-                            "Maintain a healthy weight through diet and exercise.",
-                            "Regular physical activity can help raise HDL ('good') cholesterol.",
-                            "Quit smoking, as it lowers HDL cholesterol.",
-                            "Moderate alcohol consumption."
-                        ],
-                         sampleMeal: {
-                            breakfast: "Almond milk smoothie with spinach and berries.",
-                            lunch: "Tuna salad (made with yogurt) on whole-wheat crackers.",
-                            dinner: "Tofu and vegetable stir-fry with brown rice."
-                        }
-                    },
-                    avoid: [
-                        "Processed meats (bacon, sausage).",
-                        "Fried foods and fast food.",
-                        "Full-fat dairy products (butter, cream, cheese).",
-                        "Commercially baked goods (cookies, cakes).",
-                        "Excessive amounts of red meat."
-                    ]
-                },
-                {
-                    id: 'stroke',
-                    name: 'Stroke (Recovery)',
-                    icon: 'fas fa-brain',
-                    description: 'Heart-healthy, low-sodium diet to prevent recurrence.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 3. KIDNEY & URINARY ===
-                {
-                    id: 'ckd',
-                    name: 'Chronic Kidney Disease',
-                    icon: 'fas fa-kidneys',
-                    description: 'Managing protein, phosphorus, and potassium. Requires strict medical advice.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'kidney-stones',
-                    name: 'Kidney Stones',
-                    icon: 'fas fa-gem',
-                    description: 'Managing oxalate, calcium, and fluid intake to prevent stones.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'uti',
-                    name: 'Urinary Tract Infection',
-                    icon: 'fas fa-toilet',
-                    description: 'Supporting urinary health with hydration and specific nutrients.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                
-                // === 4. LIVER & GALLBLADDER ===
-                {
-                    id: 'fatty-liver',
-                    name: 'Fatty Liver (NAFLD)',
-                    icon: 'fas fa-liver',
-                    description: 'Reducing liver fat through weight loss and a Mediterranean-style diet.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'hepatitis',
-                    name: 'Hepatitis (A, B, C)',
-                    icon: 'fas fa-virus',
-                    description: 'Supporting liver function and recovery with easy-to-digest foods.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'cirrhosis',
-                    name: 'Cirrhosis',
-                    icon: 'fas fa-procedures',
-                    description: 'Managing fluid retention and nutrient needs for advanced liver disease.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'gallstones',
-                    name: 'Gallstones',
-                    icon: 'fas fa-dot-circle',
-                    description: 'Low-fat diet to prevent gallbladder attacks.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 5. RESPIRATORY ===
-                {
-                    id: 'asthma',
-                    name: 'Asthma',
-                    icon: 'fas fa-wind',
-                    description: 'Anti-inflammatory diet to help manage symptoms.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'copd',
-                    name: 'COPD',
-                    icon: 'fas fa-lungs',
-                    description: 'Maintaining muscle mass and energy levels.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'bronchitis',
-                    name: 'Bronchitis',
-                    icon: 'fas fa-lungs-virus',
-                    description: 'Immune support and anti-inflammatory foods.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 6. DIGESTIVE ===
-                {
-                    id: 'gastritis',
-                    name: 'Gastritis',
-                    icon: 'fas fa-stomach',
-                    description: 'Soothing the stomach lining with non-acidic, non-spicy foods.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'peptic-ulcer',
-                    name: 'Peptic Ulcer',
-                    icon: 'fas fa-bacteria',
-                    description: 'Avoiding irritants like spice, alcohol, and caffeine during healing.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'ibs',
-                    name: 'Irritable Bowel (IBS)',
-                    icon: 'fas fa-poo',
-                    description: 'Often involves a low-FODMAP diet to identify trigger foods.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'constipation',
-                    name: 'Constipation',
-                    icon: 'fas fa-stopwatch',
-                    description: 'Increasing fiber and fluid intake to promote regularity.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'diarrhea',
-                    name: 'Diarrhea',
-                    icon: 'fas fa-faucet-drip',
-                    description: 'Focusing on hydration and binding foods (like BRAT diet).',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
+                    recovery: placeholderRecovery, prevention: placeholderPrevention, avoid: placeholderAvoid
                 },
                 {
                     id: 'gerd',
                     name: 'Acid Reflux (GERD)',
                     icon: 'fas fa-fire-extinguisher',
                     description: 'Avoiding trigger foods like citrus, tomato, and fatty meals.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
+                    recovery: placeholderRecovery, prevention: placeholderPrevention, avoid: placeholderAvoid
                 },
-
-                // === 7. BLOOD & IMMUNE ===
-                {
-                    id: 'anemia',
-                    name: 'Anemia (Iron-Deficiency)',
-                    icon: 'fas fa-leaf',
-                    description: 'Increasing iron intake through diet to restore healthy red blood cell levels.',
-                    recovery: {
-                        title: 'Iron-Rich Diet Plan',
-                        points: [
-                            "Eat Heme Iron (easily absorbed): Lean red meat, poultry, and fish.",
-                            "Eat Non-Heme Iron (plant-based): Lentils, beans, tofu, spinach, and fortified cereals.",
-                            "Combine with Vitamin C: Eat iron-rich foods with citrus, bell peppers, or tomatoes to boost absorption.",
-                            "Cook in cast-iron skillets, which can add small amounts of iron to food.",
-                            "Drink orange juice (Vitamin C) with your fortified breakfast cereal."
-                        ],
-                        sampleMeal: {
-                            breakfast: "Fortified oatmeal with strawberries (Vitamin C).",
-                            lunch: "Spinach salad with grilled chicken, bell peppers, and a lemon-vinaigrette.",
-                            dinner: "Lean beef stir-fry with broccoli and a side of quinoa."
-                        }
-                    },
-                    prevention: {
-                        title: 'Maintaining Iron Stores',
-                        points: [
-                            "Regularly include iron-rich foods in your balanced diet.",
-                            "Be mindful of iron intake, especially for women, vegetarians, and vegans.",
-                            "Avoid drinking tea or coffee *with* your meals, as tannins can block iron absorption.",
-                            "Include folate-rich foods like leafy greens, as folate is also key for blood health."
-                        ],
-                         sampleMeal: {
-                            breakfast: "Scrambled eggs with spinach and a side of sliced tomatoes.",
-                            lunch: "Black bean soup with a whole-wheat roll.",
-                            dinner: "Lentil shepherd's pie with a mixed green salad."
-                        }
-                    },
-                    avoid: [
-                        "Tannin-rich drinks (tea, coffee) *during* iron-rich meals.",
-                        "Calcium-rich foods (like milk) *during* your main iron meal, as calcium can interfere with absorption.",
-                        "Foods high in phytic acid (like unleavened bread) with iron-rich foods."
-                    ]
-                },
-                {
-                    id: 'leukemia',
-                    name: 'Leukemia (Diet Support)',
-                    icon: 'fas fa-syringe',
-                    description: 'Nutritional support during therapy to manage side effects and maintain strength.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'autoimmune',
-                    name: 'Autoimmune Diseases',
-                    icon: 'fas fa-shield-virus',
-                    description: 'Anti-inflammatory diets (like AIP) may help manage symptoms.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 8. BONE, JOINT & MUSCLE ===
-                {
-                    id: 'arthritis',
-                    name: 'Arthritis (OA, RA)',
-                    icon: 'fas fa-bone',
-                    description: 'Focusing on anti-inflammatory foods, Omega-3s, and antioxidants.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'osteoporosis',
-                    name: 'Osteoporosis',
-                    icon: 'fas fa-bone-break',
-                    description: 'Maximizing calcium and Vitamin D intake for bone density.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'gout',
-                    name: 'Gout',
-                    icon: 'fas fa-joint',
-                    description: 'A low-purine diet to reduce uric acid levels in the blood.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 9. NERVOUS SYSTEM ===
-                {
-                    id: 'epilepsy',
-                    name: 'Epilepsy',
-                    icon: 'fas fa-bolt',
-                    description: 'Ketogenic diet is sometimes used under strict medical supervision.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'alzheimers',
-                    name: 'Alzheimer’s Disease',
-                    icon: 'fas fa-brain',
-                    description: 'Brain-healthy diets like MIND or Mediterranean to support cognition.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'parkinsons',
-                    name: 'Parkinson’s Disease',
-                    icon: 'fas fa-brain',
-                    description: 'Managing protein intake and focusing on antioxidants and fiber.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'migraine',
-                    name: 'Migraine',
-                    icon: 'fas fa-head-side-virus',
-                    description: 'Identifying and eliminating common trigger foods and chemicals.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 10. CANCER ===
-                {
-                    id: 'cancer-support',
-                    name: 'Cancer (General Support)',
-                    icon: 'fas fa-ribbon',
-                    description: 'Maintaining calories and protein to support the body during treatment.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                // (Adding all specific cancers as one category for brevity)
-
-                // === 11. SKIN DISORDERS ===
-                {
-                    id: 'psoriasis-eczema',
-                    name: 'Psoriasis & Eczema',
-                    icon: 'fas fa-allergies',
-                    description: 'Anti-inflammatory and elimination diets to identify triggers.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'acne',
-                    name: 'Acne',
-                    icon: 'fas fa-head-side-cough',
-                    description: 'Investigating links to dairy, high-glycemic foods, and gut health.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 12. ENDOCRINE & HORMONAL ===
-                {
-                    id: 'cushings-addisons',
-                    name: 'Cushing’s & Addison’s',
-                    icon: 'fas fa-clinic-medical',
-                    description: 'Managing sodium, potassium, and blood sugar based on the specific disorder.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 13. INFECTIOUS DISEASES ===
-                {
-                    id: 'infectious-support',
-                    name: 'Infectious Disease Support',
-                    icon: 'fas fa-viruses',
-                    description: 'High-calorie, high-protein diet to fight infection and prevent weight loss.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                {
-                    id: 'tb-hiv',
-                    name: 'Tuberculosis & HIV',
-                    icon: 'fas fa-hand-holding-medical',
-                    description: 'Nutrient-dense diet to support a compromised immune system.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 14. EYE & VISION ===
-                {
-                    id: 'eye-health',
-                    name: 'Eye & Vision Health',
-                    icon: 'fas fa-eye',
-                    description: 'Diet rich in antioxidants like Lutein, Zeaxanthin, and Vitamin A.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-
-                // === 15. MENTAL HEALTH ===
-                {
-                    id: 'mental-health',
-                    name: 'Depression & Anxiety',
-                    icon: 'fas fa-user-friends',
-                    description: 'Focusing on gut-brain axis, Omega-3s, and stabilizing blood sugar.',
-                    recovery: placeholderRecovery,
-                    prevention: placeholderPrevention,
-                    avoid: placeholderAvoid
-                },
-                
-                // === MISC (Originals) ===
                 {
                     id: 'flu-cold',
                     name: 'Common Cold & Flu',
                     icon: 'fas fa-head-side-cough',
-                    description: 'Supporting the immune system with fluids, vitamins, and easily digestible foods.',
+                    description: 'Immune support with fluids and Vitamin C.',
                     recovery: {
                         title: 'Immune-Boosting Diet',
-                        points: [
-                            "Stay hydrated: Drink plenty of water, herbal teas, and clear broths.",
-                            "Consume Vitamin C-rich foods: citrus fruits, strawberries, kiwi, and bell peppers.",
-                            "Eat zinc-rich foods: lean meats, fortified cereals, and beans.",
-                            "Garlic and ginger have natural antiviral and anti-inflammatory properties.",
-                            "Warm chicken soup can help clear congestion and is hydrating."
-                        ],
-                         sampleMeal: {
-                            breakfast: "Warm tea with lemon and honey, and a bowl of oatmeal.",
-                            lunch: "Chicken noodle soup with a side of orange slices.",
-                            dinner: "Steamed vegetables with a small portion of lean chicken or tofu."
-                        }
+                        points: ["Stay hydrated.", "Consume Vitamin C foods.", "Eat zinc-rich foods.", "Warm soups."],
+                        sampleMeal: { breakfast: "Oatmeal + Tea", lunch: "Chicken soup", dinner: "Steamed veggies + tofu" }
                     },
                     prevention: {
-                        title: 'Strengthening Your Immune System',
-                        points: [
-                            "Maintain a balanced diet rich in a variety of fruits and vegetables year-round.",
-                            "Ensure adequate sleep, as it's vital for immune function.",
-                            "Consider a probiotic supplement or yogurt to support gut health.",
-                            "Regular, moderate exercise can boost your immune system.",
-                            "Practice good hygiene, like frequent hand washing."
-                        ],
-                        sampleMeal: {
-                            breakfast: "Greek yogurt with mixed berries and seeds.",
-                            lunch: "Quinoa salad with chickpeas, cucumber, and lemon dressing.",
-                            dinner: "Beef and broccoli stir-fry with a side of brown rice."
-                        }
+                        title: 'Strengthening Immunity',
+                        points: ["Balanced diet year-round.", "Adequate sleep.", "Probiotics.", "Hygiene."],
+                        sampleMeal: { breakfast: "Yogurt + berries", lunch: "Quinoa salad", dinner: "Beef broccoli stir-fry" }
                     },
-                    avoid: [
-                        "Sugary foods and drinks, which can suppress the immune system.",
-                        "Greasy, fatty, and hard-to-digest foods.",
-                        "Alcohol and excessive caffeine, which can lead to dehydration.",
-                        "Dairy products if they increase mucus production for you.",
-                    ]
+                    avoid: ["Sugary foods.", "Greasy foods.", "Alcohol."]
                 },
-                 {
-                    id: 'gastroenteritis',
-                    name: 'Stomach Upset',
-                    icon: 'fas fa-bacterium',
-                    description: 'Resting the digestive system with bland, easy-to-digest foods (BRAT diet).',
-                    recovery: {
-                        title: 'BRAT Diet for Recovery',
-                        points: [
-                           "Focus on Bananas, Rice (white), Applesauce, and Toast (white).",
-                           "Stay hydrated with clear fluids: water, electrolyte drinks, or weak tea.",
-                           "Gradually reintroduce other bland foods like crackers, boiled potatoes, and clear soups.",
-                           "Avoid complex foods until your symptoms fully subside.",
-                           "Small, frequent meals are better than three large ones."
-                        ],
-                         sampleMeal: {
-                            breakfast: "A slice of dry white toast and half a banana.",
-                            lunch: "A small bowl of plain white rice.",
-                            dinner: "A cup of clear vegetable or chicken broth."
-                        }
-                    },
-                    prevention: {
-                        title: 'Maintaining Gut Health',
-                        points: [
-                            "Practice food safety: wash hands, cook meats thoroughly, and avoid cross-contamination.",
-                            "Be cautious when eating from street vendors or in places with questionable hygiene.",
-                            "Introduce probiotics into your diet through yogurt, kefir, or supplements.",
-                            "A balanced, fiber-rich diet supports a healthy gut microbiome.",
-                            "Avoid excessive intake of alcohol, caffeine, and spicy foods if you have a sensitive stomach."
-                        ],
-                        sampleMeal: {
-                            breakfast: "Probiotic yogurt with a sprinkle of granola.",
-                            lunch: "Grilled chicken sandwich on whole-wheat bread with a side salad.",
-                            dinner: "Baked sweet potato with black beans and avocado."
-                        }
-                    },
-                    avoid: [
-                        "Dairy products (milk, cheese).",
-                        "Fatty, greasy, or fried foods.",
-                        "Spicy and heavily seasoned foods.",
-                        "Caffeine, alcohol, and carbonated drinks.",
-                        "Raw vegetables and fruits with skin (besides bananas)."
-                    ]
+                {
+                    id: 'anemia',
+                    name: 'Anemia',
+                    icon: 'fas fa-leaf',
+                    description: 'Increasing iron intake to restore red blood cells.',
+                    recovery: placeholderRecovery, prevention: placeholderPrevention, avoid: placeholderAvoid
                 }
             ];
 
-            // --- Element References ---
+            // --- Elements ---
             const diseaseGrid = document.getElementById('disease-grid');
             const searchBox = document.getElementById('search-box');
             const noResultsMsg = document.getElementById('no-results');
-            const modal = document.getElementById('diet-modal');
-            const modalContent = document.getElementById('modal-content');
+            
+            // Bootstrap Modal Instance
+            const dietModal = new bootstrap.Modal(document.getElementById('dietModal'));
             const modalTitle = document.getElementById('modal-title');
             const modalDetails = document.getElementById('modal-details');
-            const closeModalBtn = document.getElementById('close-modal');
 
-            // --- Element References for Main Tabs ---
+            // --- Navigation Logic ---
             const navDiet = document.getElementById('nav-diet');
             const navEducation = document.getElementById('nav-education');
             const contentDiet = document.getElementById('content-diet-finder');
             const contentEducation = document.getElementById('content-health-education');
 
-            // --- Functions ---
-            
-            /**
-             * Renders the disease cards to the grid.
-             * @param {Array} plans - The array of diet plans to render.
-             */
+            navDiet.addEventListener('click', () => {
+                contentDiet.classList.remove('d-none');
+                contentEducation.classList.add('d-none');
+                navDiet.classList.add('active');
+                navEducation.classList.remove('active');
+            });
+
+            navEducation.addEventListener('click', () => {
+                contentEducation.classList.remove('d-none');
+                contentDiet.classList.add('d-none');
+                navEducation.classList.add('active');
+                navDiet.classList.remove('active');
+            });
+
+            // --- Rendering Cards ---
             function renderDiseaseCards(plans) {
                 diseaseGrid.innerHTML = '';
                 if (plans.length === 0) {
-                    noResultsMsg.classList.remove('hidden');
+                    noResultsMsg.classList.remove('d-none');
                 } else {
-                    noResultsMsg.classList.add('hidden');
+                    noResultsMsg.classList.add('d-none');
                 }
 
-                // Sort plans alphabetically by name
                 plans.sort((a, b) => a.name.localeCompare(b.name));
 
                 plans.forEach(plan => {
-                    const card = document.createElement('div');
-                    card.className = 'disease-card bg-white p-6 rounded-lg shadow-md flex flex-col cursor-pointer';
-                    card.dataset.id = plan.id;
-                    card.innerHTML = `
-                        <div class="flex-grow">
-                            <div class="flex items-center mb-3">
-                                <i class="${plan.icon} text-2xl text-blue-500 mr-4"></i>
-                                <h3 class="text-xl font-bold text-slate-700">${plan.name}</h3>
+                    const col = document.createElement('div');
+                    col.className = 'col-12 col-sm-6 col-lg-4';
+                    
+                    col.innerHTML = `
+                        <div class="card h-100 border-0 shadow-sm hover-lift cursor-pointer disease-card" data-id="${plan.id}">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="${plan.icon} fa-2x text-primary me-3"></i>
+                                    <h5 class="card-title fw-bold text-dark mb-0">${plan.name}</h5>
+                                </div>
+                                <p class="card-text text-secondary flex-grow-1">${plan.description}</p>
+                                <button class="btn btn-link text-primary text-decoration-none p-0 fw-semibold align-self-start mt-3">View Plan &rarr;</button>
                             </div>
-                            <p class="text-slate-500">${plan.description}</p>
                         </div>
-                        <button class="mt-4 text-blue-600 font-semibold self-start">View Plan &rarr;</button>
                     `;
-                    diseaseGrid.appendChild(card);
+                    diseaseGrid.appendChild(col);
                 });
             }
-            
-            /**
-             * Populates and opens the diet plan modal.
-             * @param {string} planId - The ID of the plan to display.
-             */
+
+            // --- Modal Logic ---
             function openModal(planId) {
                 const plan = dietPlans.find(p => p.id === planId);
                 if (!plan) return;
 
                 modalTitle.textContent = plan.name;
-                renderTabContent(plan, 'recovery'); // Default to recovery tab
-
-                modal.classList.remove('hidden');
-                requestAnimationFrame(() => {
-                    modal.classList.remove('opacity-0');
-                    modalContent.classList.remove('scale-95', 'opacity-0');
+                
+                // Reset active tab to Recovery
+                document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if(btn.dataset.tab === 'recovery') btn.classList.add('active');
                 });
+
+                renderTabContent(plan, 'recovery');
+                dietModal.show();
             }
-            
-             /**
-             * Hides and resets the modal.
-             */
-            function closeModal() {
-                modal.classList.add('opacity-0');
-                modalContent.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-            
-            /**
-             * Renders the content for the selected tab inside the modal.
-             * @param {object} plan - The full diet plan object.
-             * @param {string} tabName - The name of the tab ('recovery', 'prevention', 'avoid').
-             */
+
             function renderTabContent(plan, tabName) {
                 let contentHTML = '';
                 const data = plan[tabName];
 
                 if(tabName === 'avoid') {
                      contentHTML = `
-                        <h4 class="text-xl font-semibold text-red-600 mb-4">Foods to Strictly Avoid</h4>
-                        <ul class="space-y-2 list-disc list-inside text-slate-600">
-                            ${data.map(item => `<li>${item}</li>`).join('')}
+                        <h4 class="h5 fw-bold text-danger mb-3">Foods to Strictly Avoid</h4>
+                        <ul class="list-group list-group-flush">
+                            ${data.map(item => `<li class="list-group-item bg-transparent px-0"><i class="fas fa-times text-danger me-2"></i>${item}</li>`).join('')}
                         </ul>
                     `;
                 } else {
                     contentHTML = `
-                        <h4 class="text-xl font-semibold text-slate-700 mb-4">${data.title}</h4>
-                        <ul class="space-y-2 list-disc list-inside text-slate-600 mb-6">
+                        <h4 class="h5 fw-bold text-primary mb-3">${data.title}</h4>
+                        <ul class="mb-4 text-secondary">
                             ${data.points.map(point => `<li>${point}</li>`).join('')}
                         </ul>
-                        <h5 class="text-lg font-semibold text-slate-600 mb-3">Sample Meal Plan</h5>
-                        <div class="text-sm bg-slate-50 p-4 rounded-md border">
-                            <p><strong class="font-semibold">Breakfast:</strong> ${data.sampleMeal.breakfast}</p>
-                            <p><strong class="font-semibold">Lunch:</strong> ${data.sampleMeal.lunch}</p>
-                            <p><strong class="font-semibold">Dinner:</strong> ${data.sampleMeal.dinner}</p>
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h5 class="h6 fw-bold text-dark mb-3">Sample Meal Plan</h5>
+                                <p class="mb-1"><strong class="text-dark">Breakfast:</strong> ${data.sampleMeal.breakfast}</p>
+                                <p class="mb-1"><strong class="text-dark">Lunch:</strong> ${data.sampleMeal.lunch}</p>
+                                <p class="mb-0"><strong class="text-dark">Dinner:</strong> ${data.sampleMeal.dinner}</p>
+                            </div>
                         </div>
                     `;
                 }
-
                 modalDetails.innerHTML = contentHTML;
-
-                 // Update active tab style
-                document.querySelectorAll('.detail-tab').forEach(tab => {
-                    tab.classList.remove('detail-tab-active');
-                    if(tab.dataset.tab === tabName) {
-                        tab.classList.add('detail-tab-active');
-                    }
-                });
             }
 
-
-            // --- Event Listeners ---
-            searchBox.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredPlans = dietPlans.filter(plan => 
-                    plan.name.toLowerCase().includes(searchTerm) || 
-                    plan.description.toLowerCase().includes(searchTerm)
-                );
-                renderDiseaseCards(filteredPlans);
-            });
+            // --- Events ---
             
+            // Search
+            searchBox.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = dietPlans.filter(p => 
+                    p.name.toLowerCase().includes(term) || 
+                    p.description.toLowerCase().includes(term)
+                );
+                renderDiseaseCards(filtered);
+            });
+
+            // Open Modal (Delegation)
             diseaseGrid.addEventListener('click', (e) => {
                 const card = e.target.closest('.disease-card');
-                if (card) {
-                    openModal(card.dataset.id);
-                }
+                if (card) openModal(card.dataset.id);
             });
 
-            closeModalBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if(e.target === modal) closeModal();
-            });
-            
-            modalContent.addEventListener('click', (e) => {
-                const tab = e.target.closest('.detail-tab');
-                if(tab) {
-                    const planId = dietPlans.find(p => p.name === modalTitle.textContent)?.id;
-                    const plan = dietPlands.find(p => p.id === planId);
-                    if(plan) {
-                        renderTabContent(plan, tab.dataset.tab);
-                    }
-                }
+            // Modal Tab Switching
+            document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Update Active Class
+                    document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // Render Content
+                    const planName = document.getElementById('modal-title').textContent;
+                    const plan = dietPlans.find(p => p.name === planName);
+                    if(plan) renderTabContent(plan, e.target.dataset.tab);
+                });
             });
 
-            // --- Event Listeners for Main Tabs ---
-            navDiet.addEventListener('click', () => {
-                // Show diet content, hide education
-                contentDiet.classList.remove('hidden');
-                contentEducation.classList.add('hidden');
-                
-                // Update tab styles
-                navDiet.classList.add('active-nav-tab');
-                navEducation.classList.remove('active-nav-tab');
-            });
-
-            navEducation.addEventListener('click', () => {
-                // Show education content, hide diet
-                contentEducation.classList.remove('hidden');
-                contentDiet.classList.add('hidden');
-
-                // Update tab styles
-                navEducation.classList.add('active-nav-tab');
-                navDiet.classList.remove('active-nav-tab');
-            });
-
-            // --- Initial Load ---
+            // Initial Render
             renderDiseaseCards(dietPlans);
         });
     </script>

@@ -3,306 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billing|MediSync</title>
+    <title>Billing | MediSync</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --light-bg: #f8f9fa;
-            --dark-text: #343a40;
-            --light-text: #6c757d;
-            --border-color: #dee2e6;
-        }
-
-        /* --- General Styles --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--dark-text);
+            background-color: #f8f9fa;
         }
-
-        /* --- Main Container & Header --- */
-        .billing-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        header p {
-            font-size: 1.1rem;
-            color: var(--light-text);
-        }
-        
-        /* --- Filter Controls --- */
-        .filter-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .filter-btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-            border-radius: 50px;
-            background-color: #fff;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn:hover {
-            background-color: #f1f1f1;
-        }
-        
-        .filter-btn.active {
-            background-color: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
-        }
-        
-        /* --- Bill List --- */
-        .bill-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        .bill-card {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .bill-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .bill-info h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .bill-info p {
-            color: var(--light-text);
-            margin-bottom: 0.25rem;
-        }
-
-        .bill-status {
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-        
-        .status-paid {
-            background-color: rgba(40, 167, 69, 0.1);
-            color: var(--success-color);
-        }
-        
-        .status-pending {
-            background-color: rgba(255, 193, 7, 0.1);
-            color: #b58900;
-        }
-
-        .bill-actions {
-            text-align: right;
-        }
-        
-        .bill-actions .amount {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--danger-color);
-        }
-
-        .pay-now-btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            background-color: var(--success-color);
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .pay-now-btn:hover {
-            background-color: #218838;
-        }
-
-        /* --- Payment Modal --- */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 1000;
-        }
-
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: #fff;
-            padding: 2.5rem;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.visible .modal-content {
-            transform: scale(1);
-        }
-        
-        .modal-header {
-            position: relative;
-            margin-bottom: 1rem;
-        }
-        
-        .modal-header h2 {
-            font-size: 1.8rem;
-            color: var(--dark-text);
-        }
-
-        .close-modal-btn {
-            position: absolute;
-            top: -1.5rem;
-            right: -1rem;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: var(--light-text);
-            cursor: pointer;
-        }
-
-        .modal-body .qr-code {
-            max-width: 250px;
-            margin: 1.5rem auto;
-            border: 5px solid var(--border-color);
-            border-radius: 10px;
+        /* Custom QR Code Border */
+        .qr-code {
+            max-width: 200px;
             padding: 10px;
-        }
-
-        .modal-body .upi-id {
-            font-weight: 600;
-            color: var(--primary-color);
-            background-color: var(--light-bg);
-            padding: 0.5rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-body .pay-link {
-            display: inline-block;
-            text-decoration: none;
-            background-color: var(--primary-color);
-            color: #fff;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-        }
-        
-        .pay-link:hover {
-            background-color: #0069d9;
+            border: 4px solid #dee2e6;
+            border-radius: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div class="billing-container">
-        <header>
-            <h1>Patient Billing Center</h1>
-            <p>View and manage all your hospital bills in one place.</p>
-        </header>
-
-        <div class="filter-controls">
-            <button id="filter-pending" class="filter-btn active">Pending Bills</button>
-            <button id="filter-paid" class="filter-btn">Payment History</button>
+    <div class="container py-5" style="max-width: 900px;">
+        
+        <div class="card shadow-sm border-0 mb-4 rounded-4">
+            <div class="card-body text-center p-4">
+                <h1 class="display-6 fw-bold text-primary">Patient Billing Center</h1>
+                <p class="text-secondary lead mb-0">View and manage all your hospital bills in one place.</p>
+            </div>
         </div>
 
-        <div id="bill-list" class="bill-list">
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button id="filter-pending" class="btn btn-primary rounded-pill px-4">Pending Bills</button>
+            <button id="filter-paid" class="btn btn-outline-secondary rounded-pill px-4">Payment History</button>
+        </div>
+
+        <div id="bill-list" class="d-flex flex-column gap-3">
             </div>
+
     </div>
 
-    <div id="payment-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button id="close-modal" class="close-modal-btn">&times;</button>
-                <h2>Complete Your Payment</h2>
-            </div>
-            <div id="modal-bill-details" class="bill-info">
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold fs-4" id="paymentModalLabel">Complete Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            <div class="modal-body">
-                <p>Scan the QR code with any UPI app</p>
-                <img id="upi-qr-code" src="" alt="UPI QR Code" class="qr-code">
-                <p>or pay to UPI ID:</p>
-                <p id="upi-id-text" class="upi-id"></p>
-                <a id="upi-payment-link" href="#" class="pay-link" target="_blank">
-                    <i class="fas fa-mobile-alt"></i> Pay with UPI App
-                </a>
-                <p style="font-size: 0.8rem; margin-top: 1rem; color: #888;">This is a simulation. No real payment will be processed.</p>
+                <div class="modal-body text-center pt-2 pb-4">
+                    
+                    <div id="modal-bill-details" class="mb-4 bg-light p-3 rounded-3 text-start"></div>
+
+                    <p class="text-muted mb-2">Scan with any UPI app</p>
+                    <img id="upi-qr-code" src="" alt="UPI QR Code" class="qr-code img-fluid mb-3">
+                    
+                    <p class="mb-1 text-muted">or pay to UPI ID:</p>
+                    <div class="bg-light d-inline-block px-3 py-2 rounded mb-4 fw-bold text-primary border" id="upi-id-text"></div>
+                    
+                    <div class="d-grid gap-2">
+                        <a id="upi-payment-link" href="#" class="btn btn-primary fw-bold py-2" target="_blank">
+                            <i class="fas fa-mobile-alt me-2"></i> Open UPI App
+                        </a>
+                    </div>
+                    
+                    <p class="text-muted small mt-3 mb-0">This is a simulation. No real payment will be processed.</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- MOCK DATA (In a real application, this would come from a server) ---
+            // --- MOCK DATA ---
             const bills = [
                 { id: 'B2025-091', patient: 'Venkatesh P.', amount: 4500.00, dueDate: '2025-09-20', details: 'Consultation & Lab Tests', status: 'Pending'},
                 { id: 'B2025-085', patient: 'Priya Sharma', amount: 32000.00, dueDate: '2025-09-18', details: 'Surgical Procedure', status: 'Pending'},
@@ -315,8 +95,11 @@
             const billListContainer = document.getElementById('bill-list');
             const filterPendingBtn = document.getElementById('filter-pending');
             const filterPaidBtn = document.getElementById('filter-paid');
-            const paymentModal = document.getElementById('payment-modal');
-            const closeModalBtn = document.getElementById('close-modal');
+            
+            // Bootstrap Modal Instance
+            const paymentModalElement = document.getElementById('paymentModal');
+            const paymentModal = new bootstrap.Modal(paymentModalElement);
+            
             const modalBillDetails = document.getElementById('modal-bill-details');
             const upiQrCode = document.getElementById('upi-qr-code');
             const upiIdText = document.getElementById('upi-id-text');
@@ -327,99 +110,115 @@
 
             // --- FUNCTIONS ---
 
-            // Function to render the list of bills based on the current filter
             const renderBills = () => {
-                billListContainer.innerHTML = ''; // Clear existing list
+                billListContainer.innerHTML = ''; 
 
                 const filteredBills = bills.filter(bill => bill.status === currentFilter);
 
                 if (filteredBills.length === 0) {
-                    billListContainer.innerHTML = `<p style="text-align:center; color: var(--light-text);">No ${currentFilter.toLowerCase()} bills found.</p>`;
+                    billListContainer.innerHTML = `
+                        <div class="alert alert-light text-center text-muted border-0 shadow-sm" role="alert">
+                            <i class="fas fa-file-invoice fa-2x mb-2 d-block text-secondary"></i>
+                            No ${currentFilter.toLowerCase()} bills found.
+                        </div>`;
                     return;
                 }
 
                 filteredBills.forEach(bill => {
                     const billCard = document.createElement('div');
-                    billCard.className = 'bill-card';
+                    billCard.className = 'card border-0 shadow-sm rounded-3 hover-shadow transition';
+                    // Custom style for hover effect
+                    billCard.style.transition = 'transform 0.2s ease, box-shadow 0.2s ease';
+                    billCard.onmouseover = () => { billCard.classList.add('shadow'); billCard.style.transform = 'translateY(-2px)'; };
+                    billCard.onmouseout = () => { billCard.classList.remove('shadow'); billCard.style.transform = 'translateY(0)'; };
 
-                    const statusClass = bill.status === 'Paid' ? 'status-paid' : 'status-pending';
-                    const formattedAmount = `₹${bill.amount.toFixed(2)}`;
+                    const statusBadge = bill.status === 'Paid' 
+                        ? '<span class="badge bg-success-subtle text-success rounded-pill px-3">Paid</span>' 
+                        : '<span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3">Pending</span>';
+                    
+                    const amountColor = bill.status === 'Paid' ? 'text-success' : 'text-danger';
                     
                     const payButtonHTML = bill.status === 'Pending' 
-                        ? `<button class="pay-now-btn" data-bill-id="${bill.id}">Pay Now</button>`
+                        ? `<button class="btn btn-sm btn-success pay-now-btn fw-bold px-3" data-bill-id="${bill.id}">Pay Now</button>`
                         : '';
 
                     billCard.innerHTML = `
-                        <div class="bill-info">
-                            <h3>Bill ID: ${bill.id}</h3>
-                            <p><strong>Patient:</strong> ${bill.patient}</p>
-                            <p><strong>Details:</strong> ${bill.details}</p>
-                            <p><strong>Due Date:</strong> ${bill.dueDate}</p>
-                        </div>
-                        <div class="bill-actions">
-                            <div class="amount" style="color: ${bill.status === 'Paid' ? 'var(--success-color)' : 'var(--danger-color)'}">${formattedAmount}</div>
-                            <span class="bill-status ${statusClass}">${bill.status}</span>
-                            ${payButtonHTML}
+                        <div class="card-body p-4">
+                            <div class="row align-items-center g-3">
+                                <div class="col-md-7">
+                                    <h5 class="card-title fw-bold mb-1">Bill #${bill.id}</h5>
+                                    <p class="text-secondary small mb-1"><i class="fas fa-user me-1"></i> ${bill.patient}</p>
+                                    <p class="text-secondary small mb-1"><i class="fas fa-notes-medical me-1"></i> ${bill.details}</p>
+                                    <p class="text-secondary small mb-0"><i class="fas fa-calendar-alt me-1"></i> Due: ${bill.dueDate}</p>
+                                </div>
+                                <div class="col-md-5 text-md-end">
+                                    <div class="d-flex flex-column align-items-md-end align-items-start gap-2">
+                                        <h3 class="${amountColor} fw-bold mb-0">₹${bill.amount.toFixed(2)}</h3>
+                                        <div class="d-flex align-items-center gap-2">
+                                            ${statusBadge}
+                                            ${payButtonHTML}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     `;
                     billListContainer.appendChild(billCard);
                 });
             };
 
-            // Function to open the payment modal
             const openPaymentModal = (billId) => {
                 const bill = bills.find(b => b.id === billId);
                 if (!bill) return;
                 
-                // --- UPI DETAILS (Static for this simulation) ---
+                // UPI Details
                 const hospitalName = "PharmaCare Hospital";
-                const upiId = "pharma.care@okhdfcbank"; // Example UPI ID
+                const upiId = "pharma.care@okhdfcbank"; 
                 const transactionNote = `Payment for Bill ${bill.id}`;
                 
-                // Populate modal with bill details
                 modalBillDetails.innerHTML = `
-                    <h3>Bill ID: ${bill.id}</h3>
-                    <p><strong>Patient:</strong> ${bill.patient}</p>
-                    <p><strong>Amount to Pay:</strong> <span style="font-weight:700; font-size:1.2rem;">₹${bill.amount.toFixed(2)}</span></p>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-secondary">Bill ID:</span>
+                        <span class="fw-bold text-dark">${bill.id}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-secondary">Patient:</span>
+                        <span class="fw-bold text-dark">${bill.patient}</span>
+                    </div>
+                    <div class="border-top my-2"></div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary">Total Amount:</span>
+                        <span class="fs-4 fw-bold text-primary">₹${bill.amount.toFixed(2)}</span>
+                    </div>
                 `;
 
-                // Generate the UPI deep link string
+                // Generate UPI Link
                 const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(hospitalName)}&am=${bill.amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
-                
-                // Generate QR Code using a free API
                 const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
 
-                // Update modal elements
                 upiQrCode.src = qrCodeUrl;
                 upiIdText.textContent = upiId;
                 upiPaymentLink.href = upiUrl;
                 
-                paymentModal.classList.add('visible');
-            };
-
-            // Function to close the payment modal
-            const closePaymentModal = () => {
-                paymentModal.classList.remove('visible');
+                paymentModal.show();
             };
 
             // --- EVENT LISTENERS ---
 
-            // Filter button clicks
             filterPendingBtn.addEventListener('click', () => {
                 currentFilter = 'Pending';
-                filterPendingBtn.classList.add('active');
-                filterPaidBtn.classList.remove('active');
+                filterPendingBtn.classList.replace('btn-outline-secondary', 'btn-primary');
+                filterPaidBtn.classList.replace('btn-primary', 'btn-outline-secondary');
                 renderBills();
             });
 
             filterPaidBtn.addEventListener('click', () => {
                 currentFilter = 'Paid';
-                filterPaidBtn.classList.add('active');
-                filterPendingBtn.classList.remove('active');
+                filterPaidBtn.classList.replace('btn-outline-secondary', 'btn-primary');
+                filterPendingBtn.classList.replace('btn-primary', 'btn-outline-secondary');
                 renderBills();
             });
 
-            // "Pay Now" button clicks (using event delegation)
             billListContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('pay-now-btn')) {
                     const billId = event.target.dataset.billId;
@@ -427,15 +226,7 @@
                 }
             });
 
-            // Modal close events
-            closeModalBtn.addEventListener('click', closePaymentModal);
-            paymentModal.addEventListener('click', (event) => {
-                if (event.target === paymentModal) {
-                    closePaymentModal();
-                }
-            });
-
-            // --- INITIAL RENDER ---
+            // Initial Render
             renderBills();
         });
     </script>

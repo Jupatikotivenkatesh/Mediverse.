@@ -2,18 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Using Inter as the default font */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-        /* Custom scrollbar for a better look */
+        
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -27,174 +31,193 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        /* Avatar styling */
+        .avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* New Entry Animation */
+        @keyframes pulse-bg {
+            0% { background-color: #e9ecef; }
+            50% { background-color: #cfe2ff; }
+            100% { background-color: #f8f9fa; }
+        }
+        .animate-pulse {
+            animation: pulse-bg 1s ease-in-out;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 min-h-screen w-full">
+    <div class="container-fluid min-vh-100">
+        <div class="row min-vh-100">
 
-        <main class="lg:col-span-2 flex justify-center items-start p-4 sm:p-6 lg:p-8">
-            <div class="container mx-auto max-w-3xl w-full">
-                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-                    <div class="p-6 sm:p-8 md:p-12">
-                        <div class="text-center mb-8">
-                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">Patient Management</h1>
-                            <p class="text-gray-500 mt-2">Add a new patient record to the system.</p>
-                        </div>
-
-                        <form id="addPatientForm" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input type="text" id="fullName" name="fullName" placeholder="e.g., John Doe" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-
-                                <div>
-                                    <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                                    <input type="date" id="dob" name="dob" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-
-                                <div>
-                                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                                    <select id="gender" name="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                        <option value="" disabled selected>Select Gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label for="contact" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                                    <input type="tel" id="contact" name="contact" placeholder="e.g., +1 234 567 890" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input type="email" id="email" name="email" placeholder="e.g., johndoe@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            </div>
-
-                            <div>
-                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
-                                <textarea id="address" name="address" rows="3" placeholder="123 Main Street, Anytown, USA" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
-                            </div>
+            <main class="col-lg-8 d-flex justify-content-center align-items-start p-4 p-md-5">
+                <div class="w-100" style="max-width: 768px;">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
                             
-                            <div>
-                                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Visit / Chief Complaint</label>
-                                <textarea id="reason" name="reason" rows="3" placeholder="Describe the patient's primary symptoms or reason for the visit." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                            <div class="text-center mb-5">
+                                <h1 class="h2 fw-bold text-dark">Patient Management</h1>
+                                <p class="text-secondary mt-2">Add a new patient record to the system.</p>
                             </div>
 
-                            <div>
-                                <label for="doctor" class="block text-sm font-medium text-gray-700 mb-1">Assign Doctor</label>
-                                <select id="doctor" name="doctor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
-                                    <option value="" disabled selected>Select a Doctor</option>
-                                    <option value="dr_smith">Dr. Alan Smith (Cardiology)</option>
-                                    <option value="dr_jones">Dr. Carol Jones (Neurology)</option>
-                                    <option value="dr_williams">Dr. Ben Williams (Pediatrics)</option>
-                                    <option value="dr_davis">Dr. Susan Davis (General Medicine)</option>
-                                </select>
-                            </div>
+                            <form id="addPatientForm" class="needs-validation" novalidate>
+                                <div class="row g-4">
+                                    
+                                    <div class="col-md-6">
+                                        <label for="fullName" class="form-label fw-medium text-secondary">Full Name</label>
+                                        <input type="text" id="fullName" name="fullName" placeholder="e.g., John Doe" class="form-control" required>
+                                    </div>
 
-                            <div class="text-center pt-4">
-                                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
-                                    Add New Patient
-                                </button>
-                            </div>
-                        </form>
+                                    <div class="col-md-6">
+                                        <label for="dob" class="form-label fw-medium text-secondary">Date of Birth</label>
+                                        <input type="date" id="dob" name="dob" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="gender" class="form-label fw-medium text-secondary">Gender</label>
+                                        <select id="gender" name="gender" class="form-select" required>
+                                            <option value="" disabled selected>Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="contact" class="form-label fw-medium text-secondary">Contact Number</label>
+                                        <input type="tel" id="contact" name="contact" placeholder="e.g., +1 234 567 890" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="email" class="form-label fw-medium text-secondary">Email Address</label>
+                                        <input type="email" id="email" name="email" placeholder="e.g., johndoe@example.com" class="form-control">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="address" class="form-label fw-medium text-secondary">Full Address</label>
+                                        <textarea id="address" name="address" rows="3" placeholder="123 Main Street, Anytown, USA" class="form-control" required></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="reason" class="form-label fw-medium text-secondary">Reason for Visit / Chief Complaint</label>
+                                        <textarea id="reason" name="reason" rows="3" placeholder="Describe the patient's primary symptoms." class="form-control" required></textarea>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="doctor" class="form-label fw-medium text-secondary">Assign Doctor</label>
+                                        <select id="doctor" name="doctor" class="form-select" required>
+                                            <option value="" disabled selected>Select a Doctor</option>
+                                            <option value="dr_smith">Dr. Alan Smith (Cardiology)</option>
+                                            <option value="dr_jones">Dr. Carol Jones (Neurology)</option>
+                                            <option value="dr_williams">Dr. Ben Williams (Pediatrics)</option>
+                                            <option value="dr_davis">Dr. Susan Davis (General Medicine)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 text-center mt-4">
+                                        <button type="submit" class="btn btn-primary fw-bold px-5 py-2 w-100 w-md-auto shadow-sm">
+                                            Add New Patient
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
-        
-        <aside class="lg:col-span-1 bg-white shadow-lg lg:min-h-screen border-l border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800">Patient History</h2>
-                <p class="text-gray-500 mt-1">Recently added patients.</p>
-            </div>
-            
-            <div id="patientHistoryList" class="p-6 space-y-4 overflow-y-auto" style="max-height: calc(100vh - 105px);">
-                <p id="noHistoryMessage" class="text-gray-500 text-center p-4">No patients added yet.</p>
-                
-                </div>
-        </aside>
+            </main>
 
+            <aside class="col-lg-4 bg-white shadow-lg border-start border-light min-vh-100 p-0 d-flex flex-column">
+                <div class="p-4 border-bottom">
+                    <h2 class="h4 fw-bold text-dark mb-1">Patient History</h2>
+                    <p class="text-secondary small mb-0">Recently added patients.</p>
+                </div>
+                
+                <div id="patientHistoryList" class="p-4 d-flex flex-column gap-3 overflow-auto" style="max-height: calc(100vh - 105px);">
+                    <p id="noHistoryMessage" class="text-secondary text-center p-3">No patients added yet.</p>
+                    </div>
+            </aside>
+
+        </div>
     </div>
-    
-    <div id="successMessage" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-500">
-        Patient added successfully!
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Patient added successfully!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const form = document.getElementById('addPatientForm');
-        const successMessage = document.getElementById('successMessage');
         const historyList = document.getElementById('patientHistoryList');
         const noHistoryMsg = document.getElementById('noHistoryMessage');
+        const successToastEl = document.getElementById('successToast');
+        const successToast = new bootstrap.Toast(successToastEl);
 
         form.addEventListener('submit', function(event) {
-            // Prevent the default form submission
             event.preventDefault();
 
-            // Get data from the form
+            // Simple validation check
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
             const formData = new FormData(form);
             const patientData = Object.fromEntries(formData.entries());
-            
-            // Log data to console (as before)
             console.log('New Patient Data:', patientData);
 
-            // --- NEW: Add patient to history list ---
-
-            // Get specific fields for the history card
+            // --- History Logic ---
             const fullName = patientData.fullName;
             const doctorSelect = document.getElementById('doctor');
             const doctorName = doctorSelect.options[doctorSelect.selectedIndex].text;
-            
-            // Get patient initials for the avatar
             const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-            
-            // Get today's date
-            const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+            const today = new Date().toLocaleDateString('en-CA');
 
-            // Hide the "No patients" message if it's visible
-            if (noHistoryMsg) {
-                noHistoryMsg.style.display = 'none';
-            }
+            if (noHistoryMsg) noHistoryMsg.style.display = 'none';
 
-            // Create the new history card element
             const newEntry = document.createElement('div');
-            // Add pulse animation on creation
-            newEntry.className = 'flex items-center space-x-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition animate-pulse'; 
+            // Bootstrap classes for the card layout
+            newEntry.className = 'd-flex align-items-center gap-3 p-3 rounded bg-light hover-shadow animate-pulse';
+            
             newEntry.innerHTML = `
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xl">
+                <div class="avatar bg-primary text-white rounded-circle fw-bold flex-shrink-0">
                     ${initials}
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900">${fullName}</h3>
-                    <p class="text-sm text-gray-500">Added: ${today}</p>
-                    <p class="text-sm text-gray-500">Assigned to: ${doctorName}</p>
+                    <h6 class="mb-0 fw-bold text-dark">${fullName}</h6>
+                    <small class="text-muted d-block">Added: ${today}</small>
+                    <small class="text-muted d-block">Assigned to: ${doctorName}</small>
                 </div>
             `;
 
-            // Add the new card to the top of the list
             historyList.prepend(newEntry);
 
-            // Remove the pulse animation after a short delay
             setTimeout(() => {
                 newEntry.classList.remove('animate-pulse');
-            }, 500);
+            }, 1000);
 
-            // --- End of new code ---
+            // Show Toast
+            successToast.show();
             
-            // Show the success message
-            successMessage.classList.remove('translate-x-full');
-            
-            // Reset the form fields
+            // Reset
             form.reset();
-
-            // Hide the success message after 3 seconds
-            setTimeout(() => {
-                successMessage.classList.add('translate-x-full');
-            }, 3000);
+            form.classList.remove('was-validated');
         });
     </script>
 
