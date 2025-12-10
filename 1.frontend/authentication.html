@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSync - Secure Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeInAnimation 0.7s ease-in-out forwards; }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-blue-50 flex items-center justify-center min-h-screen p-4">
+
+    <div id="auth-card" class="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 fade-in">
+        
+        <div id="login-container" class="p-8 space-y-6">
+            <div class="text-center">
+                <img class="mx-auto h-14 w-14 rounded-full object-cover shadow-lg" src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68b82df3346154aecb7ba8ef/c965d882a_logo.png" alt="MediSync Logo">
+                <h1 class="mt-5 text-3xl font-bold text-gray-900">Welcome Back</h1>
+                <p class="mt-2 text-sm text-gray-600">Securely sign in to your MediSync portal</p>
+            </div>
+            <form id="loginForm" class="space-y-6" onsubmit="handleLogin(event)">
+                <div class="space-y-4">
+                    <input id="email-address" type="email" autocomplete="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Email address">
+                    <input id="password" type="password" autocomplete="current-password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password">
+                </div>
+                <div id="login-captcha-trigger" onclick="showCaptcha('login-submit-button')" class="flex items-center justify-between p-3 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:border-indigo-400">
+                    <div class="flex items-center">
+                        <div class="captcha-checkbox h-6 w-6 border-2 border-gray-400 rounded"></div>
+                        <span class="captcha-text ml-3 text-sm font-medium text-gray-700">I'm not a robot</span>
+                    </div>
+                </div>
+                <button id="login-submit-button" type="submit" disabled class="w-full flex justify-center py-3 px-4 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed">Sign In</button>
+            </form>
+            <p class="text-center text-sm text-gray-600">No account yet? <a href="#" onclick="showView('signup-container')" class="font-semibold text-indigo-600 hover:text-indigo-500">Create one now</a></p>
+        </div>
+        
+        <div id="signup-container" class="hidden p-8 space-y-6">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-900">Create Your Account</h1>
+                <p class="mt-2 text-sm text-gray-600">Join MediSync today</p>
+            </div>
+            <form id="signupForm" class="space-y-4" onsubmit="handleEmailSignup(event)">
+                <input id="signup-name" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Full Name">
+                <input id="signup-email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Email address">
+                <input id="signup-password" type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Password">
+                
+                <div id="signup-captcha-trigger" onclick="showCaptcha('signup-submit-button')" class="flex items-center justify-between p-3 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:border-indigo-400">
+                    <div class="flex items-center">
+                        <div class="captcha-checkbox h-6 w-6 border-2 border-gray-400 rounded"></div>
+                        <span class="captcha-text ml-3 text-sm font-medium text-gray-700">I'm not a robot</span>
+                    </div>
+                </div>
+                
+                <button id="signup-submit-button" type="submit" disabled class="w-full py-3 px-4 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed">Create Account</button>
+            </form>
+            <p class="text-center text-sm">Already a member? <a href="#" onclick="showView('login-container')" class="font-semibold text-indigo-600">Sign in here</a></p>
+        </div>
+
+        <div id="otp-container" class="hidden p-8 space-y-6">
+             <h1 class="text-2xl font-bold text-gray-900 text-center">Check Your Email</h1>
+             <p id="otp-message" class="text-center text-sm text-gray-600"></p>
+             <input id="otp-code" type="text" maxlength="6" class="w-full px-3 py-3 text-center tracking-[1em] text-lg rounded-lg border-gray-300" placeholder="______">
+             <button onclick="verifyOtp()" class="w-full py-3 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600">Verify & Proceed</button>
+        </div>
+    </div>
+
+    <div id="captcha-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center fade-in">
+            <h2 class="text-lg font-bold">Security Check</h2>
+            <p class="font-mono text-sm text-gray-500">Step <span id="captcha-step-current">1</span> of 3</p>
+            <p class="text-sm text-gray-600 mt-2">Select all images that match this one:</p>
+            
+            <div id="captcha-target-image" class="text-5xl my-4 flex justify-center items-center">
+                </div>
+
+            <div id="captcha-grid" class="grid grid-cols-3 gap-3">
+                </div>
+
+            <button id="captcha-verify-btn" onclick="verifyGridChallenge()" class="w-full mt-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Verify</button>
+            <p id="captcha-error" class="text-red-500 text-sm mt-3 h-4"></p>
+        </div>
+    </div>
+
+    <script>
+    // --- State and Constants ---
+    let generatedOtp = '', userEmail = '', userName = '';
+    let buttonToEnableId = null; 
+    let captchaStep = 1; // To track the current question
+
+    // Emoji sets for the challenge
+    const CAPTCHA_TARGETS = ['🚲', '⭐', '🌳', '⚽', '🔑', '❤️', '☀️', '☂️', '🚗', '🍎', '🏠', '🎁'];
+    const ALL_EMOJIS = [...CAPTCHA_TARGETS, '🐶', '🐱', '🦁', '🦓', '🐘', '🦋', '🐢', '🤖', '🎉', '💻'];
+    let currentTargetEmoji = '';
+
+    // --- View Management ---
+    function showView(viewId) {
+        ['login-container', 'signup-container', 'otp-container'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        resetCaptchaState();
+    }
+
+    // --- CAPTCHA Logic ---
+    function showCaptcha(buttonId) {
+        buttonToEnableId = buttonId;
+        captchaStep = 1; // Reset to step 1 every time it opens
+        document.getElementById('captcha-error').textContent = '';
+        generateGridChallenge();
+        document.getElementById('captcha-modal').classList.remove('hidden');
+    }
+
+    function generateGridChallenge() {
+        // Update UI for the current step
+        document.getElementById('captcha-step-current').textContent = captchaStep;
+
+        // 1. Select a random target
+        currentTargetEmoji = CAPTCHA_TARGETS[Math.floor(Math.random() * CAPTCHA_TARGETS.length)];
+        document.getElementById('captcha-target-image').textContent = currentTargetEmoji;
+
+        // 2. Prepare grid items
+        let gridItems = [];
+        const numTargets = 2 + Math.floor(Math.random() * 2); // 2 or 3 targets
+        for(let i = 0; i < numTargets; i++) {
+            gridItems.push({ emoji: currentTargetEmoji, isCorrect: true });
+        }
+
+        while(gridItems.length < 9) {
+            let distractor = ALL_EMOJIS[Math.floor(Math.random() * ALL_EMOJIS.length)];
+            if (distractor !== currentTargetEmoji) {
+                 gridItems.push({ emoji: distractor, isCorrect: false });
+            }
+        }
+        
+        // 3. Shuffle and render grid
+        gridItems.sort(() => 0.5 - Math.random());
+        const gridContainer = document.getElementById('captcha-grid');
+        gridContainer.innerHTML = '';
+        gridItems.forEach(item => {
+            const cell = document.createElement('div');
+            cell.className = 'text-4xl p-2 border-2 border-gray-200 rounded-lg cursor-pointer flex items-center justify-center hover:bg-gray-100 transition-all';
+            cell.textContent = item.emoji;
+            cell.dataset.correct = item.isCorrect;
+            cell.onclick = () => toggleSelect(cell);
+            gridContainer.appendChild(cell);
+        });
+    }
+
+    function toggleSelect(element) {
+        element.classList.toggle('ring-2');
+        element.classList.toggle('ring-indigo-500');
+        element.classList.toggle('bg-indigo-100');
+    }
+    
+    function verifyGridChallenge() {
+        const gridCells = document.querySelectorAll('#captcha-grid div');
+        let isValid = true;
+        gridCells.forEach(cell => {
+            const isCorrect = cell.dataset.correct === 'true';
+            const isSelected = cell.classList.contains('ring-2');
+            if ((isCorrect && !isSelected) || (!isCorrect && isSelected)) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            if (captchaStep < 3) {
+                // If correct and not the last step, advance to the next question
+                captchaStep++;
+                generateGridChallenge();
+            } else {
+                // If correct and on the last step, success!
+                captchaSuccess();
+            }
+        } else {
+            captchaFail();
+        }
+    }
+
+    function captchaFail() {
+        document.getElementById('captcha-error').textContent = 'Incorrect. Please try again.';
+        setTimeout(() => {
+            document.getElementById('captcha-modal').classList.add('hidden');
+        }, 1500);
+    }
+
+    function captchaSuccess() {
+        document.getElementById('captcha-modal').classList.add('hidden');
+        document.querySelectorAll('.captcha-text').forEach(el => el.textContent = 'You are verified!');
+        document.querySelectorAll('.captcha-checkbox').forEach(el => {
+            el.style.backgroundColor = '#22c55e';
+            el.innerHTML = `<svg class="w-5 h-5 mx-auto text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+        });
+        if (buttonToEnableId) {
+            document.getElementById(buttonToEnableId).disabled = false;
+        }
+    }
+
+    function resetCaptchaState() {
+        captchaStep = 1;
+        ['login-submit-button', 'signup-submit-button'].forEach(id => {
+            const button = document.getElementById(id);
+            if(button) button.disabled = true;
+        });
+        document.querySelectorAll('.captcha-text').forEach(el => el.textContent = "I'm not a robot");
+        document.querySelectorAll('.captcha-checkbox').forEach(el => {
+            el.style.backgroundColor = '';
+            el.innerHTML = '';
+        });
+    }
+
+    // --- Form Handlers ---
+    function handleLogin(event) {
+        event.preventDefault();
+        userEmail = document.getElementById('email-address').value;
+        generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        localStorage.setItem('loggedInUserEmail', userEmail);
+        
+        alert(`-- FOR DEMO --\nYour verification code is: ${generatedOtp}`);
+        document.getElementById('otp-message').textContent = `A code was sent to ${userEmail}.`;
+        showView('otp-container');
+    }
+
+    function verifyOtp() {
+        if (document.getElementById('otp-code').value === generatedOtp) {
+            window.location.href = 'home.html';
+        } else {
+            alert('Invalid OTP.');
+        }
+    }
+    
+    function handleEmailSignup(event) {
+        event.preventDefault();
+        userName = document.getElementById('signup-name').value;
+        userEmail = document.getElementById('signup-email').value;
+
+        localStorage.setItem('loggedInUserName', userName);
+        localStorage.setItem('loggedInUserEmail', userEmail);
+
+        alert(`Account for ${userName} created successfully! Redirecting...`);
+        window.location.href = 'home.html';
+    }
+    </script>
+</body>
+</html>

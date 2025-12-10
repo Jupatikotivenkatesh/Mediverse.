@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280; /* text-gray-500 */
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: -2px; /* Align with border */
+        }
+        .tab-btn.active-tab {
+            color: #2563eb; /* text-blue-600 */
+            border-bottom-color: #2563eb; /* border-blue-600 */
+        }
+        .action-btn {
+            padding: 0.25rem 0.75rem; /* py-1 px-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <div class="lg:w-5/12 flex-shrink-0 space-y-8">
+                
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="p-6 sm:p-8 md:p-12">
+                        <div class="text-center mb-8">
+                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Appointment Management</h1>
+                            <p class="text-gray-500 mt-2">Book a new appointment.</p>
+                        </div>
+
+                        <form id="addAppointmentForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Patient Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" placeholder="e.g., John Doe" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="contact" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                                    <input type="tel" id="contact" name="contact" placeholder="e.g., +1 234 567 890" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                                </div>
+
+                                <div>
+                                    <label for="appointmentDate" class="block text-sm font-medium text-gray-700 mb-1">Appointment Date</label>
+                                    <input type="date" id="appointmentDate" name="appointmentDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                                </div>
+
+                                <div>
+                                    <label for="appointmentTime" class="block text-sm font-medium text-gray-700 mb-1">Appointment Time</label>
+                                    <input type="time" id="appointmentTime" name="appointmentTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="doctor" class="block text-sm font-medium text-gray-700 mb-1">Assign Doctor</label>
+                                <select id="doctor" name="doctor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                                    <option value="" disabled selected>Select a Doctor</option>
+                                    <option value="dr_smith">Dr. Alan Smith (Cardiology)</option>
+                                    <option value="dr_jones">Dr. Carol Jones (Neurology)</option>
+                                    <option value="dr_williams">Dr. Ben Williams (Pediatrics)</option>
+                                    <option value="dr_davis">Dr. Susan Davis (General Medicine)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Appointment</label>
+                                <textarea id="reason" name="reason" rows="3" placeholder="Briefly describe the reason for your visit." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                            </div>
+
+                            <div class="text-center pt-4">
+                                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
+                                    Book Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="p-6 sm:p-8 md:p-10 text-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Book by Phone</h2>
+                        <p class="text-gray-500 mt-2">Prefer to talk to someone? Call us to book your appointment.</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-4">
+                            <a href="tel:+1-800-123-4567" class="hover:underline">+91-6303370137</a>
+                        </p>
+                    </div>
+                </div>
+            </div> <div class="lg:w-7/12">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden h-full">
+                    <div class="p-6 sm:p-8 md:p-12">
+                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">Appointment History</h2>
+                        
+                        <div class="flex border-b border-gray-200 mb-6">
+                            <button class="tab-btn active-tab" data-tab="upcoming">Upcoming</button>
+                            <button class="tab-btn" data-tab="in-process">In Process</button>
+                            <button class="tab-btn" data-tab="past">Past</button>
+                            <button class="tab-btn" data-tab="cancelled">Cancelled</button>
+                        </div>
+                        
+                        <div id="appointmentListContainer" class="space-y-4 min-h-[100px] relative">
+                            <p id="emptyMessage" class="text-gray-500 text-center absolute inset-0 flex items-center justify-center">
+                                No appointments in this category.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div> </div> </div>
+
+    <div id="successMessage" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-500">
+        Appointment booked successfully!
+    </div>
+
+    <script>
+        const form = document.getElementById('addAppointmentForm');
+        const successMessage = document.getElementById('successMessage');
+        const listContainer = document.getElementById('appointmentListContainer');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+
+        let allAppointments = [];
+        let currentTab = 'upcoming'; 
+        let appointmentIdCounter = 0; 
+
+        function renderAppointments() {
+            listContainer.innerHTML = '';
+            
+            const filteredAppointments = allAppointments.filter(app => app.status === currentTab);
+
+            if (filteredAppointments.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                listContainer.appendChild(emptyMessage);
+            } else {
+                emptyMessage.classList.add('hidden');
+                
+                filteredAppointments.forEach(app => {
+                    const appointmentCard = document.createElement('div');
+                    appointmentCard.className = 'border rounded-lg p-4 bg-gray-50 flex flex-col sm:flex-row justify-between sm:items-center shadow-sm';
+                    
+                    let buttonsHtml = '';
+                    if (app.status === 'upcoming') {
+                        buttonsHtml = `
+                            <button class="action-btn bg-green-500 text-white" data-id="${app.id}" data-action="start">Start</button>
+                            <button class="action-btn bg-red-500 text-white mt-2 sm:mt-0 sm:ml-2" data-id="${app.id}" data-action="cancel">Cancel</button>
+                        `;
+                    } else if (app.status === 'in-process') {
+                        buttonsHtml = `
+                            <button class="action-btn bg-blue-500 text-white" data-id="${app.id}" data-action="complete">Complete</button>
+                        `;
+                    } else {
+                        buttonsHtml = `<span class="text-sm font-medium text-gray-400 capitalize">${app.status}</span>`;
+                    }
+
+                    appointmentCard.innerHTML = `
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">${app.fullName}</p>
+                            <p class="text-sm text-gray-600">${app.doctorText}</p>
+                            <p class="text-sm text-gray-600">${app.appointmentDate} at ${app.appointmentTime}</p>
+                            <p class="text-sm text-gray-500 mt-1"><strong>Reason:</strong> ${app.reason}</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 sm:ml-4 flex-shrink-0">
+                            ${buttonsHtml}
+                        </div>
+                    `;
+                    listContainer.appendChild(appointmentCard);
+                });
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const appointmentData = Object.fromEntries(formData.entries());
+            
+            appointmentData.id = appointmentIdCounter++;
+            appointmentData.status = 'upcoming'; 
+            const doctorSelect = document.getElementById('doctor');
+            appointmentData.doctorText = doctorSelect.options[doctorSelect.selectedIndex].text;
+
+            allAppointments.push(appointmentData);
+            
+            successMessage.classList.remove('translate-x-full');
+            form.reset();
+            setTimeout(() => {
+                successMessage.classList.add('translate-x-full');
+            }, 3000);
+
+            renderAppointments();
+        });
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelector('.tab-btn.active-tab').classList.remove('active-tab');
+                btn.classList.add('active-tab');
+                currentTab = btn.dataset.tab;
+                renderAppointments();
+            });
+        });
+
+        listContainer.addEventListener('click', function(event) {
+            if (event.target.classList.contains('action-btn')) {
+                const id = parseInt(event.target.dataset.id);
+                const action = event.target.dataset.action;
+                const appointment = allAppointments.find(app => app.id === id);
+
+                if (!appointment) return;
+
+                if (action === 'cancel') {
+                    if (confirm('Are you sure you want to cancel this appointment?')) {
+                        appointment.status = 'cancelled';
+                    }
+                } else if (action === 'start') {
+                    appointment.status = 'in-process';
+                } else if (action === 'complete') {
+                    appointment.status = 'past';
+                }
+                
+                renderAppointments();
+            }
+        });
+        
+        renderAppointments();
+    </script>
+
+</body>
+</html>

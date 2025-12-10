@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Test Booking | MediSync</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- General Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; }
+
+        /* --- Main Container --- */
+        .lab-container { max-width: 1200px; margin: 2rem auto; padding: 2rem; }
+        header h1 { text-align: center; font-size: 2.5rem; font-weight: 700; color: #1a2a45; margin-bottom: 2rem; }
+
+        /* --- Search Bar --- */
+        .search-bar { margin-bottom: 2.5rem; }
+        .search-bar input { width: 100%; padding: 1rem; font-size: 1rem; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
+        .search-bar input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); }
+
+        /* --- Test Grid Layout --- */
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        
+        /* --- Section Header --- */
+        .section-header {
+            grid-column: 1 / -1; /* Span full width of the grid */
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1a2a45;
+            margin-top: 2rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+        }
+
+        /* --- Test Card Styling --- */
+        .test-card { display: flex; flex-direction: column; background-color: #ffffff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .test-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); }
+        .test-card h3 { font-size: 1.4rem; font-weight: 600; color: #0056b3; margin-bottom: 0.75rem; }
+        .test-card .description { font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; border-left: 3px solid #007bff; padding-left: 1rem; flex-grow: 1; }
+        .test-details { display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa; padding: 0.75rem; border-radius: 8px; margin-top: auto; }
+        .test-details .info-item { display: flex; align-items: center; font-size: 0.95rem; color: #444; }
+        .test-details .info-item i { margin-right: 0.5rem; width: 20px; text-align: center; }
+        .test-details .price i { color: #28a745; }
+        .test-details .timings i { color: #fd7e14; }
+        .test-details .price span { font-weight: 600; color: #28a745; }
+        
+        /* --- Book Now Button --- */
+        .book-now-btn { background-color: #007bff; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; }
+        .book-now-btn:hover { background-color: #0056b3; }
+
+        /* --- No Results Message --- */
+        .no-results { text-align: center; font-size: 1.2rem; color: #888; padding: 2rem; grid-column: 1 / -1; }
+        
+        /* --- Booking Modal Styles --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; transition-delay: 0s; }
+        .modal-content { background: #fff; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .modal-header h2 { font-size: 1.5rem; color: #1a2a45; }
+        .close-modal-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: #888; }
+        .booking-form .form-group { margin-bottom: 1rem; }
+        .booking-form label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .booking-form input { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        .booking-form button { width: 100%; padding: 0.8rem; background-color: #28a745; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s ease; }
+        .booking-form button:hover { background-color: #218838; }
+
+        /* --- Toast Notification --- */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #28a745; color: white; padding: 1rem 2rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1001; opacity: 0; transition: opacity 0.3s ease, bottom 0.3s ease; }
+        .toast.show { bottom: 30px; opacity: 1; }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .lab-container { padding: 1rem; }
+            .test-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-container">
+        <header>
+            <h1>Laboratory & Imaging Directory</h1>
+        </header>
+
+        <div class="search-bar">
+            <input type="text" id="test-search" placeholder="Search for a lab test, X-Ray, or scan...">
+        </div>
+
+        <div class="test-grid" id="test-grid">
+            
+            <h2 class="section-header">Popular Tests</h2>
+
+            <div class="test-card">
+                <h3>Complete Blood Count (CBC)</h3>
+                <p class="description">Evaluates your overall health and detects a wide range of disorders, including anemia, infection, and leukemia.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>350.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <h3>Lipid Profile</h3>
+                <p class="description">Measures the amount of lipids in the blood to assess the risk of cardiovascular disease.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>750.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 11 AM (Fasting)</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <h3>Thyroid Stimulating Hormone (TSH)</h3>
+                <p class="description">Checks thyroid gland function. A key indicator for diagnosing hypothyroidism or hyperthyroidism.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>400.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+            <div class="test-card">
+                <h3>X-Ray Chest (PA View)</h3>
+                <p class="description">An imaging test that produces a black-and-white image of your lungs, heart, airways, and bones of the chest.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>9 AM - 8 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <h3>Liver Function Test (LFT)</h3>
+                <p class="description">A blood test that helps diagnose and monitor liver-related diseases or damage.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>900.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 1 PM (Fasting)</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+            <div class="test-card">
+                <h3>CT Scan Brain</h3>
+                <p class="description">A computerized tomography (CT) scan combines a series of X-ray images to create detailed images of the brain.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>2500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>By Appointment</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <h3>Electrocardiogram (ECG)</h3>
+                <p class="description">Records the electrical signal from the heart to check for different heart conditions.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>300.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>24 Hours</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+            <h2 class="section-header">Blood Tests</h2>
+            <div class="test-card">
+                <h3>Blood Sugar (FBS/PPBS)</h3>
+                <p class="description">Measures glucose levels in your blood to screen for and manage diabetes.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>200.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 11 AM (Fasting)</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>HbA1c</h3>
+                <p class="description">Provides an average of your blood sugar levels over the past three months.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>450.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Kidney Function Tests (KFT)</h3>
+                <p class="description">Assesses how well your kidneys are working by measuring levels of various substances in the blood.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>800.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+             <div class="test-card">
+                <h3>Vitamin D</h3>
+                <p class="description">Measures the level of Vitamin D in the blood, essential for bone health and immune function.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1200.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <h2 class="section-header">Urine & Stool Tests</h2>
+            <div class="test-card">
+                <h3>Urinalysis</h3>
+                <p class="description">A test of your urine to detect and manage a wide range of disorders, such as urinary tract infections and kidney disease.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>250.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 2 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Stool Routine & Microscopy</h3>
+                <p class="description">Examines a stool sample for parasites, bacteria, and other signs of digestive system problems.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>300.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 2 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Fecal Occult Blood Test (FOBT)</h3>
+                <p class="description">Checks for hidden blood in the stool, which can be an early sign of cancer or other digestive issues.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>600.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 2 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <h2 class="section-header">Cardiac & Infectious Disease</h2>
+            <div class="test-card">
+                <h3>Troponin I/T</h3>
+                <p class="description">Measures the level of troponin proteins in the blood to diagnose a heart attack.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>24 Hours (STAT)</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Dengue NS1 / IgM / IgG</h3>
+                <p class="description">Blood test to detect the dengue virus and determine the stage of infection.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1100.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 8 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>COVID-19 PCR</h3>
+                <p class="description">A highly accurate molecular test to detect the presence of the COVID-19 virus.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>24 Hours</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+             <h2 class="section-header">Endocrine / Hormonal Tests</h2>
+            <div class="test-card">
+                <h3>Parathyroid Hormone (PTH)</h3>
+                <p class="description">Measures PTH levels to help diagnose issues with calcium balance and parathyroid glands.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 4 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Estradiol</h3>
+                <p class="description">Measures estrogen levels, important for assessing female reproductive health.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>850.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Prolactin</h3>
+                <p class="description">Measures prolactin levels, often tested for issues related to fertility and lactation.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>700.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+            <h2 class="section-header">Vitamin & Nutritional Tests</h2>
+            <div class="test-card">
+                <h3>Vitamin A</h3>
+                <p class="description">Measures the level of Vitamin A, crucial for vision, immune function, and skin health.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1800.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 4 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Zinc</h3>
+                <p class="description">Measures zinc levels, an essential mineral for immune function, wound healing, and metabolism.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>900.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 4 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Magnesium</h3>
+                <p class="description">Measures magnesium levels, important for muscle and nerve function, and energy production.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>400.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+            <h2 class="section-header">Chronic Infection & Immunity</h2>
+            <div class="test-card">
+                <h3>TB Test (IGRA)</h3>
+                <p class="description">A blood test to screen for tuberculosis (TB) infection, either active or latent.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>2500.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 2 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>H. pylori Antibody</h3>
+                <p class="description">Detects antibodies to H. pylori bacteria, a common cause of stomach ulcers.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1100.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>Sputum AFB (TB detection)</h3>
+                <p class="description">Microscopic examination of sputum for acid-fast bacilli, a primary test for diagnosing active TB.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>450.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 12 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            
+            <h2 class="section-header">Oncology / Cancer Markers</h2>
+            <div class="test-card">
+                <h3>PSA (Prostate-Specific Antigen)</h3>
+                <p class="description">Measures the level of PSA in a man's blood. Used for prostate cancer screening.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>950.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>CA-125</h3>
+                <p class="description">Measures the amount of the protein CA-125 in the blood. Used to monitor certain cancers.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1300.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+            <div class="test-card">
+                <h3>CA 19-9</h3>
+                <p class="description">A tumor marker primarily used to monitor pancreatic cancer treatment and recurrence.</p>
+                <div class="test-details">
+                    <div class="info-item price"><i class="fas fa-rupee-sign"></i><span>1600.00</span></div>
+                    <div class="info-item timings"><i class="fas fa-clock"></i><span>8 AM - 6 PM</span></div>
+                    <button class="book-now-btn">Book Now</button>
+                </div>
+            </div>
+
+
+            <div class="no-results" id="no-results" style="display: none;">
+                <p>No lab tests found matching your search.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="booking-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book Lab Test</h2>
+                <button id="close-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+            <p>You are booking: <strong id="modal-test-name"></strong></p>
+            <form id="booking-form" class="booking-form">
+                <div class="form-group">
+                    <label for="patient-name">Patient Name</label>
+                    <input type="text" id="patient-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-number">Contact Number</label>
+                    <input type="tel" id="contact-number" required>
+                </div>
+                <div class="form-group">
+                    <label for="booking-date">Preferred Date</label>
+                    <input type="date" id="booking-date" required>
+                </div>
+                <button type="submit">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-notification" class="toast"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- ELEMENT REFERENCES ---
+        const searchInput = document.getElementById('test-search');
+        const testGrid = document.getElementById('test-grid');
+        const noResultsMessage = document.getElementById('no-results');
+        const bookingModal = document.getElementById('booking-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalTestName = document.getElementById('modal-test-name');
+        const bookingForm = document.getElementById('booking-form');
+        const toastNotification = document.getElementById('toast-notification');
+
+        // --- SEARCH FUNCTIONALITY ---
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const testCards = testGrid.querySelectorAll('.test-card');
+            const sectionHeaders = testGrid.querySelectorAll('.section-header');
+            let visibleCards = 0;
+
+            // Initially show all headers, they will be hidden later if they are empty
+            sectionHeaders.forEach(header => {
+                header.style.display = 'block'; 
+            });
+
+            // Filter test cards based on search term
+            testCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('.description').textContent.toLowerCase();
+                const isVisible = title.includes(searchTerm) || description.includes(searchTerm);
+                card.style.display = isVisible ? 'flex' : 'none';
+                if (isVisible) visibleCards++;
+            });
+            
+            // Hide section headers that have no visible cards under them
+            sectionHeaders.forEach(header => {
+                let nextElement = header.nextElementSibling;
+                let hasVisibleCards = false;
+                while(nextElement && !nextElement.classList.contains('section-header')) {
+                    // Check if the element is a test card and it's not hidden
+                    if (nextElement.classList.contains('test-card') && nextElement.style.display !== 'none') {
+                        hasVisibleCards = true;
+                        break;
+                    }
+                    nextElement = nextElement.nextElementSibling;
+                }
+                // If no visible cards were found for this section, hide the header
+                if (!hasVisibleCards) {
+                    header.style.display = 'none';
+                }
+            });
+
+            // Show or hide the "no results" message
+            noResultsMessage.style.display = visibleCards === 0 ? 'block' : 'none';
+        });
+
+        // --- BOOKING MODAL FUNCTIONALITY ---
+
+        // Function to open the modal
+        const openBookingModal = (testName) => {
+            modalTestName.textContent = testName;
+            bookingModal.classList.add('visible');
+        };
+
+        // Function to close the modal
+        const closeBookingModal = () => {
+            bookingModal.classList.remove('visible');
+        };
+
+        // Function to show a toast notification
+        const showToast = (message) => {
+            toastNotification.textContent = message;
+            toastNotification.classList.add('show');
+            setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 3000); // Hide after 3 seconds
+        };
+
+        // Event delegation for "Book Now" buttons
+        testGrid.addEventListener('click', (event) => {
+            if (event.target.classList.contains('book-now-btn')) {
+                const card = event.target.closest('.test-card');
+                const testName = card.querySelector('h3').textContent;
+                openBookingModal(testName);
+            }
+        });
+
+        // Event listeners for closing the modal
+        closeModalBtn.addEventListener('click', closeBookingModal);
+        bookingModal.addEventListener('click', (event) => {
+            if (event.target === bookingModal) {
+                closeBookingModal();
+            }
+        });
+
+        // Event listener for form submission
+        bookingForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent page reload
+            const patientName = document.getElementById('patient-name').value;
+            // You can get other form values here as well
+
+            // Simulate booking confirmation
+            console.log('Booking Details:', {
+                test: modalTestName.textContent,
+                patient: patientName,
+                contact: document.getElementById('contact-number').value,
+                date: document.getElementById('booking-date').value
+            });
+
+            closeBookingModal();
+            showToast(`Booking confirmed for ${patientName}!`);
+            bookingForm.reset();
+        });
+    });
+</script>
+
+</body>
+</html>

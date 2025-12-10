@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidResponse | Ambulance Services</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- LeafletJS CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+
+        /* Active tab style */
+        .tab-active {
+            border-bottom-color: #ef4444; /* red-500 */
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        /* Message box styling */
+        .message-box {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        /* Custom Leaflet Icons */
+        .ambulance-map-icon {
+            color: #ef4444; /* red-500 */
+            font-size: 2.5rem;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+        .hospital-map-icon {
+            color: #3b82f6; /* blue-500 */
+            font-size: 2.5rem;
+            text-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div id="app" class="max-w-4xl mx-auto min-h-screen bg-white shadow-2xl rounded-lg my-0 sm:my-8 overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-gray-800 text-white p-4 flex items-center justify-between shadow-md">
+            <div class="flex items-center">
+                <i class="fas fa-ambulance text-3xl text-green-500 mr-3"></i>
+                <h1 class="text-xl md:text-2xl font-bold">Your Ambulance</h1>
+            </div>
+            <button class="p-2 rounded-full hover:bg-gray-700 transition duration-300">
+                <i class="fas fa-user-circle text-2xl"></i>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4 sm:p-6 md:p-8">
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex border-b-2 border-gray-200 mb-6">
+                <button data-tab="booking" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300 tab-active">
+                    <i class="fas fa-plus-circle mr-2"></i>Book
+                </button>
+                <button data-tab="tracking" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
+                    <i class="fas fa-map-marker-alt mr-2"></i>Track
+                </button>
+                <button data-tab="availability" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
+                    <i class="fas fa-check-circle mr-2"></i>Availability
+                </button>
+            </nav>
+
+            <!-- Content Sections -->
+            <!-- Booking Section -->
+            <div id="booking" class="tab-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Book an Ambulance</h2>
+                    <p class="text-gray-500 mt-1">Fill in the details below for immediate assistance.</p>
+                </div>
+                <form id="booking-form" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-600">Patient's Name</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-600">Contact Number</label>
+                        <input type="tel" id="phone" name="phone" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition">
+                    </div>
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-600">Pickup Location</label>
+                        <div class="relative">
+                            <input type="text" id="location" name="location" placeholder="Enter address or detect automatically" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 transition pr-10">
+                            <button type="button" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-red-500">
+                                <i class="fas fa-location-arrow"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300 transform hover:scale-105 shadow-lg">
+                            Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tracking Section (Initially Hidden) -->
+            <div id="tracking" class="tab-content hidden">
+                 <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Live Ambulance Tracking</h2>
+                    <p class="text-gray-500 mt-1">Your help is on the way. ETA: <span id="eta" class="font-bold text-red-500">8 minutes</span></p>
+                </div>
+                <!-- Map Container -->
+                <div id="map" class="w-full h-64 md:h-80 bg-gray-200 rounded-lg overflow-hidden shadow-inner z-0">
+                    <!-- The map will be rendered here by Leaflet.js -->
+                </div>
+                <!-- Driver Info -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg mb-3">Driver Information</h3>
+                    <div class="flex items-center space-x-4">
+                        <img src="https://placehold.co/64x64/d1d5db/374151?text=Driver" class="w-16 h-16 rounded-full" alt="Driver photo">
+                        <div>
+                            <p class="font-semibold text-gray-800">John Doe</p>
+                            <p class="text-sm text-gray-500">Vehicle: AP 03 Z 1234</p>
+                            <p class="text-sm text-gray-500">Rating: 4.8 <i class="fas fa-star text-yellow-400"></i></p>
+                        </div>
+                        <div class="flex-grow text-right">
+                             <a href="tel:1234567890" class="inline-block bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition shadow">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Availability Section (Initially Hidden) -->
+            <div id="availability" class="tab-content hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Nearby Ambulances</h2>
+                    <p class="text-gray-500 mt-1">Select an available ambulance to proceed with booking.</p>
+                </div>
+                <div class="space-y-4">
+                    <!-- Cards remain the same -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-ambulance text-2xl text-green-600 mr-4"></i>
+                            <div>
+                                <p class="font-semibold">Basic Life Support (BLS)</p>
+                                <p class="text-sm text-gray-600">Approx. 5 mins away</p>
+                            </div>
+                        </div>
+                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
+                        <div class="flex items-center">
+                             <i class="fas fa-star-of-life text-2xl text-blue-600 mr-4"></i>
+                             <div>
+                                <p class="font-semibold">Advanced Life Support (ALS)</p>
+                                <p class="text-sm text-gray-600">Approx. 8 mins away</p>
+                            </div>
+                        </div>
+                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
+                    </div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
+                         <div class="flex items-center">
+                            <i class="fas fa-baby text-2xl text-yellow-600 mr-4"></i>
+                            <div>
+                                <p class="font-semibold">Neonatal Transport</p>
+                                <p class="text-sm text-gray-600">Approx. 12 mins away</p>
+                            </div>
+                        </div>
+                        <button class="request-btn bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition">Request</button>
+                    </div>
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg flex items-center justify-between shadow-sm">
+                         <div class="flex items-center">
+                            <i class="fas fa-heartbeat text-2xl text-red-600 mr-4"></i>
+                            <div>
+                                <p class="font-semibold">Cardiac Care Ambulance</p>
+                                <p class="text-sm text-gray-600">Not available in your area</p>
+                            </div>
+                        </div>
+                        <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded-md cursor-not-allowed" disabled>Request</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-gray-100 p-4 text-center border-t">
+            <p class="text-gray-600 text-sm">Emergency Contact: <a href="tel:102" class="font-bold text-red-600">102</a></p>
+            <p class="text-xs text-gray-400 mt-2">&copy; 2025 RapidResponse Services. All Rights Reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Custom Message Box (hidden by default) -->
+    <div id="message-box" class="message-box fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10">
+        <p id="message-text"></p>
+    </div>
+
+    <!-- LeafletJS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            const bookingForm = document.getElementById('booking-form');
+            const requestButtons = document.querySelectorAll('.request-btn');
+
+            let map = null;
+            let ambulanceMarker = null;
+            let etaInterval = null;
+
+            // Function to initialize and run the map
+            function initMap() {
+                // Prevent re-initialization
+                if (map) {
+                    setTimeout(() => map.invalidateSize(), 0); // Recalculate map size if it was hidden
+                    return;
+                }
+                
+                // --- Map setup ---
+                // Centered on a location in Andhra Pradesh, India
+                const patientLocation = [13.6288, 79.4192]; 
+                const hospitalLocation = [13.6510, 79.4320];
+
+                map = L.map('map').setView(patientLocation, 14);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // --- Custom Icons ---
+                const ambulanceIcon = L.divIcon({
+                    className: 'ambulance-map-icon',
+                    html: '<i class="fas fa-ambulance fa-flip-horizontal"></i>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const hospitalIcon = L.divIcon({
+                    className: 'hospital-map-icon',
+                    html: '<i class="fas fa-hospital-symbol"></i>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                });
+
+                // --- Markers ---
+                ambulanceMarker = L.marker(patientLocation, { icon: ambulanceIcon }).addTo(map).bindPopup('Ambulance is here.');
+                L.marker(hospitalLocation, { icon: hospitalIcon }).addTo(map).bindPopup('City General Hospital');
+                L.polyline([patientLocation, hospitalLocation], {color: 'blue', dashArray: '5, 5'}).addTo(map);
+                
+                map.fitBounds([patientLocation, hospitalLocation], { padding: [50, 50] });
+
+                // --- Movement Simulation ---
+                simulateAmbulanceMovement(patientLocation, hospitalLocation);
+            }
+
+            function simulateAmbulanceMovement(startPoint, endPoint) {
+                let currentStep = 0;
+                const totalSteps = 100; // Increase for smoother animation
+                const totalDuration = 8 * 60 * 1000; // 8 minutes in milliseconds
+                const intervalTime = totalDuration / totalSteps;
+
+                const latStep = (endPoint[0] - startPoint[0]) / totalSteps;
+                const lngStep = (endPoint[1] - startPoint[1]) / totalSteps;
+
+                if (etaInterval) clearInterval(etaInterval);
+
+                etaInterval = setInterval(() => {
+                    if (currentStep >= totalSteps) {
+                        clearInterval(etaInterval);
+                        document.getElementById('eta').textContent = 'Arrived!';
+                        ambulanceMarker.getPopup().setContent('Ambulance has arrived.').openPopup();
+                        return;
+                    }
+                    currentStep++;
+                    
+                    const newLat = startPoint[0] + (latStep * currentStep);
+                    const newLng = startPoint[1] + (lngStep * currentStep);
+                    const newLatLng = [newLat, newLng];
+
+                    ambulanceMarker.setLatLng(newLatLng);
+                    map.panTo(newLatLng); // Keep the ambulance centered
+
+                    const remainingMinutes = Math.round(8 * (1 - (currentStep / totalSteps)));
+                    document.getElementById('eta').textContent = `${remainingMinutes} minutes`;
+
+                }, intervalTime);
+            }
+
+            // Function to switch tabs
+            function switchTab(tabName) {
+                tabs.forEach(tab => {
+                    tab.classList.toggle('tab-active', tab.dataset.tab === tabName);
+                });
+                contents.forEach(content => {
+                    content.classList.toggle('hidden', content.id !== tabName);
+                });
+
+                // Clear simulation if navigating away from tracking tab
+                if (tabName !== 'tracking' && etaInterval) {
+                    clearInterval(etaInterval);
+                    etaInterval = null;
+                }
+
+                // Initialize map when tracking tab is selected
+                if (tabName === 'tracking') {
+                    initMap();
+                }
+            }
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            bookingForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                showMessage('Booking confirmed! Help is on the way.', 'success');
+                setTimeout(() => switchTab('tracking'), 2000);
+            });
+            
+            requestButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab('booking'));
+            });
+
+            function showMessage(text, type) {
+                const messageBox = document.getElementById('message-box');
+                const messageText = document.getElementById('message-text');
+                messageText.textContent = text;
+                messageBox.className = 'message-box fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10';
+                
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-500');
+                } else {
+                    messageBox.classList.add('bg-red-500');
+                }
+
+                requestAnimationFrame(() => {
+                    messageBox.classList.remove('opacity-0', '-translate-y-10');
+                    messageBox.classList.add('opacity-100', 'translate-y-0');
+                });
+                
+                setTimeout(() => {
+                    messageBox.classList.remove('opacity-100', 'translate-y-0');
+                    messageBox.classList.add('opacity-0', '-translate-y-10');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
+

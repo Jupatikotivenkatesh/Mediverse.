@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Hospital Management System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --dark-blue: #0056b3;
+            --grey-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-dark: #343a40;
+            --text-light: #6c757d;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+            --body-bg-light: #f8f9fa;
+            --body-color-light: #212529;
+            --card-bg-light: #ffffff;
+            --body-bg-dark: #1c1c1e;
+            --body-color-dark: #f0f0f0;
+            --card-bg-dark: #2c2c2e;
+        }
+
+        /* --- General Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg-light);
+            color: var(--body-color-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* --- Dark Theme --- */
+        body.dark-theme {
+            background-color: var(--body-bg-dark);
+            color: var(--body-color-dark);
+        }
+        body.dark-theme .settings-card,
+        body.dark-theme .modal-content {
+            background-color: var(--card-bg-dark);
+            border-color: #444;
+        }
+        body.dark-theme h1, body.dark-theme h2 {
+            color: #fff;
+        }
+        body.dark-theme input, body.dark-theme select {
+            background-color: #3a3a3c;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+
+        /* --- Main Container & Header --- */
+        .settings-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 2rem;
+        }
+
+        /* --- Settings Card --- */
+        .settings-card {
+            background-color: var(--card-bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .settings-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- CSS Toggle Switch --- */
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle-checkbox { display: none; }
+        .toggle-label {
+            position: relative; display: inline-block;
+            width: 50px; height: 28px; background-color: #ccc;
+            border-radius: 28px; cursor: pointer; transition: background-color 0.3s;
+        }
+        .toggle-label::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            border-radius: 50%; background-color: white; top: 4px; left: 4px;
+            transition: transform 0.3s;
+        }
+        .toggle-checkbox:checked + .toggle-label { background-color: var(--success-green); }
+        .toggle-checkbox:checked + .toggle-label::after { transform: translateX(22px); }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-primary { background-color: var(--primary-blue); color: white; }
+        .btn-primary:hover { background-color: var(--dark-blue); }
+        .btn-danger { background-color: var(--danger-red); color: white; }
+        .form-actions { text-align: right; }
+        
+        /* --- Toast Notification --- */
+        .toast {
+            position: fixed; bottom: -100px; left: 50%;
+            transform: translateX(-50%); padding: 1rem 2rem;
+            background-color: var(--success-green); color: white;
+            border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-weight: 500; transition: bottom 0.5s ease; z-index: 1001;
+        }
+        .toast.show { bottom: 30px; }
+
+        /* --- Password Modal Styles --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; transition-delay: 0s; }
+        .modal-content {
+            background: var(--card-bg-light); padding: 2rem; border-radius: 12px; width: 90%;
+            max-width: 450px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: scale(0.9); transition: transform 0.3s ease, background-color 0.3s;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;
+        }
+        .modal-header h2 { font-size: 1.5rem; margin: 0; }
+        .close-modal-btn { background: none; border: none; font-size: 2rem; cursor: pointer; color: #888; }
+        .error-message {
+            color: var(--danger-red); font-size: 0.9rem; margin-top: 0.5rem; height: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="settings-container">
+        <header><h1>System Settings</h1></header>
+
+        <form id="settings-form">
+            <div class="settings-card">
+                <h2><i class="fas fa-user-circle"></i> Profile Settings</h2>
+                <div class="form-group">
+                    <label for="admin-name">Admin Name</label>
+                    <input type="text" id="admin-name" name="admin_name" value="Venkatesh P.">
+                </div>
+                <div class="form-group">
+                    <label for="admin-email">Email Address</label>
+                    <input type="email" id="admin-email" name="admin_email" value="admin@medisync.com">
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" id="change-password-btn">Change Password</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2><i class="fas fa-bell"></i> Notification Preferences</h2>
+                <div class="form-group toggle-group">
+                    <label for="email-notifications">Email Notifications for New Appointments</label>
+                    <input type="checkbox" id="email-notifications" name="email_notifications" class="toggle-checkbox" checked>
+                    <label for="email-notifications" class="toggle-label"></label>
+                </div>
+                <div class="form-group toggle-group">
+                    <label for="sms-notifications">SMS Alerts for Critical Events</label>
+                    <input type="checkbox" id="sms-notifications" name="sms_notifications" class="toggle-checkbox">
+                    <label for="sms-notifications" class="toggle-label"></label>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2><i class="fas fa-palette"></i> Appearance</h2>
+                <div class="form-group">
+                    <label>Theme</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="radio" id="light-theme" name="theme" value="light" checked>
+                        <label for="light-theme">Light Mode</label>
+                        <input type="radio" id="dark-theme" name="theme" value="dark">
+                        <label for="dark-theme">Dark Mode</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="toast-notification" class="toast"></div>
+
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button id="close-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <p class="error-message" id="password-error"></p>
+                <div class="form-actions" style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const settingsForm = document.getElementById('settings-form');
+    const toast = document.getElementById('toast-notification');
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    
+    // --- Password Change Modal Logic ---
+    const changePasswordBtn = document.getElementById('change-password-btn');
+    const passwordModal = document.getElementById('password-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const passwordForm = document.getElementById('password-form');
+    const passwordError = document.getElementById('password-error');
+
+    const openPasswordModal = () => passwordModal.classList.add('visible');
+    const closePasswordModal = () => {
+        passwordModal.classList.remove('visible');
+        passwordForm.reset();
+        passwordError.textContent = '';
+    };
+
+    changePasswordBtn.addEventListener('click', openPasswordModal);
+    closeModalBtn.addEventListener('click', closePasswordModal);
+    passwordModal.addEventListener('click', (event) => {
+        if (event.target === passwordModal) {
+            closePasswordModal();
+        }
+    });
+
+    passwordForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // Validation
+        if (newPassword !== confirmPassword) {
+            passwordError.textContent = 'New passwords do not match.';
+            return;
+        }
+        
+        passwordError.textContent = '';
+        
+        // Simulate saving the new password
+        console.log('Password change submitted.');
+
+        closePasswordModal();
+        showToast('Password updated successfully!');
+    });
+
+
+    // --- Handle Settings Form Submission ---
+    settingsForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(settingsForm);
+        const settingsData = Object.fromEntries(formData.entries());
+        console.log('Settings Saved:', settingsData);
+        showToast('Settings saved successfully!');
+    });
+    
+    // --- Toast Notification Function ---
+    function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // --- Theme Switching Logic ---
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            if (event.target.value === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>

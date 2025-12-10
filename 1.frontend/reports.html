@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --light-blue: #e7f3ff;
+            --dark-blue: #0056b3;
+            --grey-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-dark: #343a40;
+            --text-light: #6c757d;
+            --danger-red: #dc3545;
+            --success-green: #28a745;
+        }
+
+        /* --- General & Reset --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--grey-bg);
+            color: var(--text-dark);
+            font-size: 15px;
+        }
+        button {
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            border: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+        }
+        .btn-danger {
+            background-color: var(--danger-red);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-secondary {
+            background-color: var(--text-light);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            padding: 0.25rem 0.5rem;
+            font-size: 1.1rem;
+        }
+        .btn-icon.view { color: var(--primary-blue); }
+        .btn-icon.edit { color: var(--success-green); }
+        .btn-icon.delete { color: var(--danger-red); }
+        .btn-icon:hover { opacity: 0.7; }
+
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        .hidden { display: none !important; }
+
+        /* --- Main Container --- */
+        .management-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 1.5rem 2rem;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+        }
+        header p {
+            color: var(--text-light);
+        }
+
+        /* --- Dashboard Controls --- */
+        .dashboard-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--grey-bg);
+            border-radius: 8px;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        .dashboard-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        #main-search {
+            max-width: 400px;
+            flex-grow: 1;
+        }
+
+        /* --- Patient Table --- */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .patient-table th, .patient-table td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .patient-table th {
+            font-weight: 600;
+            background: var(--grey-bg);
+        }
+        .patient-table th.sortable {
+            cursor: pointer;
+        }
+        .patient-table th.sortable .sort-icon {
+            font-size: 0.8rem;
+            margin-left: 0.3rem;
+            color: var(--text-light);
+            opacity: 0.5;
+        }
+        .patient-table th.sortable.asc .sort-icon,
+        .patient-table th.sortable.desc .sort-icon {
+            opacity: 1;
+            color: var(--dark-blue);
+        }
+        .patient-table .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* --- Pagination --- */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+        }
+        .pagination-controls button {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            margin: 0 0.25rem;
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-controls button.active {
+            background-color: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        /* --- Modal Styles --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.show .modal-content {
+            transform: scale(1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark-blue);
+        }
+        .modal-header .close-modal {
+            font-size: 2rem;
+            font-weight: 300;
+            background: none;
+            border: none;
+            color: var(--text-light);
+        }
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--grey-bg);
+        }
+
+        /* --- Modal: Add/Edit Form --- */
+        .patient-form .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .patient-form fieldset {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .patient-form legend {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            padding: 0 0.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .form-group.full-span {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            font-weight: 500;
+        }
+        .form-group label .required {
+            color: var(--danger-red);
+        }
+        .form-group .error-message {
+            font-size: 0.85rem;
+            color: var(--danger-red);
+            display: none;
+        }
+        .form-group.invalid input, .form-group.invalid select {
+            border-color: var(--danger-red);
+        }
+        .form-group.invalid .error-message {
+            display: block;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 400;
+        }
+        #form-error {
+            text-align: right;
+            color: var(--danger-red);
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* --- Modal: View Patient --- */
+        #view-patient-details {
+            background-color: var(--light-blue);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid #bde0ff;
+        }
+        #view-patient-details h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-blue);
+        }
+        #view-patient-details .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            color: var(--text-dark);
+        }
+        #view-visit-records h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: 0.5rem;
+        }
+        .visit-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .visit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .visit-header.active { background-color: var(--light-blue); }
+        .visit-header .icon i { transition: transform 0.3s ease; }
+        .visit-header.active .icon i { transform: rotate(180deg); }
+        
+        .visit-body {
+            max-height: 0;
+            overflow: hidden;
+            background-color: var(--grey-bg);
+            padding: 0 1.5rem;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .visit-body.active {
+             max-height: 1000px;
+             padding: 1.5rem;
+        }
+        .visit-section { margin-bottom: 1rem; }
+        .visit-section h5 { color: var(--primary-blue); margin-bottom: 0.5rem; }
+        .visit-section ul { list-style: none; padding-left: 1rem; }
+        .visit-section li { border-left: 2px solid var(--border-color); padding-left: 1rem; margin-bottom: 0.25rem; }
+
+        /* --- Modal: Delete --- */
+        #delete-modal .modal-content {
+            max-width: 500px;
+        }
+        #delete-modal-body {
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        #delete-modal-body p {
+            margin-bottom: 0.5rem;
+        }
+        #delete-patient-name {
+            font-weight: 600;
+            color: var(--danger-red);
+        }
+
+        /* --- Responsiveness --- */
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+            .management-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .dashboard-controls {
+                padding: 0.5rem;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .dashboard-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #main-search {
+                max-width: 100%;
+            }
+            .patient-table th, .patient-table td {
+                padding: 0.6rem 0.8rem;
+            }
+            .pagination-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .modal-content {
+                max-width: 100%;
+                max-height: 95vh;
+            }
+            .modal-header h2 { font-size: 1.25rem; }
+            .modal-body { padding: 1rem; }
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body {
+                background-color: #fff;
+            }
+            .management-container, .modal-backdrop, .dashboard-controls, .table-container, .pagination-container, .modal-footer {
+                display: none;
+            }
+            .modal-backdrop.show {
+                display: block;
+                position: static;
+                background: none;
+                padding: 0;
+            }
+            .modal-content {
+                box-shadow: none;
+                border-radius: 0;
+                max-height: 100%;
+            }
+            .modal-header {
+                border-bottom: 2px solid #000;
+            }
+            .modal-header .close-modal {
+                display: none;
+            }
+            .visit-body {
+                max-height: 100% !important;
+                overflow: visible !important;
+                padding: 1.5rem !important;
+            }
+            .visit-item {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="management-container">
+        <header>
+            <h1>Patient Management System</h1>
+            <p>Search, filter, and manage patient records.</p>
+        </header>
+
+        <div class="dashboard-controls">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filter-department">Department</label>
+                    <select id="filter-department">
+                        <option value="">All Departments</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="General Physician">General Physician</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-doctor">Doctor</label>
+                    <select id="filter-doctor">
+                        <option value="">All Doctors</option>
+                        <option value="Dr. Sharma">Dr. Sharma</option>
+                        <option value="Dr. Gupta">Dr. Gupta</option>
+                        <option value="Dr. Reddy">Dr. Reddy</option>
+                        <option value="Dr. Singh">Dr. Singh</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-date-start">Last Visit From</label>
+                    <input type="date" id="filter-date-start">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-date-end">Last Visit To</label>
+                    <input type="date" id="filter-date-end">
+                </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+            <div class="dashboard-actions">
+                <input type="text" id="main-search" placeholder="Search by Name, ID, Phone, or Diagnosis...">
+                <button id="add-patient-btn" class="btn-primary"><i class="fas fa-plus"></i> Add New Patient</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="patient-table">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th class="sortable" data-sort="name">Name <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Contact</th>
+                        <th class="sortable" data-sort="lastVisit">Last Visit <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th>Diagnosis</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patient-table-body">
+                    </tbody>
+            </table>
+            <p id="no-table-results" class="hidden" style="text-align: center; padding: 2rem; color: var(--text-light);">No patients found matching your criteria.</p>
+        </div>
+
+        <div class="pagination-container">
+            <span id="pagination-info">Showing 0-0 of 0</span>
+            <div class="pagination-controls" id="pagination-controls">
+                </div>
+        </div>
+
+    </div>
+    <div class="modal-backdrop" id="patient-form-modal" role="dialog" aria-modal="true" aria-labelledby="form-modal-title">
+        <div class="modal-content">
+            <form id="patient-form" class="patient-form" novalidate>
+                <input type="hidden" id="patientId" name="patientId">
+                <header class="modal-header">
+                    <h2 id="form-modal-title">Add New Patient</h2>
+                    <button type="button" class="close-modal" aria-label="Close modal">&times;</button>
+                </header>
+                <main class="modal-body">
+                    
+                    <fieldset>
+                        <legend>Personal Info</legend>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">Full Name <span class="required">*</span></label>
+                                <input type="text" id="name" name="name" required>
+                                <span class="error-message">Name is required.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="dob">Date of Birth <span class="required">*</span></label>
+                                <input type="date" id="dob" name="dob" required>
+                                <span class="error-message">Valid date of birth is required.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender <span class="required">*</span></label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select...</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span class="error-message">Gender is required.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number <span class="required">*</span></label>
+                                <input type="tel" id="phone" name="phone" placeholder="e.g., 9876543210" required pattern="[0-9]{10}">
+                                <span class="error-message">A 10-digit phone number is required.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" placeholder="e.g., user@example.com">
+                                <span class="error-message">Please enter a valid email address.</span>
+                            </div>
+                            <div class="form-group full-span">
+                                <label for="address">Address</label>
+                                <input type="text" id="address" name="address">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Medical History</legend>
+                        <div class="form-grid">
+                            <div class="form-group full-span">
+                                <label for="allergies">Allergies (comma-separated)</label>
+                                <input type="text" id="allergies" name="allergies" placeholder="e.g., Penicillin, Peanuts">
+                            </div>
+                            <div class="form-group full-span">
+                                <label>Chronic Conditions</label>
+                                <div class="checkbox-group" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                    <label><input type="checkbox" name="chronic" value="Diabetes"> Diabetes</label>
+                                    <label><input type="checkbox" name="chronic" value="Hypertension"> Hypertension</label>
+                                    <label><input type="checkbox" name="chronic" value="Asthma"> Asthma</label>
+                                    <label><input type="checkbox" name="chronic" value="Arthritis"> Arthritis</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset id="visit-details-fieldset">
+                        <legend>Latest Visit Details</legend>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="visitDate">Visit Date <span class="required">*</span></label>
+                                <input type="date" id="visitDate" name="visitDate" required>
+                                <span class="error-message">Visit date is required.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="department">Department <span class="required">*</span></label>
+                                <select id="department" name="department" required>
+                                    <option value="">Select...</option>
+                                    <option value="Cardiology">Cardiology</option>
+                                    <option value="Dermatology">Dermatology</option>
+                                    <option value="General Physician">General Physician</option>
+                                    <option value="Orthopedics">Orthopedics</option>
+                                </select>
+                                <span class="error-message">Department is required.</span>
+                            </div>
+                             <div class="form-group">
+                                <label for="doctor">Doctor <span class="required">*</span></label>
+                                <select id="doctor" name="doctor" required>
+                                    <option value="">Select...</option>
+                                    <option value="Dr. Sharma">Dr. Sharma</option>
+                                    <option value="Dr. Gupta">Dr. Gupta</option>
+                                    <option value="Dr. Reddy">Dr. Reddy</option>
+                                    <option value="Dr. Singh">Dr. Singh</option>
+                                </select>
+                                <span class="error-message">Doctor is required.</span>
+                            </div>
+                             <div class="form-group full-span">
+                                <label for="diagnosis">Primary Diagnosis <span class="required">*</span></label>
+                                <input type="text" id="diagnosis" name="diagnosis" required>
+                                 <span class="error-message">Diagnosis is required.</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                </main>
+                <footer class="modal-footer">
+                    <span id="form-error"></span>
+                    <button type="button" class="btn-secondary close-modal">Cancel</button>
+                    <button type="submit" id="save-patient-btn" class="btn-primary">Save Patient</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="view-patient-modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2 id="view-modal-title">Patient Medical Report</h2>
+                <button type="button" class="close-modal" aria-label="Close modal">&times;</button>
+            </header>
+            <main class="modal-body" id="view-modal-printable-area">
+                <div id="view-patient-details">
+                    </div>
+                <div id="view-visit-records">
+                    <h4>Visit History</h4>
+                    <div id="view-visits-accordion">
+                        </div>
+                </div>
+                <div id="view-audit-log" class="visit-section" style="font-size: 0.85rem; color: var(--text-light);">
+                    <h5>Record History</h5>
+                    <ul id="view-audit-log-list">
+                        </ul>
+                </div>
+            </main>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary close-modal">Close</button>
+                <button type="button" id="print-report-btn" class="btn-primary"><i class="fas fa-print"></i> Print Report</button>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <div class="modal-content">
+             <header class="modal-header">
+                <h2 id="delete-modal-title">Confirm Deletion</h2>
+                <button type="button" class="close-modal" aria-label="Close modal">&times;</button>
+            </header>
+            <main class="modal-body" id="delete-modal-body">
+                <p>Are you sure you want to permanently delete this record?</p>
+                <p id="delete-patient-name" style="font-size: 1.2rem;"></p>
+            </main>
+            <footer class="modal-footer">
+                <button type="button" class="btn-secondary close-modal">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="btn-danger">Yes, Delete</button>
+            </footer>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- MOCK DATABASE (Expanded) ---
+    // In a real system, this data would be fetched from a server.
+    let mockPatientsDB = [
+        {
+            id: 'PID-001',
+            name: 'Venkatesh P.',
+            dob: '1991-04-15',
+            gender: 'Male',
+            phone: '9876543210',
+            email: 'venkatesh@example.com',
+            address: '123 Main St, Hyderabad',
+            allergies: ['Penicillin'],
+            chronicConditions: ['Hypertension'],
+            auditLog: [
+                { user: 'admin', action: 'Record Created', timestamp: '2025-05-11T10:00:00Z' },
+                { user: 'admin', action: 'Record Updated', timestamp: '2025-08-20T14:30:00Z' }
+            ],
+            visits: [
+                {
+                    date: '2025-08-20',
+                    doctor: 'Dr. Sharma',
+                    department: 'Cardiology',
+                    diagnosis: 'Minor Arrhythmia',
+                    notes: 'Patient reported chest pain and shortness of breath. ECG showed minor irregularities. Advised stress test.',
+                    prescriptions: ['Aspirin 75mg', 'Atorvastatin 20mg'],
+                    labResults: [{ test: 'ECG', result: 'Minor ST-segment depression' }]
+                },
+                {
+                    date: '2025-05-11',
+                    doctor: 'Dr. Gupta',
+                    department: 'General Physician',
+                    diagnosis: 'Annual Check-up',
+                    notes: 'Annual check-up. Blood pressure slightly elevated at 135/85 mmHg. Advised dietary changes and regular exercise.',
+                    prescriptions: [],
+                    labResults: [{ test: 'Lipid Profile', result: 'Cholesterol slightly high' }]
+                }
+            ]
+        },
+        {
+            id: 'PID-002',
+            name: 'Priya Sharma',
+            dob: '1997-09-01',
+            gender: 'Female',
+            phone: '9876543211',
+            email: 'priya@example.com',
+            address: '456 Park Ave, Mumbai',
+            allergies: ['Peanuts', 'Dust'],
+            chronicConditions: ['Asthma'],
+            auditLog: [{ user: 'admin', action: 'Record Created', timestamp: '2025-09-01T11:00:00Z' }],
+            visits: [
+                {
+                    date: '2025-09-01',
+                    doctor: 'Dr. Reddy',
+                    department: 'Dermatology',
+                    diagnosis: 'Contact Dermatitis',
+                    notes: 'Patient presented with a mild skin rash on the forearm. Diagnosed as contact dermatitis.',
+                    prescriptions: ['Hydrocortisone Cream 1%'],
+                    labResults: []
+                }
+            ]
+        },
+        {
+            id: 'PID-003',
+            name: 'Amit Kumar',
+            dob: '1980-02-20',
+            gender: 'Male',
+            phone: '9876543212',
+            email: 'amit@example.com',
+            address: '789 Lake Rd, Delhi',
+            allergies: [],
+            chronicConditions: ['Arthritis'],
+            auditLog: [{ user: 'admin', action: 'Record Created', timestamp: '2025-07-15T09:15:00Z' }],
+            visits: [
+                {
+                    date: '2025-07-15',
+                    doctor: 'Dr. Singh',
+                    department: 'Orthopedics',
+                    diagnosis: 'Mild Osteoarthritis',
+                    notes: 'Follow-up for left knee pain. X-Ray shows mild arthritis. Recommended physical therapy.',
+                    prescriptions: ['Ibuprofen 400mg as needed'],
+                    labResults: [{ test: 'X-Ray Left Knee', result: 'Mild signs of osteoarthritis' }]
+                }
+            ]
+        }
+        // ... more patients would be here
+    ];
+
+    // --- GLOBAL STATE ---
+    const appState = {
+        patients: [...mockPatientsDB],
+        currentPage: 1,
+        rowsPerPage: 10,
+        sortColumn: 'name',
+        sortDirection: 'asc', // 'asc' or 'desc'
+        filters: {
+            search: '',
+            department: '',
+            doctor: '',
+            dateStart: '',
+            dateEnd: ''
+        },
+        patientToEdit: null,
+        patientToDelete: null
+    };
+
+    // --- ELEMENT REFERENCES ---
+    const tableBody = document.getElementById('patient-table-body');
+    const noTableResults = document.getElementById('no-table-results');
+    const paginationInfo = document.getElementById('pagination-info');
+    const paginationControls = document.getElementById('pagination-controls');
+    
+    // Modals
+    const formModal = document.getElementById('patient-form-modal');
+    const viewModal = document.getElementById('view-patient-modal');
+    const deleteModal = document.getElementById('delete-modal');
+    const formModalTitle = document.getElementById('form-modal-title');
+    const patientForm = document.getElementById('patient-form');
+    const visitFieldset = document.getElementById('visit-details-fieldset');
+    const formError = document.getElementById('form-error');
+
+    // Buttons
+    const addPatientBtn = document.getElementById('add-patient-btn');
+    const printReportBtn = document.getElementById('print-report-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    
+    // Filters & Search
+    const mainSearch = document.getElementById('main-search');
+    const filterDepartment = document.getElementById('filter-department');
+    const filterDoctor = document.getElementById('filter-doctor');
+    const filterDateStart = document.getElementById('filter-date-start');
+    const filterDateEnd = document.getElementById('filter-date-end');
+
+    // --- HELPER FUNCTIONS ---
+    
+    /**
+     * Calculates age from Date of Birth
+     * @param {string} dobString - Date of birth in 'YYYY-MM-DD' format
+     * @returns {number} Age in years
+     */
+    const getAge = (dobString) => {
+        if (!dobString) return 'N/A';
+        const today = new Date();
+        const birthDate = new Date(dobString);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    /**
+     * Formats a timestamp into a readable string
+     * @param {string} timestamp - ISO timestamp string
+     * @returns {string} Formatted date and time
+     */
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return 'N/A';
+        return new Date(timestamp).toLocaleString('en-IN', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+        });
+    };
+    
+    /**
+     * Generates a new unique Patient ID
+     * @returns {string} New Patient ID
+     */
+    const generatePatientId = () => {
+        const maxId = appState.patients.reduce((max, p) => {
+            const idNum = parseInt(p.id.split('-')[1]);
+            return idNum > max ? idNum : max;
+        }, 0);
+        return `PID-${String(maxId + 1).padStart(3, '0')}`;
+    };
+
+    // --- DATA & STATE FUNCTIONS ---
+
+    /**
+     * Applies all filters and sorting to the patient list
+     * @returns {Array} The filtered and sorted array of patients
+     */
+    const getProcessedPatients = () => {
+        const { search, department, doctor, dateStart, dateEnd } = appState.filters;
+        const searchLower = search.toLowerCase();
+
+        // 1. Filter
+        let filtered = appState.patients.filter(patient => {
+            const lastVisit = patient.visits[0]; // Assuming most recent is first
+            
+            // Search filter
+            const matchesSearch = searchLower === '' ||
+                patient.name.toLowerCase().includes(searchLower) ||
+                patient.id.toLowerCase().includes(searchLower) ||
+                patient.phone.includes(searchLower) ||
+                (lastVisit && lastVisit.diagnosis.toLowerCase().includes(searchLower));
+
+            // Department filter
+            const matchesDept = department === '' || (lastVisit && lastVisit.department === department);
+            
+            // Doctor filter
+            const matchesDoctor = doctor === '' || (lastVisit && lastVisit.doctor === doctor);
+            
+            // Date filter
+            const visitDate = lastVisit ? new Date(lastVisit.date) : null;
+            const startDate = dateStart ? new Date(dateStart) : null;
+            const endDate = dateEnd ? new Date(dateEnd) : null;
+
+            const matchesDate = (!startDate || (visitDate && visitDate >= startDate)) &&
+                                (!endDate || (visitDate && visitDate <= endDate));
+
+            return matchesSearch && matchesDept && matchesDoctor && matchesDate;
+        });
+
+        // 2. Sort
+        filtered.sort((a, b) => {
+            let valA, valB;
+            
+            if (appState.sortColumn === 'name') {
+                valA = a.name.toLowerCase();
+                valB = b.name.toLowerCase();
+            } else if (appState.sortColumn === 'lastVisit') {
+                valA = a.visits[0]?.date || '1900-01-01'; // Oldest date if no visit
+                valB = b.visits[0]?.date || '1900-01-01';
+            }
+
+            if (valA < valB) {
+                return appState.sortDirection === 'asc' ? -1 : 1;
+            }
+            if (valA > valB) {
+                return appState.sortDirection === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        return filtered;
+    };
+
+    /**
+     * Main render function to update the table and pagination
+     */
+    const renderApp = () => {
+        const processedPatients = getProcessedPatients();
+        renderTable(processedPatients);
+        renderPagination(processedPatients.length);
+        updateSortIcons();
+    };
+
+    // --- RENDER FUNCTIONS ---
+
+    /**
+     * Renders the patient table for the current page
+     * @param {Array} patients - The *full* list of filtered/sorted patients
+     */
+    const renderTable = (patients) => {
+        tableBody.innerHTML = '';
+        
+        if (patients.length === 0) {
+            noTableResults.classList.remove('hidden');
+            tableBody.classList.add('hidden');
+            return;
+        }
+        
+        noTableResults.classList.add('hidden');
+        tableBody.classList.remove('hidden');
+        
+        const start = (appState.currentPage - 1) * appState.rowsPerPage;
+        const end = start + appState.rowsPerPage;
+        const paginatedPatients = patients.slice(start, end);
+
+        paginatedPatients.forEach(patient => {
+            const lastVisit = patient.visits[0]; // Assuming most recent is first
+            const age = getAge(patient.dob);
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${patient.id}</td>
+                <td>${patient.name}</td>
+                <td>${age}</td>
+                <td>${patient.gender}</td>
+                <td>${patient.phone}</td>
+                <td>${lastVisit?.date || 'N/A'}</td>
+                <td>${lastVisit?.diagnosis || 'N/A'}</td>
+                <td class="actions-cell">
+                    <button class="btn-icon view" data-id="${patient.id}" aria-label="View ${patient.name}"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon edit" data-id="${patient.id}" aria-label="Edit ${patient.name}"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon delete" data-id="${patient.id}" aria-label="Delete ${patient.name}"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    };
+
+    /**
+     * Renders pagination controls
+     * @param {number} totalItems - Total number of items after filtering
+     */
+    const renderPagination = (totalItems) => {
+        const totalPages = Math.ceil(totalItems / appState.rowsPerPage);
+        paginationControls.innerHTML = '';
+        
+        if (totalPages <= 1) {
+            paginationInfo.textContent = `Showing ${totalItems} of ${totalItems} results`;
+            return;
+        }
+
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '&laquo; Prev';
+        prevBtn.disabled = appState.currentPage === 1;
+        prevBtn.addEventListener('click', () => {
+            if (appState.currentPage > 1) {
+                appState.currentPage--;
+                renderApp();
+            }
+        });
+        paginationControls.appendChild(prevBtn);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.textContent = i;
+            if (i === appState.currentPage) {
+                pageBtn.classList.add('active');
+            }
+            pageBtn.addEventListener('click', () => {
+                appState.currentPage = i;
+                renderApp();
+            });
+            paginationControls.appendChild(pageBtn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = 'Next &raquo;';
+        nextBtn.disabled = appState.currentPage === totalPages;
+        nextBtn.addEventListener('click', () => {
+            if (appState.currentPage < totalPages) {
+                appState.currentPage++;
+                renderApp();
+            }
+        });
+        paginationControls.appendChild(nextBtn);
+        
+        // Info text
+        const start = (appState.currentPage - 1) * appState.rowsPerPage + 1;
+        const end = Math.min(start + appState.rowsPerPage - 1, totalItems);
+        paginationInfo.textContent = `Showing ${start}-${end} of ${totalItems} results`;
+    };
+    
+    /**
+     * Updates the sort icons in the table header
+     */
+    const updateSortIcons = () => {
+        document.querySelectorAll('.patient-table th.sortable').forEach(th => {
+            th.classList.remove('asc', 'desc');
+            const icon = th.querySelector('.sort-icon i');
+            
+            if (th.dataset.sort === appState.sortColumn) {
+                if (appState.sortDirection === 'asc') {
+                    th.classList.add('asc');
+                    icon.className = 'fas fa-sort-up';
+                } else {
+                    th.classList.add('desc');
+                    icon.className = 'fas fa-sort-down';
+                }
+            } else {
+                 icon.className = 'fas fa-sort';
+            }
+        });
+    };
+    
+    // --- MODAL & FORM FUNCTIONS ---
+
+    /**
+     * Shows a modal
+     * @param {string} modalId - The ID of the modal to show
+     */
+    const showModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            // Focus the first focusable element
+            modal.querySelector('button, input, select, textarea').focus();
+        }
+    };
+
+    /**
+     * Hides a modal
+     * @param {string} modalId - The ID of the modal to hide
+     */
+    const hideModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('show');
+    };
+
+    /**
+     * Handles opening the Add Patient modal
+     */
+    const openAddModal = () => {
+        appState.patientToEdit = null;
+        patientForm.reset();
+        formModalTitle.textContent = 'Add New Patient';
+        visitFieldset.classList.remove('hidden');
+        document.getElementById('patientId').value = generatePatientId();
+        clearFormValidation();
+        showModal('patient-form-modal');
+    };
+    
+    /**
+     * Handles opening the Edit Patient modal
+     * @param {string} patientId - The ID of the patient to edit
+     */
+    const openEditModal = (patientId) => {
+        const patient = appState.patients.find(p => p.id === patientId);
+        if (!patient) return;
+
+        appState.patientToEdit = patient;
+        patientForm.reset();
+        clearFormValidation();
+        formModalTitle.textContent = 'Edit Patient Record';
+        visitFieldset.classList.add('hidden'); // Hide visit details on edit, as we're editing the *patient*, not adding a new *visit*
+
+        // Populate form fields
+        document.getElementById('patientId').value = patient.id;
+        document.getElementById('name').value = patient.name;
+        document.getElementById('dob').value = patient.dob;
+        document.getElementById('gender').value = patient.gender;
+        document.getElementById('phone').value = patient.phone;
+        document.getElementById('email').value = patient.email || '';
+        document.getElementById('address').value = patient.address || '';
+        document.getElementById('allergies').value = patient.allergies.join(', ');
+        
+        // Populate checkboxes
+        document.querySelectorAll('input[name="chronic"]').forEach(cb => {
+            cb.checked = patient.chronicConditions.includes(cb.value);
+        });
+        
+        showModal('patient-form-modal');
+    };
+
+    /**
+     * Handles opening the View Patient modal
+     * @param {string} patientId - The ID of the patient to view
+     */
+    const openViewModal = (patientId) => {
+        const patient = appState.patients.find(p => p.id === patientId);
+        if (!patient) return;
+        
+        const patientDetailsContainer = document.getElementById('view-patient-details');
+        patientDetailsContainer.innerHTML = `
+            <h3>${patient.name}</h3>
+            <div class="details-grid">
+                <p><strong>Patient ID:</strong> ${patient.id}</p>
+                <p><strong>Age:</strong> ${getAge(patient.dob)} (DOB: ${patient.dob})</p>
+                <p><strong>Gender:</strong> ${patient.gender}</p>
+                <p><strong>Phone:</strong> ${patient.phone}</p>
+                <p><strong>Email:</strong> ${patient.email || 'N/A'}</p>
+                <p><strong>Address:</strong> ${patient.address || 'N/A'}</p>
+                <p><strong>Allergies:</strong> ${patient.allergies.length > 0 ? patient.allergies.join(', ') : 'None'}</p>
+                <p><strong>Chronic Conditions:</strong> ${patient.chronicConditions.length > 0 ? patient.chronicConditions.join(', ') : 'None'}</p>
+            </div>
+        `;
+        
+        const visitsAccordionContainer = document.getElementById('view-visits-accordion');
+        visitsAccordionContainer.innerHTML = ''; // Clear previous
+        
+        if (patient.visits.length === 0) {
+            visitsAccordionContainer.innerHTML = `<p>No visit history found.</p>`;
+        } else {
+            patient.visits.forEach(visit => {
+                const visitItem = document.createElement('div');
+                visitItem.className = 'visit-item';
+                
+                const prescriptionsHTML = visit.prescriptions.length > 0 
+                    ? `<ul>${visit.prescriptions.map(p => `<li>${p}</li>`).join('')}</ul>`
+                    : '<p>N/A</p>';
+                    
+                const labResultsHTML = visit.labResults.length > 0
+                    ? `<ul>${visit.labResults.map(l => `<li><strong>${l.test}:</strong> ${l.result}</li>`).join('')}</ul>`
+                    : '<p>N/A</p>';
+
+                visitItem.innerHTML = `
+                    <div class="visit-header">
+                        <h4>${visit.date} - ${visit.department} (Dr. ${visit.doctor})</h4>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="visit-body">
+                        <div class="visit-section">
+                            <h5>Primary Diagnosis</h5>
+                            <p>${visit.diagnosis}</p>
+                        </div>
+                        <div class="visit-section">
+                            <h5>Doctor's Notes</h5>
+                            <p>${visit.notes}</p>
+                        </div>
+                        <div class="visit-section">
+                            <h5>Prescriptions</h5>
+                            ${prescriptionsHTML}
+                        </div>
+                        <div class="visit-section">
+                            <h5>Lab & Imaging Results</h5>
+                            ${labResultsHTML}
+                        </div>
+                    </div>
+                `;
+                visitsAccordionContainer.appendChild(visitItem);
+            });
+        }
+        
+        // Populate Audit Log
+        const auditList = document.getElementById('view-audit-log-list');
+        auditList.innerHTML = patient.auditLog.map(log => 
+            `<li><strong>${formatTimestamp(log.timestamp)}:</strong> ${log.action} by ${log.user}</li>`
+        ).join('');
+        
+        showModal('view-patient-modal');
+    };
+    
+    /**
+     * Handles opening the Delete confirmation modal
+     * @param {string} patientId - The ID of the patient to delete
+     */
+    const openDeleteModal = (patientId) => {
+        const patient = appState.patients.find(p => p.id === patientId);
+        if (!patient) return;
+        
+        appState.patientToDelete = patient;
+        document.getElementById('delete-patient-name').textContent = `${patient.name} (ID: ${patient.id})`;
+        showModal('delete-modal');
+    };
+    
+    /**
+     * Clears all validation error messages from the form
+     */
+    const clearFormValidation = () => {
+        formError.textContent = '';
+        patientForm.querySelectorAll('.form-group.invalid').forEach(el => el.classList.remove('invalid'));
+    };
+
+    /**
+     * Validates the patient form
+     * @returns {boolean} True if valid, false otherwise
+     */
+    const validateForm = () => {
+        clearFormValidation();
+        let isValid = true;
+        
+        const requiredFields = appState.patientToEdit 
+            ? ['name', 'dob', 'gender', 'phone'] // Visit details not required when editing patient info
+            : ['name', 'dob', 'gender', 'phone', 'visitDate', 'department', 'doctor', 'diagnosis']; // All required for new patient
+        
+        for (const id of requiredFields) {
+            const input = document.getElementById(id);
+            if (!input.value) {
+                isValid = false;
+                input.closest('.form-group').classList.add('invalid');
+            }
+        }
+        
+        // Email validation
+        const email = document.getElementById('email');
+        if (email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+            isValid = false;
+            email.closest('.form-group').classList.add('invalid');
+        }
+        
+        // Phone validation
+        const phone = document.getElementById('phone');
+        if (phone.value && !/^[0-9]{10}$/.test(phone.value)) {
+             isValid = false;
+             phone.closest('.form-group').classList.add('invalid');
+        }
+
+        // Date validation
+        const dob = document.getElementById('dob');
+        if (dob.value && new Date(dob.value) > new Date()) {
+            isValid = false;
+            dob.closest('.form-group').classList.add('invalid');
+            dob.nextElementSibling.textContent = 'Date of birth cannot be in the future.';
+        }
+        
+        const visitDate = document.getElementById('visitDate');
+        if (!appState.patientToEdit && visitDate.value && new Date(visitDate.value) > new Date()) {
+            isValid = false;
+            visitDate.closest('.form-group').classList.add('invalid');
+            visitDate.nextElementSibling.textContent = 'Visit date cannot be in the future.';
+        }
+        
+        if (!isValid) {
+            formError.textContent = 'Please fix the errors above.';
+        }
+        
+        return isValid;
+    };
+    
+    /**
+     * Handles the patient form submission
+     * @param {Event} e - The form submit event
+     */
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        const formData = new FormData(patientForm);
+        
+        const allergies = formData.get('allergies').split(',').map(s => s.trim()).filter(Boolean);
+        const chronicConditions = Array.from(formData.getAll('chronic'));
+        
+        const auditLogEntry = {
+            user: 'admin', // Hardcoded user
+            action: appState.patientToEdit ? 'Record Updated' : 'Record Created',
+            timestamp: new Date().toISOString()
+        };
+
+        if (appState.patientToEdit) {
+            // --- Update Existing Patient ---
+            const patient = appState.patientToEdit;
+            patient.name = formData.get('name');
+            patient.dob = formData.get('dob');
+            patient.gender = formData.get('gender');
+            patient.phone = formData.get('phone');
+            patient.email = formData.get('email');
+            patient.address = formData.get('address');
+            patient.allergies = allergies;
+            patient.chronicConditions = chronicConditions;
+            patient.auditLog.push(auditLogEntry);
+            
+            // Find and replace in the main array
+            const index = appState.patients.findIndex(p => p.id === patient.id);
+            if (index !== -1) {
+                appState.patients[index] = patient;
+            }
+
+        } else {
+            // --- Add New Patient ---
+            const newPatient = {
+                id: formData.get('patientId'),
+                name: formData.get('name'),
+                dob: formData.get('dob'),
+                gender: formData.get('gender'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                address: formData.get('address'),
+                allergies: allergies,
+                chronicConditions: chronicConditions,
+                auditLog: [auditLogEntry],
+                visits: [
+                    {
+                        date: formData.get('visitDate'),
+                        doctor: formData.get('doctor'),
+                        department: formData.get('department'),
+                        diagnosis: formData.get('diagnosis'),
+                        notes: 'Initial visit record created with patient.',
+                        prescriptions: [],
+                        labResults: []
+                    }
+                ]
+            };
+            appState.patients.push(newPatient);
+        }
+
+        hideModal('patient-form-modal');
+        renderApp();
+    };
+
+    /**
+     * Handles the final deletion of a patient
+     */
+    const handleDeletePatient = () => {
+        if (!appState.patientToDelete) return;
+        
+        appState.patients = appState.patients.filter(p => p.id !== appState.patientToDelete.id);
+        
+        appState.patientToDelete = null;
+        hideModal('delete-modal');
+        renderApp();
+    };
+
+
+    // --- EVENT LISTENERS ---
+    
+    // Filter & Search listeners
+    mainSearch.addEventListener('input', (e) => {
+        appState.filters.search = e.target.value;
+        appState.currentPage = 1;
+        renderApp();
+    });
+    [filterDepartment, filterDoctor, filterDateStart, filterDateEnd].forEach(el => {
+        el.addEventListener('change', () => {
+            appState.filters.department = filterDepartment.value;
+            appState.filters.doctor = filterDoctor.value;
+            appState.filters.dateStart = filterDateStart.value;
+            appState.filters.dateEnd = filterDateEnd.value;
+            appState.currentPage = 1;
+            renderApp();
+        });
+    });
+
+    // Table sorting listener
+    document.querySelector('.patient-table thead').addEventListener('click', (e) => {
+        const header = e.target.closest('th.sortable');
+        if (!header) return;
+
+        const sortKey = header.dataset.sort;
+        if (appState.sortColumn === sortKey) {
+            appState.sortDirection = appState.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            appState.sortColumn = sortKey;
+            appState.sortDirection = 'asc';
+        }
+        renderApp();
+    });
+    
+    // Table action buttons (View, Edit, Delete) listener
+    tableBody.addEventListener('click', (e) => {
+        const button = e.target.closest('button.btn-icon');
+        if (!button) return;
+
+        const id = button.dataset.id;
+        if (button.classList.contains('view')) {
+            openViewModal(id);
+        } else if (button.classList.contains('edit')) {
+            openEditModal(id);
+        } else if (button.classList.contains('delete')) {
+            openDeleteModal(id);
+        }
+    });
+
+    // Add Patient button
+    addPatientBtn.addEventListener('click', openAddModal);
+
+    // Form submit
+    patientForm.addEventListener('submit', handleFormSubmit);
+
+    // Delete confirmation
+    confirmDeleteBtn.addEventListener('click', handleDeletePatient);
+    
+    // Print button
+    printReportBtn.addEventListener('click', () => {
+        window.print();
+    });
+    
+    // Modal close buttons
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal-backdrop');
+            hideModal(modal.id);
+        });
+    });
+
+    // Close modal on backdrop click
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal(modal.id);
+            }
+        });
+    });
+    
+    // View Modal Accordion toggle
+    document.getElementById('view-visits-accordion').addEventListener('click', (event) => {
+        const header = event.target.closest('.visit-header');
+        if (header) {
+            const body = header.nextElementSibling;
+            header.classList.toggle('active');
+            body.classList.toggle('active');
+        }
+    });
+
+    // --- INITIAL LOAD ---
+    renderApp();
+});
+</script>
+
+</body>
+</html>

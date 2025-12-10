@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Bed & Ward Management</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+
+        .bed {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .bed.available {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #4ade80; /* green-400 */
+            color: #166534; /* green-800 */
+            cursor: pointer;
+        }
+        .bed.available:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #bbf7d0; /* green-200 */
+        }
+
+        .bed.occupied {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #f87171; /* red-400 */
+            color: #991b1b; /* red-800 */
+        }
+        
+        .bed.cleaning {
+            background-color: #fef9c3; /* yellow-100 */
+            border-color: #facc15; /* yellow-400 */
+            color: #854d0e; /* yellow-800 */
+        }
+
+        /* Modal styles */
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-900">
+
+    <div id="app" class="max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Header -->
+        <header class="bg-white shadow-md p-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center">
+                <i class="fas fa-hospital-user text-3xl text-blue-600 mr-3"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">Ward & Bed Management</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                    <span class="text-sm font-medium">Available</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                    <span class="text-sm font-medium">Occupied</span>
+                </div>
+                 <div class="flex items-center">
+                    <span class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                    <span class="text-sm font-medium">Cleaning</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="ward-container" class="p-4 sm:p-6 md:p-8 space-y-8">
+            <!-- Ward sections will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <!-- Patient Allocation Modal -->
+    <div id="allocation-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md transform scale-95 opacity-0">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Allocate Bed</h3>
+                        <p id="modal-bed-info" class="text-gray-500 text-sm mt-1"></p>
+                    </div>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+            </div>
+            <form id="allocation-form" class="p-6 space-y-4">
+                <input type="hidden" id="bed-id-input">
+                <div>
+                    <label for="patient-name" class="block text-sm font-medium text-gray-700">Patient Name</label>
+                    <input type="text" id="patient-name" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label for="patient-id" class="block text-sm font-medium text-gray-700">Patient ID / MRN</label>
+                    <input type="text" id="patient-id" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label for="admission-date" class="block text-sm font-medium text-gray-700">Admission Date</label>
+                    <input type="date" id="admission-date" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div class="pt-4 flex justify-end space-x-3">
+                     <button type="button" id="cancel-allocation" class="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-sm">Allocate Bed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+     <!-- Custom Alert/Message Box -->
+    <div id="message-box" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10 transition-all duration-300 z-[100]">
+        <p id="message-text"></p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Initial Data Store (Simulates a database) ---
+            let wards = [
+                {
+                    id: 'ward-gen',
+                    name: 'General Ward',
+                    beds: [
+                        { id: 'gen-01', status: 'occupied', patient: { name: 'Ravi Kumar', id: 'P0123', admission: '2025-09-10' } },
+                        { id: 'gen-02', status: 'available' },
+                        { id: 'gen-03', status: 'cleaning' },
+                        { id: 'gen-04', status: 'available' },
+                        { id: 'gen-05', status: 'occupied', patient: { name: 'Priya Sharma', id: 'P0456', admission: '2025-09-11' } },
+                        { id: 'gen-06', status: 'available' },
+                        { id: 'gen-07', status: 'available' },
+                        { id: 'gen-08', status: 'occupied', patient: { name: 'Amit Singh', id: 'P0512', admission: '2025-09-12' } },
+                    ]
+                },
+                {
+                    id: 'ward-icu',
+                    name: 'Intensive Care Unit (ICU)',
+                    beds: [
+                        { id: 'icu-01', status: 'occupied', patient: { name: 'Anil Verma', id: 'P0789', admission: '2025-09-09' } },
+                        { id: 'icu-02', status: 'occupied', patient: { name: 'Sunita Devi', id: 'P1011', admission: '2025-09-12' } },
+                        { id: 'icu-03', status: 'cleaning' },
+                        { id: 'icu-04', status: 'available' },
+                    ]
+                },
+                {
+                    id: 'ward-mat',
+                    name: 'Maternity Ward',
+                    beds: [
+                        { id: 'mat-01', status: 'available' },
+                        { id: 'mat-02', status: 'occupied', patient: { name: 'Geeta Singh', id: 'P1213', admission: '2025-09-11' } },
+                        { id: 'mat-03', status: 'available' },
+                        { id: 'mat-04', status: 'available' },
+                    ]
+                },
+                {
+                    id: 'ward-ped',
+                    name: 'Pediatric Ward',
+                    beds: [
+                        { id: 'ped-01', status: 'available' },
+                        { id: 'ped-02', status: 'cleaning' },
+                        { id: 'ped-03', status: 'occupied', patient: { name: 'Aarav Gupta', id: 'P1415', admission: '2025-09-12' } },
+                    ]
+                },
+                {
+                    id: 'ward-surg',
+                    name: 'Surgical Ward',
+                    beds: [
+                        { id: 'surg-01', status: 'occupied', patient: { name: 'Suresh Patil', id: 'P1617', admission: '2025-09-12' } },
+                        { id: 'surg-02', status: 'cleaning' },
+                        { id: 'surg-03', status: 'available' },
+                        { id: 'surg-04', status: 'available' },
+                        { id: 'surg-05', status: 'occupied', patient: { name: 'Deepa Iyer', id: 'P1819', admission: '2025-09-11' } },
+                    ]
+                },
+                {
+                    id: 'ward-er',
+                    name: 'Emergency Room',
+                    beds: [
+                        { id: 'er-01', status: 'occupied', patient: { name: 'John Doe', id: 'P2021', admission: '2025-09-12' } },
+                        { id: 'er-02', status: 'cleaning' },
+                        { id: 'er-03', status: 'occupied', patient: { name: 'Jane Smith', id: 'P2223', admission: '2025-09-12' } },
+                        { id: 'er-04', status: 'cleaning' },
+                    ]
+                }
+            ];
+
+            // --- Element References ---
+            const wardContainer = document.getElementById('ward-container');
+            const modal = document.getElementById('allocation-modal');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal');
+            const cancelAllocationBtn = document.getElementById('cancel-allocation');
+            const allocationForm = document.getElementById('allocation-form');
+            const bedIdInput = document.getElementById('bed-id-input');
+            const modalBedInfo = document.getElementById('modal-bed-info');
+            const admissionDateInput = document.getElementById('admission-date');
+            
+            // --- Core Functions ---
+
+            /**
+             * Renders all wards and their beds to the UI.
+             */
+            function renderWards() {
+                wardContainer.innerHTML = ''; // Clear existing content
+                wards.forEach(ward => {
+                    const wardElement = document.createElement('section');
+                    wardElement.id = ward.id;
+                    wardElement.className = 'bg-white p-6 rounded-lg shadow-md';
+                    
+                    const bedGrid = document.createElement('div');
+                    bedGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4';
+                    
+                    ward.beds.forEach(bed => {
+                        const bedElement = createBedElement(bed, ward);
+                        bedGrid.appendChild(bedElement);
+                    });
+                    
+                    wardElement.innerHTML = `<h2 class="text-2xl font-bold text-gray-700 border-b pb-3 mb-4">${ward.name}</h2>`;
+                    wardElement.appendChild(bedGrid);
+                    wardContainer.appendChild(wardElement);
+                });
+            }
+
+            /**
+             * Creates a single bed element with its details and status.
+             * @param {object} bed - The bed object from the data store.
+             * @param {object} ward - The parent ward object.
+             * @returns {HTMLElement} - The fully constructed bed element.
+             */
+            function createBedElement(bed, ward) {
+                const bedElement = document.createElement('div');
+                bedElement.dataset.bedId = bed.id;
+                bedElement.dataset.wardId = ward.id;
+                bedElement.className = `bed p-4 border-2 rounded-lg text-center font-semibold ${bed.status}`;
+                
+                let icon = '';
+                let content = '';
+                
+                switch(bed.status) {
+                    case 'available':
+                        icon = '<i class="fas fa-bed text-3xl mb-2"></i>';
+                        content = `<p>Bed ${bed.id.split('-')[1]}</p><p class="text-sm font-normal">Available</p>`;
+                        break;
+                    case 'occupied':
+                        icon = '<i class="fas fa-user-injured text-3xl mb-2"></i>';
+                        content = `<p>Bed ${bed.id.split('-')[1]}</p><p class="text-sm font-normal">${bed.patient.name}</p>`;
+                        break;
+                    case 'cleaning':
+                        icon = '<i class="fas fa-pump-soap text-3xl mb-2"></i>';
+                        content = `<p>Bed ${bed.id.split('-')[1]}</p><p class="text-sm font-normal">Cleaning</p>`;
+                        break;
+                }
+                
+                bedElement.innerHTML = icon + content;
+                return bedElement;
+            }
+
+            /**
+             * Shows the patient allocation modal.
+             * @param {string} bedId - The ID of the bed to be allocated.
+             * @param {string} wardId - The ID of the ward containing the bed.
+             */
+            function showModal(bedId, wardId) {
+                const ward = wards.find(w => w.id === wardId);
+                const bedNumber = bedId.split('-')[1];
+
+                bedIdInput.value = bedId;
+                modalBedInfo.textContent = `In ${ward.name}, Bed No. ${bedNumber}`;
+                admissionDateInput.valueAsDate = new Date(); // Set to today
+
+                modal.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                });
+            }
+
+            /**
+             * Hides the patient allocation modal.
+             */
+            function hideModal() {
+                allocationForm.reset();
+                modal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+
+            /**
+             * Handles the allocation form submission.
+             * @param {Event} e - The form submission event.
+             */
+            function handleAllocation(e) {
+                e.preventDefault();
+                const bedId = bedIdInput.value;
+                const patientName = document.getElementById('patient-name').value;
+                const patientId = document.getElementById('patient-id').value;
+                const admissionDate = admissionDateInput.value;
+
+                // Find the ward and bed in the data store and update it
+                wards.forEach(ward => {
+                    const bed = ward.beds.find(b => b.id === bedId);
+                    if (bed) {
+                        bed.status = 'occupied';
+                        bed.patient = {
+                            name: patientName,
+                            id: patientId,
+                            admission: admissionDate
+                        };
+                    }
+                });
+                
+                hideModal();
+                renderWards(); // Re-render the UI to reflect the change
+                showMessage(`Bed ${bedId.toUpperCase()} allocated to ${patientName} successfully!`, 'success');
+            }
+            
+             /**
+             * Displays a temporary message to the user.
+             * @param {string} text - The message to display.
+             * @param {string} type - 'success' or 'error'.
+             */
+            function showMessage(text, type) {
+                const messageBox = document.getElementById('message-box');
+                const messageText = document.getElementById('message-text');
+                messageText.textContent = text;
+
+                messageBox.className = 'fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10 transition-all duration-300 z-[100]';
+                messageBox.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+
+                requestAnimationFrame(() => {
+                    messageBox.classList.remove('opacity-0', '-translate-y-10');
+                });
+                
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0', '-translate-y-10');
+                }, 4000);
+            }
+
+            // --- Event Listeners ---
+            wardContainer.addEventListener('click', (e) => {
+                const bedElement = e.target.closest('.bed.available');
+                if (bedElement) {
+                    const { bedId, wardId } = bedElement.dataset;
+                    showModal(bedId, wardId);
+                }
+            });
+
+            closeModalBtn.addEventListener('click', hideModal);
+            cancelAllocationBtn.addEventListener('click', hideModal);
+            allocationForm.addEventListener('submit', handleAllocation);
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) hideModal();
+            });
+
+            // --- Initial Load ---
+            renderWards();
+        });
+    </script>
+</body>
+</html>
+

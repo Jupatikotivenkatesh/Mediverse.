@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriHeal | Disease Diet Plans</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Modal styles */
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        /* Active tab style for modal */
+        .detail-tab-active {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+            color: #2563eb; /* blue-600 */
+        }
+        
+        /* Card hover effect */
+        .disease-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .disease-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div id="app" class="max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Header -->
+        <header class="bg-white/80 backdrop-blur-sm shadow-sm p-4 sticky top-0 z-40">
+            <div class="max-w-5xl mx-auto flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-seedling text-3xl text-green-600 mr-3"></i>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">NutriHeal</h1>
+                </div>
+                <p class="hidden sm:block text-slate-500 font-medium">Your Guide to a Healthier Diet</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4 sm:p-6 md:p-8">
+            <div class="max-w-5xl mx-auto">
+                <!-- Search and Filter Section -->
+                <section class="mb-8 text-center">
+                    <h2 class="text-3xl font-bold text-slate-700 mb-2">Find Your Diet Plan</h2>
+                    <p class="text-slate-500 mb-6 max-w-2xl mx-auto">Search for a condition to find recommended dietary guidelines for recovery and long-term prevention.</p>
+                    <div class="relative max-w-xl mx-auto">
+                        <input type="search" id="search-box" placeholder="Search for a disease (e.g., Diabetes, Flu...)" class="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    </div>
+                </section>
+
+                <!-- Disease Grid -->
+                <section id="disease-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Disease cards will be dynamically inserted here -->
+                </section>
+                
+                <p id="no-results" class="text-center text-slate-500 hidden mt-8">No results found. Please try a different search term.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Diet Plan Modal -->
+    <div id="diet-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-3xl h-[90vh] flex flex-col transform scale-95 opacity-0">
+            <!-- Modal Header -->
+            <div class="p-5 border-b flex justify-between items-center flex-shrink-0">
+                <h3 id="modal-title" class="text-2xl font-bold text-slate-800"></h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-700 text-3xl">&times;</button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto flex-grow">
+                 <!-- Tabs -->
+                <div class="flex items-center border-b border-slate-200 mb-5">
+                    <button data-tab="recovery" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 transition duration-200 detail-tab-active">Recovery Diet</button>
+                    <button data-tab="prevention" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition duration-200">Prevention Diet</button>
+                    <button data-tab="avoid" class="detail-tab flex-1 py-2 px-4 text-center font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition duration-200">Foods to Avoid</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="modal-details">
+                    <!-- Content will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Data Store ---
+            const dietPlans = [
+                {
+                    id: 'diabetes-2',
+                    name: 'Type 2 Diabetes',
+                    icon: 'fas fa-tint',
+                    description: 'Managing blood sugar levels through a balanced diet rich in nutrients and low in processed sugars.',
+                    recovery: {
+                        title: 'Diet for Blood Sugar Control',
+                        points: [
+                            "Focus on complex carbohydrates: whole grains like oats, quinoa, and brown rice.",
+                            "Incorporate lean proteins: chicken breast, fish, tofu, and legumes.",
+                            "Eat plenty of non-starchy vegetables: leafy greens, broccoli, bell peppers.",
+                            "Choose healthy fats: avocados, nuts, seeds, and olive oil.",
+                            "Monitor portion sizes carefully to manage calorie and carbohydrate intake."
+                        ],
+                        sampleMeal: {
+                            breakfast: "Oatmeal with berries and a sprinkle of nuts.",
+                            lunch: "Grilled chicken salad with mixed greens and a vinaigrette dressing.",
+                            dinner: "Baked salmon with quinoa and steamed asparagus."
+                        }
+                    },
+                    prevention: {
+                        title: 'Long-Term Prevention Diet',
+                        points: [
+                            "Maintain a consistent meal schedule to keep blood sugar stable.",
+                            "Limit sugary drinks and processed snacks.",
+                            "Prioritize fiber-rich foods to improve glycemic control and satiety.",
+                            "Regular physical activity is crucial alongside a healthy diet.",
+                            "Stay hydrated with water instead of sweetened beverages."
+                        ],
+                        sampleMeal: {
+                            breakfast: "Scrambled eggs with spinach and a slice of whole-wheat toast.",
+                            lunch: "Lentil soup with a side of whole-grain crackers.",
+                            dinner: "Turkey meatballs with zucchini noodles and marinara sauce."
+                        }
+                    },
+                    avoid: [
+                        "Sugary beverages: soda, fruit juices, sweet tea.",
+                        "Refined grains: white bread, pasta, and white rice.",
+                        "Processed meats and foods high in trans fats.",
+                        "Full-fat dairy products.",
+                        "Dried fruits and heavily sweetened desserts."
+                    ]
+                },
+                {
+                    id: 'hypertension',
+                    name: 'Hypertension (High BP)',
+                    icon: 'fas fa-heartbeat',
+                    description: 'Reducing sodium intake and focusing on heart-healthy foods to manage blood pressure.',
+                     recovery: {
+                        title: 'Diet to Lower Blood Pressure (DASH)',
+                        points: [
+                            "Drastically reduce sodium intake; avoid adding salt and check food labels.",
+                            "Increase potassium intake: bananas, spinach, sweet potatoes, and avocados.",
+                            "Focus on whole grains, fruits, and vegetables.",
+                            "Include low-fat dairy products, fish, poultry, and nuts.",
+                            "Limit foods high in saturated fat, such as fatty meats and full-fat dairy."
+                        ],
+                        sampleMeal: {
+                            breakfast: "Yogurt with sliced banana and a handful of almonds.",
+                            lunch: "A large salad with grilled fish, loaded with vegetables.",
+                            dinner: "Whole-wheat pasta with a low-sodium tomato sauce and lean ground turkey."
+                        }
+                    },
+                    prevention: {
+                        title: 'Maintaining Healthy Blood Pressure',
+                        points: [
+                            "Make reading labels a habit to monitor sodium content.",
+                            "Limit alcohol consumption.",
+                            "Incorporate regular exercise, such as brisk walking, into your routine.",
+                            "Eat dark chocolate (in moderation) for its flavonoid content.",
+                            "Manage stress through relaxation techniques."
+                        ],
+                         sampleMeal: {
+                            breakfast: "Smoothie with spinach, fruits, and low-fat yogurt.",
+                            lunch: "Kidney bean and vegetable wrap in a whole-wheat tortilla.",
+                            dinner: "Chicken stir-fry with brown rice and lots of colorful vegetables."
+                        }
+                    },
+                    avoid: [
+                        "Canned soups and processed foods (high in sodium).",
+                        "Salty snacks like chips and pretzels.",
+                        "Pickled foods and cured meats (bacon, sausage).",
+                        "Excessive caffeine and alcohol.",
+                        "Restaurant and fast food, which is often very high in sodium."
+                    ]
+                },
+                {
+                    id: 'flu-cold',
+                    name: 'Common Cold & Flu',
+                    icon: 'fas fa-head-side-cough',
+                    description: 'Supporting the immune system with fluids, vitamins, and easily digestible foods.',
+                    recovery: {
+                        title: 'Immune-Boosting Diet',
+                        points: [
+                            "Stay hydrated: Drink plenty of water, herbal teas, and clear broths.",
+                            "Consume Vitamin C-rich foods: citrus fruits, strawberries, kiwi, and bell peppers.",
+                            "Eat zinc-rich foods: lean meats, fortified cereals, and beans.",
+                            "Garlic and ginger have natural antiviral and anti-inflammatory properties.",
+                            "Warm chicken soup can help clear congestion and is hydrating."
+                        ],
+                         sampleMeal: {
+                            breakfast: "Warm tea with lemon and honey, and a bowl of oatmeal.",
+                            lunch: "Chicken noodle soup with a side of orange slices.",
+                            dinner: "Steamed vegetables with a small portion of lean chicken or tofu."
+                        }
+                    },
+                    prevention: {
+                        title: 'Strengthening Your Immune System',
+                        points: [
+                            "Maintain a balanced diet rich in a variety of fruits and vegetables year-round.",
+                            "Ensure adequate sleep, as it's vital for immune function.",
+                            "Consider a probiotic supplement or yogurt to support gut health.",
+                            "Regular, moderate exercise can boost your immune system.",
+                            "Practice good hygiene, like frequent hand washing."
+                        ],
+                        sampleMeal: {
+                            breakfast: "Greek yogurt with mixed berries and seeds.",
+                            lunch: "Quinoa salad with chickpeas, cucumber, and lemon dressing.",
+                            dinner: "Beef and broccoli stir-fry with a side of brown rice."
+                        }
+                    },
+                    avoid: [
+                        "Sugary foods and drinks, which can suppress the immune system.",
+                        "Greasy, fatty, and hard-to-digest foods.",
+                        "Alcohol and excessive caffeine, which can lead to dehydration.",
+                        "Dairy products if they increase mucus production for you.",
+                    ]
+                },
+                 {
+                    id: 'gastroenteritis',
+                    name: 'Stomach Upset',
+                    icon: 'fas fa-bacterium',
+                    description: 'Resting the digestive system with bland, easy-to-digest foods (BRAT diet).',
+                    recovery: {
+                        title: 'BRAT Diet for Recovery',
+                        points: [
+                           "Focus on Bananas, Rice (white), Applesauce, and Toast (white).",
+                           "Stay hydrated with clear fluids: water, electrolyte drinks, or weak tea.",
+                           "Gradually reintroduce other bland foods like crackers, boiled potatoes, and clear soups.",
+                           "Avoid complex foods until your symptoms fully subside.",
+                           "Small, frequent meals are better than three large ones."
+                        ],
+                         sampleMeal: {
+                            breakfast: "A slice of dry white toast and half a banana.",
+                            lunch: "A small bowl of plain white rice.",
+                            dinner: "A cup of clear vegetable or chicken broth."
+                        }
+                    },
+                    prevention: {
+                        title: 'Maintaining Gut Health',
+                        points: [
+                            "Practice food safety: wash hands, cook meats thoroughly, and avoid cross-contamination.",
+                            "Be cautious when eating from street vendors or in places with questionable hygiene.",
+                            "Introduce probiotics into your diet through yogurt, kefir, or supplements.",
+                            "A balanced, fiber-rich diet supports a healthy gut microbiome.",
+                            "Avoid excessive intake of alcohol, caffeine, and spicy foods if you have a sensitive stomach."
+                        ],
+                        sampleMeal: {
+                            breakfast: "Probiotic yogurt with a sprinkle of granola.",
+                            lunch: "Grilled chicken sandwich on whole-wheat bread with a side salad.",
+                            dinner: "Baked sweet potato with black beans and avocado."
+                        }
+                    },
+                    avoid: [
+                        "Dairy products (milk, cheese).",
+                        "Fatty, greasy, or fried foods.",
+                        "Spicy and heavily seasoned foods.",
+                        "Caffeine, alcohol, and carbonated drinks.",
+                        "Raw vegetables and fruits with skin (besides bananas)."
+                    ]
+                }
+            ];
+
+            // --- Element References ---
+            const diseaseGrid = document.getElementById('disease-grid');
+            const searchBox = document.getElementById('search-box');
+            const noResultsMsg = document.getElementById('no-results');
+            const modal = document.getElementById('diet-modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDetails = document.getElementById('modal-details');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            // --- Functions ---
+
+            /**
+             * Renders the disease cards to the grid.
+             * @param {Array} plans - The array of diet plans to render.
+             */
+            function renderDiseaseCards(plans) {
+                diseaseGrid.innerHTML = '';
+                if (plans.length === 0) {
+                    noResultsMsg.classList.remove('hidden');
+                } else {
+                    noResultsMsg.classList.add('hidden');
+                }
+
+                plans.forEach(plan => {
+                    const card = document.createElement('div');
+                    card.className = 'disease-card bg-white p-6 rounded-lg shadow-md flex flex-col cursor-pointer';
+                    card.dataset.id = plan.id;
+                    card.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="flex items-center mb-3">
+                                <i class="${plan.icon} text-2xl text-blue-500 mr-4"></i>
+                                <h3 class="text-xl font-bold text-slate-700">${plan.name}</h3>
+                            </div>
+                            <p class="text-slate-500">${plan.description}</p>
+                        </div>
+                        <button class="mt-4 text-blue-600 font-semibold self-start">View Plan &rarr;</button>
+                    `;
+                    diseaseGrid.appendChild(card);
+                });
+            }
+            
+            /**
+             * Populates and opens the diet plan modal.
+             * @param {string} planId - The ID of the plan to display.
+             */
+            function openModal(planId) {
+                const plan = dietPlans.find(p => p.id === planId);
+                if (!plan) return;
+
+                modalTitle.textContent = plan.name;
+                renderTabContent(plan, 'recovery'); // Default to recovery tab
+
+                modal.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                });
+            }
+            
+             /**
+             * Hides and resets the modal.
+             */
+            function closeModal() {
+                modal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+            
+            /**
+             * Renders the content for the selected tab inside the modal.
+             * @param {object} plan - The full diet plan object.
+             * @param {string} tabName - The name of the tab ('recovery', 'prevention', 'avoid').
+             */
+            function renderTabContent(plan, tabName) {
+                let contentHTML = '';
+                const data = plan[tabName];
+
+                if(tabName === 'avoid') {
+                     contentHTML = `
+                        <h4 class="text-xl font-semibold text-red-600 mb-4">Foods to Strictly Avoid</h4>
+                        <ul class="space-y-2 list-disc list-inside text-slate-600">
+                            ${data.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    `;
+                } else {
+                    contentHTML = `
+                        <h4 class="text-xl font-semibold text-slate-700 mb-4">${data.title}</h4>
+                        <ul class="space-y-2 list-disc list-inside text-slate-600 mb-6">
+                            ${data.points.map(point => `<li>${point}</li>`).join('')}
+                        </ul>
+                        <h5 class="text-lg font-semibold text-slate-600 mb-3">Sample Meal Plan</h5>
+                        <div class="text-sm bg-slate-50 p-4 rounded-md border">
+                            <p><strong class="font-semibold">Breakfast:</strong> ${data.sampleMeal.breakfast}</p>
+                            <p><strong class="font-semibold">Lunch:</strong> ${data.sampleMeal.lunch}</p>
+                            <p><strong class="font-semibold">Dinner:</strong> ${data.sampleMeal.dinner}</p>
+                        </div>
+                    `;
+                }
+
+                modalDetails.innerHTML = contentHTML;
+
+                 // Update active tab style
+                document.querySelectorAll('.detail-tab').forEach(tab => {
+                    tab.classList.remove('detail-tab-active');
+                    if(tab.dataset.tab === tabName) {
+                        tab.classList.add('detail-tab-active');
+                    }
+                });
+            }
+
+            // --- Event Listeners ---
+            searchBox.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredPlans = dietPlans.filter(plan => 
+                    plan.name.toLowerCase().includes(searchTerm) || 
+                    plan.description.toLowerCase().includes(searchTerm)
+                );
+                renderDiseaseCards(filteredPlans);
+            });
+            
+            diseaseGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.disease-card');
+                if (card) {
+                    openModal(card.dataset.id);
+                }
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeModal();
+            });
+            
+            modalContent.addEventListener('click', (e) => {
+                const tab = e.target.closest('.detail-tab');
+                if(tab) {
+                    const planId = dietPlans.find(p => p.name === modalTitle.textContent)?.id;
+                    const plan = dietPlans.find(p => p.id === planId);
+                    if(plan) {
+                        renderTabContent(plan, tab.dataset.tab);
+                    }
+                }
+            });
+
+            // --- Initial Load ---
+            renderDiseaseCards(dietPlans);
+        });
+    </script>
+</body>
+</html>

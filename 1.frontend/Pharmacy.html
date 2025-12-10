@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaCare | Online Pharmacy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* gray-100 */
+        }
+
+        /* Active tab style */
+        .tab-active {
+            border-bottom-color: #2563eb; /* blue-600 */
+            color: #2563eb;
+            font-weight: 600;
+        }
+        
+        /* Custom message box styling */
+        .message-box {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            z-index: 100;
+        }
+
+        /* Custom file input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-button {
+            border: 2px dashed #d1d5db;
+            color: #4b5563;
+            background-color: #f9fafb;
+            padding: 2.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .file-input-wrapper:hover .file-input-button {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        /* Modal styles */
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div id="app" class="max-w-4xl mx-auto min-h-screen bg-white shadow-2xl rounded-lg my-0 sm:my-8 overflow-hidden">
+        
+        <header class="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm sticky top-0 bg-opacity-90 backdrop-blur-sm z-50">
+            <div class="flex items-center">
+                <i class="fas fa-pills text-3xl text-blue-600 mr-3"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">PharmaCare</h1>
+            </div>
+            <button class="p-2 rounded-full hover:bg-gray-100 transition duration-300">
+                <i class="fas fa-shopping-cart text-2xl text-gray-600"></i>
+            </button>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8">
+            
+            <nav class="flex border-b-2 border-gray-200 mb-6 flex-wrap">
+                <button data-tab="search" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300 tab-active">
+                    <i class="fas fa-search mr-2"></i>Search
+                </button>
+                <button data-tab="order" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
+                    <i class="fas fa-upload mr-2"></i>Order
+                </button>
+                <button data-tab="diseases" class="tab-button flex-1 py-3 text-center text-gray-500 hover:bg-gray-100 transition duration-300">
+                    <i class="fas fa-book-medical mr-2"></i>MedSearch
+                </button>
+            </nav>
+
+            <div id="search" class="tab-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Find Medicines & Products</h2>
+                    <p class="text-gray-500 mt-1">Search for any medicine or health condition.</p>
+                </div>
+                <div class="relative mb-6">
+                    <input type="search" id="medicine-search" placeholder="e.g., Paracetamol, Diabetes..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <div id="search-results" class="space-y-3">
+                    <p class="text-center text-gray-400">Search results will appear here.</p>
+                </div>
+            </div>
+
+            <div id="order" class="tab-content hidden">
+                <div id="order-entry-view">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-700">Order with Prescription</h2>
+                        <p class="text-gray-500 mt-1">Upload a valid prescription to book your medicines.</p>
+                    </div>
+                    <form id="order-form" class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                            <div class="file-input-wrapper w-full h-full">
+                                <div id="file-label-upload" class="file-input-button flex flex-col justify-center items-center h-full">
+                                      <i class="fas fa-cloud-upload-alt text-4xl mb-2 text-gray-400"></i>
+                                      <p class="font-semibold">Upload from device</p>
+                                      <p class="text-sm text-gray-500">PNG, JPG, PDF</p>
+                                </div>
+                                <input type="file" id="prescription-file" accept="image/png, image/jpeg, application/pdf">
+                            </div>
+                            <button type="button" id="open-camera-btn" class="file-input-button flex flex-col justify-center items-center h-full hover:border-blue-500 hover:bg-blue-50">
+                                <i class="fas fa-camera text-4xl mb-2 text-gray-400"></i>
+                                <p class="font-semibold">Use Camera</p>
+                                <p class="text-sm text-gray-500">Capture a photo</p>
+                            </button>
+                        </div>
+
+                        <div id="file-preview-container" class="hidden w-full text-center">
+                            <p class="font-semibold text-gray-700 mb-2">Prescription Preview:</p>
+                            <img id="image-preview" class="max-h-48 mx-auto rounded-lg shadow-md mb-2" alt="Prescription Preview">
+                            <div class="flex items-center justify-center">
+                                <p id="file-name" class="text-sm text-gray-600 font-medium"></p>
+                                <button type="button" id="remove-file-btn" class="ml-2 text-red-500 hover:text-red-700 text-xs">&times; Remove</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-600">Delivery Address</label>
+                            <textarea id="address" name="address" rows="3" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+                        </div>
+                          <div>
+                            <label for="order-notes" class="block text-sm font-medium text-gray-600">Notes (Optional)</label>
+                            <input type="text" id="order-notes" name="order-notes" class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:scale-105 shadow-lg">
+                                Proceed to Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="payment-view" class="hidden">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-700">Complete Your Payment</h2>
+                        <p class="text-gray-500 mt-1">Please review your order and proceed.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg border">
+                        <h3 class="font-bold text-lg mb-4">Order Summary</h3>
+                        <div class="space-y-2 text-gray-600">
+                            <div class="flex justify-between"><span>Prescription Medicines</span><span>As per bill</span></div>
+                            <div class="flex justify-between"><span>Delivery Fee</span><span>₹50.00</span></div>
+                            <div class="flex justify-between font-bold text-xl border-t pt-2 mt-2 text-gray-800"><span>Estimated Total</span><span id="payment-total">₹550.00</span></div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <button id="pay-now-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-lg">
+                            <i class="fas fa-credit-card mr-2"></i>Pay Now
+                        </button>
+                        <button type="button" id="cancel-payment-btn" class="w-full mt-2 bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-md hover:bg-gray-300 transition">Go Back</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="diseases" class="tab-content hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">Health A-Z</h2>
+                    <p class="text-gray-500 mt-1">Browse medicines by health condition.</p>
+                </div>
+                <div id="disease-list" class="space-y-3">
+                   </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10">
+        <p id="message-text"></p>
+    </div>
+    
+    <div id="medicine-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md p-6 transform scale-95">
+             </div>
+    </div>
+
+    <div id="camera-view" class="hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center p-4 z-[100]">
+        <video id="camera-stream" class="w-full max-w-lg h-auto rounded-lg" autoplay playsinline></video>
+        <canvas id="capture-canvas" class="hidden"></canvas>
+        <div class="mt-6 flex items-center space-x-4">
+            <button type="button" id="close-camera-btn" class="text-white text-lg bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center">&times;</button>
+            <button type="button" id="capture-btn" class="w-20 h-20 bg-white rounded-full border-4 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ring-offset-2 ring-offset-black"></button>
+            <div class="w-12 h-12"></div> </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Mock Database ---
+            const medicines = [
+                { id: 1, name: 'Paracetamol 500mg', uses: 'Fever, Headache, Pain', disease: 'Fever', description: 'Provides relief from fever and mild to moderate pain.', price: 20.50 },
+                { id: 2, name: 'Cetirizine 10mg', uses: 'Allergies, Runny Nose, Sneezing', disease: 'Allergy', description: 'An antihistamine used to relieve allergy symptoms.', price: 45.00 },
+                { id: 3, name: 'Amoxicillin 250mg', uses: 'Bacterial Infections', disease: 'Infection', description: 'An antibiotic that fights bacteria. Prescription required.', price: 80.75 },
+                { id: 4, name: 'Metformin 500mg', uses: 'Type 2 Diabetes', disease: 'Diabetes', description: 'Helps control blood sugar levels in people with type 2 diabetes.', price: 65.00 },
+                { id: 5, name: 'Amlodipine 5mg', uses: 'High Blood Pressure', disease: 'Hypertension', description: 'Used to treat high blood pressure (hypertension) and chest pain (angina).', price: 55.20 },
+                { id: 6, name: 'Ibuprofen 400mg', uses: 'Pain, Inflammation, Fever', disease: 'Pain', description: 'A nonsteroidal anti-inflammatory drug (NSAID) used for pain relief.', price: 35.00 }
+            ];
+            
+            const diseases = [...new Set(medicines.map(m => m.disease))].sort();
+
+            // --- Element References ---
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            const searchInput = document.getElementById('medicine-search');
+            const searchResultsContainer = document.getElementById('search-results');
+            const diseaseListContainer = document.getElementById('disease-list');
+            const orderForm = document.getElementById('order-form');
+            const fileInput = document.getElementById('prescription-file');
+            const fileLabel = document.getElementById('file-label-upload').parentElement;
+            const filePreviewContainer = document.getElementById('file-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const fileNameDisplay = document.getElementById('file-name');
+            const modal = document.getElementById('medicine-modal');
+            const modalContent = document.getElementById('modal-content');
+            const openCameraButton = document.getElementById('open-camera-btn');
+            const cameraView = document.getElementById('camera-view');
+            const cameraStream = document.getElementById('camera-stream');
+            const captureButton = document.getElementById('capture-btn');
+            const closeCameraButton = document.getElementById('close-camera-btn');
+            const captureCanvas = document.getElementById('capture-canvas');
+            const removeFileButton = document.getElementById('remove-file-btn');
+            const orderEntryView = document.getElementById('order-entry-view');
+            const paymentView = document.getElementById('payment-view');
+            const payNowBtn = document.getElementById('pay-now-btn');
+            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+            const paymentTotal = document.getElementById('payment-total');
+
+            let capturedImageBlob = null;
+
+            // --- Tab Switching Logic ---
+            function switchTab(tabName) {
+                tabs.forEach(tab => tab.classList.toggle('tab-active', tab.dataset.tab === tabName));
+                contents.forEach(content => content.classList.toggle('hidden', content.id !== tabName));
+            }
+            tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+            // --- Search Functionality ---
+            function renderSearchResults(query) {
+                searchResultsContainer.innerHTML = '';
+                const lowerCaseQuery = query.toLowerCase();
+                const results = medicines.filter(m => 
+                    m.name.toLowerCase().includes(lowerCaseQuery) || 
+                    m.uses.toLowerCase().includes(lowerCaseQuery) ||
+                    m.disease.toLowerCase().includes(lowerCaseQuery)
+                );
+
+                if (results.length === 0) {
+                    searchResultsContainer.innerHTML = `<p class="text-center text-gray-500">No results found for "${query}".</p>`;
+                    return;
+                }
+
+                results.forEach(med => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'p-4 border rounded-lg hover:bg-gray-50 hover:shadow-md transition cursor-pointer flex justify-between items-center';
+                    resultCard.innerHTML = `
+                        <div>
+                            <p class="font-bold text-blue-700">${med.name}</p>
+                            <p class="text-sm text-gray-600">Used for: ${med.uses}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    `;
+                    resultCard.addEventListener('click', () => showMedicineDetails(med.id));
+                    searchResultsContainer.appendChild(resultCard);
+                });
+            }
+            searchInput.addEventListener('input', () => renderSearchResults(searchInput.value));
+            
+            // --- Medicine Details Modal ---
+            function showMedicineDetails(medicineId) {
+                const med = medicines.find(m => m.id === medicineId);
+                if (!med) return;
+
+                modalContent.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">${med.name}</h3>
+                        <button id="close-modal" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    <div class="space-y-3">
+                        <p><strong class="font-medium text-gray-600">Primary Use:</strong> <span class="text-blue-600 font-semibold">${med.disease}</span></p>
+                        <p><strong class="font-medium text-gray-600">Common Uses:</strong> ${med.uses}</p>
+                        <p class="text-gray-600">${med.description}</p>
+                        <p class="text-xl font-bold text-right text-green-600">₹${med.price.toFixed(2)}</p>
+                    </div>
+                    <button class="w-full mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Add to Cart</button>
+                `;
+                modal.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                });
+                document.getElementById('close-modal').addEventListener('click', hideMedicineDetails);
+            }
+
+            function hideMedicineDetails() {
+                modal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) hideMedicineDetails();
+            });
+
+            // --- Disease A-Z List ---
+            function renderDiseaseList() {
+                diseaseListContainer.innerHTML = '';
+                diseases.forEach(disease => {
+                    const diseaseCard = document.createElement('div');
+                    diseaseCard.className = 'p-4 border rounded-lg hover:bg-blue-50 transition cursor-pointer';
+                    diseaseCard.innerHTML = `<p class="font-semibold text-gray-700">${disease}</p>`;
+                    diseaseCard.addEventListener('click', () => {
+                        switchTab('search');
+                        searchInput.value = disease;
+                        renderSearchResults(disease);
+                    });
+                    diseaseListContainer.appendChild(diseaseCard);
+                });
+            }
+
+            // --- Order Form & File Handling ---
+            function resetFileInput() {
+                orderForm.reset();
+                fileInput.value = '';
+                capturedImageBlob = null;
+                filePreviewContainer.classList.add('hidden');
+                fileLabel.parentElement.parentElement.classList.remove('hidden');
+                imagePreview.src = '';
+                fileNameDisplay.textContent = '';
+            }
+
+            removeFileButton.addEventListener('click', resetFileInput);
+
+            function handleFile(file) {
+                if (!file) return;
+                capturedImageBlob = null;
+                fileLabel.parentElement.parentElement.classList.add('hidden');
+                filePreviewContainer.classList.remove('hidden');
+                fileNameDisplay.textContent = file.name;
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { imagePreview.src = e.target.result; };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = `https://placehold.co/200x150/e2e8f0/64748b?text=PDF`;
+                }
+            }
+            
+            fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+            
+            orderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!fileInput.files[0] && !capturedImageBlob) {
+                    showMessage('Please upload or capture a prescription.', 'error');
+                    return;
+                }
+                orderEntryView.classList.add('hidden');
+                paymentView.classList.remove('hidden');
+                const randomAmount = Math.floor(Math.random() * 1000) + 100;
+                paymentTotal.textContent = `₹${(randomAmount + 50).toFixed(2)}`;
+            });
+
+            cancelPaymentBtn.addEventListener('click', () => {
+                paymentView.classList.add('hidden');
+                orderEntryView.classList.remove('hidden');
+            });
+
+            payNowBtn.addEventListener('click', () => {
+                payNowBtn.disabled = true;
+                payNowBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Processing...`;
+
+                setTimeout(() => {
+                    paymentView.classList.add('hidden');
+                    orderEntryView.classList.remove('hidden');
+                    showMessage('Payment successful! Your order has been placed.', 'success');
+                    resetFileInput();
+                    payNowBtn.disabled = false;
+                    payNowBtn.innerHTML = `<i class="fas fa-credit-card mr-2"></i>Pay Now`;
+                }, 2500);
+            });
+
+            // --- Camera Functionality ---
+            async function startCamera() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                        cameraStream.srcObject = stream;
+                        cameraView.classList.remove('hidden');
+                    } catch (err) {
+                        console.error("Camera Error:", err);
+                        showMessage('Could not access the camera. Please check permissions.', 'error');
+                    }
+                } else {
+                    showMessage('Your browser does not support camera access.', 'error');
+                }
+            }
+
+            function stopCamera() {
+                const stream = cameraStream.srcObject;
+                if (stream) {
+                    const tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+                    cameraStream.srcObject = null;
+                }
+                cameraView.classList.add('hidden');
+            }
+
+            function captureImage() {
+                const context = captureCanvas.getContext('2d');
+                captureCanvas.width = cameraStream.videoWidth;
+                captureCanvas.height = cameraStream.videoHeight;
+                context.drawImage(cameraStream, 0, 0, captureCanvas.width, captureCanvas.height);
+                
+                captureCanvas.toBlob(blob => {
+                    capturedImageBlob = blob;
+                    const tempFile = new File([blob], "prescription-capture.jpg", { type: "image/jpeg" });
+                    handleFile(tempFile);
+                    stopCamera();
+                }, 'image/jpeg');
+            }
+
+            openCameraButton.addEventListener('click', startCamera);
+            closeCameraButton.addEventListener('click', stopCamera);
+            captureButton.addEventListener('click', captureImage);
+
+            // --- Custom Message Function ---
+            function showMessage(text, type) {
+                const messageBox = document.getElementById('message-box');
+                const messageText = document.getElementById('message-text');
+                messageText.textContent = text;
+                messageBox.className = 'message-box fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl opacity-0 transform -translate-y-10';
+                
+                messageBox.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+
+                requestAnimationFrame(() => {
+                    messageBox.classList.remove('opacity-0', '-translate-y-10');
+                });
+                
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0', '-translate-y-10');
+                }, 3000);
+            }
+
+            // --- Initial Load ---
+            renderDiseaseList();
+        });
+    </script>
+</body>
+</html>
