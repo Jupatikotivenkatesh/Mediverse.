@@ -126,6 +126,9 @@
                     <li><a href="#" onclick="loadPage('medscan', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">qr_code_scanner</span> MedScan</a></li>
                     <li><a href="#" onclick="loadPage('pharmacy', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">local_pharmacy</span> Pharmacy</a></li>
                     <li><a href="#" onclick="loadPage('lab', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">science</span> Lab Tests</a></li>
+                    <li><a href="#" onclick="loadPage('ward-bed', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">bed</span> Ward & Bed</a></li>
+                    <li><a href="#" onclick="loadPage('diet-health', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">restaurant_menu</span> Diet & Health</a></li>
+                    <li><a href="#" onclick="loadPage('ambulance', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">ambulance</span> Ambulance Services </a></li>
                     
                     <li class="nav-item mt-3"><small class="text-uppercase text-body-secondary fw-bold ms-3" style="font-size: 0.7rem;">Admin</small></li>
                     <li><a href="#" onclick="loadPage('billing', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">receipt_long</span> Billing</a></li>
@@ -372,6 +375,145 @@
                     </div>
                 </div>
             `,
+            'ward-bed': `
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Ward & Bed Management</h4>
+                        <button class="btn btn-primary rounded-pill px-4">View Ward Map</button>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                         <div class="col-md-4"><div class="p-3 bg-success-subtle text-success rounded-4 text-center border border-success-subtle h-100"><h3 class="fw-bold mb-0">12</h3><small>Available Beds</small></div></div>
+                         <div class="col-md-4"><div class="p-3 bg-danger-subtle text-danger rounded-4 text-center border border-danger-subtle h-100"><h3 class="fw-bold mb-0">45</h3><small>Occupied Beds</small></div></div>
+                         <div class="col-md-4"><div class="p-3 bg-warning-subtle text-warning-emphasis rounded-4 text-center border border-warning-subtle h-100"><h3 class="fw-bold mb-0">3</h3><small>Cleaning / Maintenance</small></div></div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary mb-3">General Ward (G-Wing)</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="card p-3 text-center border border-2 border-success bg-success-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-01 Selected')">
+                                <span class="material-symbols-rounded text-success fs-1 mb-2">bed</span>
+                                <h6 class="fw-bold mb-0">G-01</h6>
+                                <small class="text-success-emphasis">Available</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="card p-3 text-center border border-2 border-danger bg-danger-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-02 Details: John Doe')">
+                                <span class="material-symbols-rounded text-danger fs-1 mb-2">patient_list</span>
+                                <h6 class="fw-bold mb-0">G-02</h6>
+                                <small class="text-danger-emphasis">Occupied</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="card p-3 text-center border border-2 border-success bg-success-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-03 Selected')">
+                                <span class="material-symbols-rounded text-success fs-1 mb-2">bed</span>
+                                <h6 class="fw-bold mb-0">G-03</h6>
+                                <small class="text-success-emphasis">Available</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="card p-3 text-center border border-2 border-warning bg-warning-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Maintenance Requested')">
+                                <span class="material-symbols-rounded text-warning-emphasis fs-1 mb-2">cleaning_services</span>
+                                <h6 class="fw-bold mb-0">G-04</h6>
+                                <small class="text-warning-emphasis">Cleaning</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            'diet-health': `
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h4 class="fw-bold mb-4">Diet & Health Plans</h4>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
+                                        <span class="material-symbols-rounded fs-1">egg_alt</span>
+                                    </div>
+                                    <h5 class="fw-bold">Diabetic Plan</h5>
+                                    <p class="text-secondary small">Low sugar, high fiber diet designed for managing blood glucose levels effectively.</p>
+                                    <button class="btn btn-outline-primary rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
+                                        <span class="material-symbols-rounded fs-1">favorite</span>
+                                    </div>
+                                    <h5 class="fw-bold">Cardiac Care</h5>
+                                    <p class="text-secondary small">Heart-healthy diet low in sodium and saturated fats to improve cardiovascular health.</p>
+                                    <button class="btn btn-outline-danger rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
+                                <div class="card-body text-center p-4">
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex p-3 mb-3">
+                                        <span class="material-symbols-rounded fs-1">spa</span>
+                                    </div>
+                                    <h5 class="fw-bold">Renal Diet</h5>
+                                    <p class="text-secondary small">Specialized nutrition plan limiting potassium and phosphorus for kidney health.</p>
+                                    <button class="btn btn-outline-success rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            ambulance: `
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Ambulance Services</h4>
+                        <button class="btn btn-danger rounded-pill px-4 hover-lift" onclick="showToast('Emergency Dispatch Initiated')">
+                            <span class="material-symbols-rounded align-middle me-2">emergency_share</span>Dispatch Emergency
+                        </button>
+                    </div>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-8">
+                            <div class="bg-body-tertiary rounded-4 p-5 text-center border d-flex flex-column justify-content-center align-items-center" style="min-height: 300px;">
+                                <span class="material-symbols-rounded fs-1 text-secondary mb-3">map</span>
+                                <h5 class="text-secondary">Live GPS Map View</h5>
+                                <p class="text-secondary small">Map integration requires API Key</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-primary text-white rounded-4 p-4 h-100">
+                                <span class="material-symbols-rounded fs-1 mb-2">ambulance</span>
+                                <h2 class="display-4 fw-bold mb-0">08</h2>
+                                <p class="opacity-75">Active Ambulances</p>
+                                <hr class="border-white opacity-25">
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>On Mission</span>
+                                        <span class="fw-bold">3</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Available</span>
+                                        <span class="fw-bold">5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3">Fleet Status</h6>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-light"><tr><th>ID</th><th>Driver</th><th>Status</th><th>Location</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="badge bg-secondary">AMB-01</span></td><td>Robert Fox</td><td><span class="badge bg-success">Available</span></td><td>Hospital Base</td><td><button class="btn btn-sm btn-light rounded-pill" onclick="showToast('Tracking AMB-01')">Track</button></td></tr>
+                                <tr><td><span class="badge bg-secondary">AMB-02</span></td><td>Cody Fisher</td><td><span class="badge bg-danger">On Mission</span></td><td>Route 66, North</td><td><button class="btn btn-sm btn-light rounded-pill" onclick="showToast('Tracking AMB-02')">Track</button></td></tr>
+                                <tr><td><span class="badge bg-secondary">AMB-03</span></td><td>Esther Howard</td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td>Workshop</td><td><button class="btn btn-sm btn-light rounded-pill" disabled>Track</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `,
             billing: `
                 <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
                     <div class="mb-3"><span class="material-symbols-rounded text-success" style="font-size: 4rem;">receipt_long</span></div>
@@ -445,7 +587,7 @@
             const actionBtn = document.getElementById('modalActionBtn');
             const modalInstance = new bootstrap.Modal(document.getElementById('universalModal'));
 
-            // RESET BUTTON DEFAULTS (Because Logout changes it)
+            // RESET BUTTON DEFAULTS
             actionBtn.innerText = 'Save';
             actionBtn.className = 'btn btn-primary rounded-pill px-4';
             actionBtn.setAttribute('onclick', 'handleFormSubmit()');
@@ -475,13 +617,9 @@
             } else if (type === 'addDoctor') {
                 modalTitle.innerText = 'Add New Doctor';
                 html = `<form><div class="mb-3"><label>Full Name</label><input type="text" class="form-control"></div><div class="mb-3"><label>Specialization</label><input type="text" class="form-control"></div><div class="mb-3"><label>Email</label><input type="email" class="form-control"></div></form>`;
-            
-            // --- NEW: LOGOUT MODAL CASE ---
             } else if (type === 'logout') {
                 modalTitle.innerText = 'Confirm Logout';
                 html = `<div class="text-center py-3"><span class="material-symbols-rounded text-danger fs-1 mb-3">logout</span><h5 class="fw-bold">Ready to Leave?</h5><p class="text-secondary mb-0">You are about to sign out of your account.</p></div>`;
-                
-                // Customize Action Button for Logout
                 actionBtn.innerText = 'Yes, Logout';
                 actionBtn.className = 'btn btn-danger rounded-pill px-4';
                 actionBtn.setAttribute('onclick', 'performLogout()');
@@ -492,29 +630,22 @@
         }
 
         function handleFormSubmit() {
-            // Close modal
             const el = document.getElementById('universalModal');
             const modal = bootstrap.Modal.getInstance(el);
             modal.hide();
-            // Show Success Toast
             showToast('Saved Successfully');
         }
 
-        // --- NEW: LOGOUT FUNCTION ---
         function performLogout() {
             const el = document.getElementById('universalModal');
             const modal = bootstrap.Modal.getInstance(el);
             modal.hide();
-
             showToast('Securely logging out...');
-            
-            // Simulate logout redirect
             setTimeout(() => {
                 window.location.reload(); 
             }, 1500);
         }
 
-        // --- 4. UTILITIES (Toast & Scan Sim) ---
         function showToast(message) {
             document.getElementById('toastMessage').innerText = message;
             const toast = new bootstrap.Toast(document.getElementById('liveToast'));
@@ -525,7 +656,7 @@
             const icon = document.getElementById('scanIcon');
             const text = document.getElementById('scanText');
             
-            icon.innerText = 'hourglass_top'; // Loading icon
+            icon.innerText = 'hourglass_top'; 
             text.innerText = 'Scanning...';
             
             setTimeout(() => {
@@ -538,18 +669,11 @@
             }, 1500);
         }
 
-        // --- 5. INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Set Date
             document.getElementById("datePicker").value = new Date().toISOString().split('T')[0];
-            
-            // Note: We don't call loadPage('dashboard') here because the dashboard HTML 
-            // is already hardcoded in the body for faster initial paint.
-            // But we ensure the view state is ready for navigation.
             views.dashboard = document.getElementById('dynamicContent').innerHTML;
         });
 
-        // Theme Toggle
         document.getElementById('themeToggle').addEventListener('change', function() {
             document.documentElement.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
         });
