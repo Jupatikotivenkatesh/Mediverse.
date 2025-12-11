@@ -89,7 +89,7 @@
                     </div>
                 <div class="modal-footer border-top-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" onclick="handleFormSubmit()">Save</button>
+                    <button type="button" id="modalActionBtn" class="btn btn-primary rounded-pill px-4" onclick="handleFormSubmit()">Save</button>
                 </div>
             </div>
         </div>
@@ -134,7 +134,7 @@
                 </ul>
 
                 <div class="mt-auto pt-4">
-                    <a href="#" class="nav-link text-danger bg-danger-subtle d-flex align-items-center gap-3 py-3 rounded-4 justify-content-center" onclick="showToast('Securely logging out...')">
+                    <a href="#" class="nav-link text-danger bg-danger-subtle d-flex align-items-center gap-3 py-3 rounded-4 justify-content-center" onclick="openModal('logout')">
                         <span class="material-symbols-rounded">logout</span> Logout
                     </a>
                 </div>
@@ -205,7 +205,7 @@
                                     <div class="col-6 col-md-3"><div onclick="openModal('createBill')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-success fs-2">receipt_long</span><div class="fw-bold mt-2 text-body">New Bill</div></div></div>
                                     <div class="col-6 col-md-3"><div onclick="openModal('labTest')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-warning fs-2">science</span><div class="fw-bold mt-2 text-body">Lab Test</div></div></div>
                                     <div class="col-6 col-md-3"><div onclick="openModal('addStock')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-primary fs-2">local_pharmacy</span><div class="fw-bold mt-2 text-body">Pharmacy</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('addDoctor')" class="p-3 border
+                                    <div class="col-6 col-md-3"><div onclick="openModal('addDoctor')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-info fs-2">person_add_alt</span><div class="fw-bold mt-2 text-body">New Doc</div></div></div>
                                 </div>
                             </div>
                         </div>
@@ -263,10 +263,8 @@
 
     <script>
         // --- 1. VIEW CONTENT TEMPLATES ---
-        // This holds the HTML for every page to allow SPA (Single Page Application) behavior.
         const views = {
-            // NOTE: 'dashboard' is hardcoded in HTML for initial load, but included here for navigation.
-            dashboard: document.getElementById('dynamicContent').innerHTML, // Captures the initial state
+            dashboard: document.getElementById('dynamicContent').innerHTML,
             
             patients: `
                 <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -392,16 +390,6 @@
                     </div>
                 </div>
             `,
-            diet: `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <h4 class="fw-bold mb-4">Diet & Health Plans</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4"><div class="p-3 border rounded-4 bg-body-tertiary hover-shadow text-center"><h6 class="fw-bold">Diabetes</h6><p class="small text-secondary mb-3">Low sugar, high fiber plan.</p><button class="btn btn-sm btn-primary rounded-pill w-100" onclick="showToast('Plan Downloaded')">Download</button></div></div>
-                        <div class="col-md-4"><div class="p-3 border rounded-4 bg-body-tertiary hover-shadow text-center"><h6 class="fw-bold">Cardiac</h6><p class="small text-secondary mb-3">Heart healthy, low sodium.</p><button class="btn btn-sm btn-primary rounded-pill w-100" onclick="showToast('Plan Downloaded')">Download</button></div></div>
-                        <div class="col-md-4"><div class="p-3 border rounded-4 bg-body-tertiary hover-shadow text-center"><h6 class="fw-bold">Renal</h6><p class="small text-secondary mb-3">Kidney friendly nutrition.</p><button class="btn btn-sm btn-primary rounded-pill w-100" onclick="showToast('Plan Downloaded')">Download</button></div></div>
-                    </div>
-                </div>
-            `,
             settings: `
                 <div class="card border-0 shadow-sm rounded-4 p-4">
                     <h4 class="fw-bold mb-4">System Settings</h4>
@@ -454,7 +442,13 @@
         function openModal(type) {
             const modalTitle = document.getElementById('modalTitle');
             const modalBody = document.getElementById('modalBody');
+            const actionBtn = document.getElementById('modalActionBtn');
             const modalInstance = new bootstrap.Modal(document.getElementById('universalModal'));
+
+            // RESET BUTTON DEFAULTS (Because Logout changes it)
+            actionBtn.innerText = 'Save';
+            actionBtn.className = 'btn btn-primary rounded-pill px-4';
+            actionBtn.setAttribute('onclick', 'handleFormSubmit()');
 
             let html = '';
             if (type === 'addPatient') {
@@ -481,6 +475,16 @@
             } else if (type === 'addDoctor') {
                 modalTitle.innerText = 'Add New Doctor';
                 html = `<form><div class="mb-3"><label>Full Name</label><input type="text" class="form-control"></div><div class="mb-3"><label>Specialization</label><input type="text" class="form-control"></div><div class="mb-3"><label>Email</label><input type="email" class="form-control"></div></form>`;
+            
+            // --- NEW: LOGOUT MODAL CASE ---
+            } else if (type === 'logout') {
+                modalTitle.innerText = 'Confirm Logout';
+                html = `<div class="text-center py-3"><span class="material-symbols-rounded text-danger fs-1 mb-3">logout</span><h5 class="fw-bold">Ready to Leave?</h5><p class="text-secondary mb-0">You are about to sign out of your account.</p></div>`;
+                
+                // Customize Action Button for Logout
+                actionBtn.innerText = 'Yes, Logout';
+                actionBtn.className = 'btn btn-danger rounded-pill px-4';
+                actionBtn.setAttribute('onclick', 'performLogout()');
             }
 
             modalBody.innerHTML = html;
@@ -494,6 +498,20 @@
             modal.hide();
             // Show Success Toast
             showToast('Saved Successfully');
+        }
+
+        // --- NEW: LOGOUT FUNCTION ---
+        function performLogout() {
+            const el = document.getElementById('universalModal');
+            const modal = bootstrap.Modal.getInstance(el);
+            modal.hide();
+
+            showToast('Securely logging out...');
+            
+            // Simulate logout redirect
+            setTimeout(() => {
+                window.location.reload(); 
+            }, 1500);
         }
 
         // --- 4. UTILITIES (Toast & Scan Sim) ---
