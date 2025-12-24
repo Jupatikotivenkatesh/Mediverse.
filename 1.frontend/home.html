@@ -3,28 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediSync  | Full Hospital System</title>
+    <title>MediSync | Full Hospital System</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
             --bs-font-sans-serif: 'Plus Jakarta Sans', sans-serif;
             --primary-color: #7380ec;
+            --transition-speed: 0.4s;
         }
         
         body {
             background-color: var(--bs-tertiary-bg);
             font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Login Overlay Styling */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        [data-bs-theme="dark"] #loginOverlay {
+            background: rgba(15, 15, 25, 0.8);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 3rem;
+            border-radius: 2.5rem;
+            background: var(--bs-body-bg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--bs-border-color);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #loginOverlay.active .login-card {
+            transform: translateY(0);
+            opacity: 1;
         }
 
         /* Sidebar Styling */
         @media (min-width: 992px) {
             .sidebar-fixed {
-                width: 260px;
+                width: 280px;
                 height: 100vh;
                 position: sticky;
                 top: 0;
@@ -34,649 +72,253 @@
             }
         }
 
-        /* Navigation Links */
         .nav-link {
             color: var(--bs-secondary-color);
-            font-weight: 500;
-            margin-bottom: 4px;
-            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+            padding: 12px 20px;
         }
-        .nav-link:hover {
+
+        .nav-link:hover:not(.active) {
             color: var(--primary-color);
             background-color: var(--bs-tertiary-bg);
-            transform: translateX(4px);
+            transform: translateX(5px);
         }
+
         .nav-link.active {
             background-color: var(--primary-color);
             color: white !important;
-            box-shadow: 0 4px 10px rgba(115, 128, 236, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(115, 128, 236, 0.4);
         }
 
-        /* Cards & Interactions */
+        /* Generic UI Classes */
         .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
-        .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1)!important; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08)!important; }
         .cursor-pointer { cursor: pointer; }
-
-        /* Metric Icon Circles */
-        .icon-circle {
-            width: 48px; height: 48px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .icon-circle { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        
+        #dynamicContent { transition: all 0.3s ease; }
     </style>
 </head>
-<body>
+<body class="overflow-hidden">
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-        <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
+    <div id="loginOverlay" class="active">
+        <div class="login-card text-center">
+            <div class="mb-5">
+                <div class="bg-primary bg-opacity-10 d-inline-block p-3 rounded-4 mb-3">
+                    <span class="material-symbols-rounded fs-1 text-primary">health_and_safety</span>
+                </div>
+                <h2 class="fw-extrabold">Medi<span class="text-primary">Sync</span></h2>
+                <p class="text-secondary small">Secure Staff Portal</p>
+            </div>
+            <form id="loginForm" onsubmit="performLogin(event)">
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control rounded-4 border-0 bg-body-tertiary" id="email" placeholder="Email" value="venkatesh@medisync.com" required>
+                    <label>Email Address</label>
+                </div>
+                <div class="form-floating mb-4">
+                    <input type="password" class="form-control rounded-4 border-0 bg-body-tertiary" id="password" placeholder="Password" value="admin123" required>
+                    <label>Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 3000">
+        <div id="liveToast" class="toast align-items-center text-bg-dark border-0 rounded-4" role="alert">
+            <div class="d-flex p-2">
                 <div class="toast-body d-flex align-items-center gap-2">
-                    <span class="material-symbols-rounded fs-5">check_circle</span>
-                    <span id="toastMessage">Action Successful</span>
+                    <span class="material-symbols-rounded text-primary">verified</span>
+                    <span id="toastMessage"></span>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="universalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="universalModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow-lg">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalTitle">Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content rounded-5 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold" id="modalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body pt-3" id="modalBody">
-                    </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="modalActionBtn" class="btn btn-primary rounded-pill px-4" onclick="handleFormSubmit()">Save</button>
+                <div class="modal-body p-4" id="modalBody"></div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="modalActionBtn" class="btn btn-primary rounded-pill px-4">Save</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <nav class="navbar bg-body border-bottom d-lg-none sticky-top px-3 shadow-sm">
-        <div class="d-flex align-items-center justify-content-between w-100">
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
-                <span class="material-symbols-rounded text-primary">health_and_safety</span> MediSync
-            </a>
-            <button class="btn border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-                <span class="material-symbols-rounded fs-1">menu</span>
-            </button>
-        </div>
-    </nav>
 
     <div class="d-flex w-100">
-        
-        <div class="offcanvas-lg offcanvas-start sidebar-fixed" tabindex="-1" id="sidebarOffcanvas">
+        <aside class="offcanvas-lg offcanvas-start sidebar-fixed" id="sidebarOffcanvas">
             <div class="d-flex flex-column h-100 p-4">
-                <div class="d-none d-lg-flex align-items-center gap-2 mb-5 px-2">
-                    <span class="material-symbols-rounded fs-1 text-primary">health_and_safety</span>
-                    <h3 class="fw-bold mb-0">Medi<span class="text-primary">Sync</span></h3>
+                <div class="d-flex align-items-center gap-2 mb-5 px-2">
+                    <span class="material-symbols-rounded fs-2 text-primary">health_and_safety</span>
+                    <h4 class="fw-bold mb-0">MediSync</h4>
                 </div>
 
-                <ul class="nav nav-pills flex-column gap-1" id="menu-list">
-                    <li class="nav-item"><small class="text-uppercase text-body-secondary fw-bold ms-3" style="font-size: 0.7rem;">Main</small></li>
-                    <li><a href="#" onclick="loadPage('dashboard', this)" class="nav-link active d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">grid_view</span> Dashboard</a></li>
-                    <li><a href="#" onclick="loadPage('patients', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">patient_list</span> Patients</a></li>
-                    <li><a href="#" onclick="loadPage('doctors', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">stethoscope</span> Doctors</a></li>
-                    <li><a href="#" onclick="loadPage('appointments', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">calendar_month</span> Appointments</a></li>
-                    
-                    <li class="nav-item mt-3"><small class="text-uppercase text-body-secondary fw-bold ms-3" style="font-size: 0.7rem;">Services</small></li>
-                    <li><a href="#" onclick="loadPage('medscan', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">qr_code_scanner</span> MedScan</a></li>
-                    <li><a href="#" onclick="loadPage('pharmacy', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">local_pharmacy</span> Pharmacy</a></li>
-                    <li><a href="#" onclick="loadPage('lab', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">science</span> Lab Tests</a></li>
-                    <li><a href="#" onclick="loadPage('ward-bed', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">bed</span> Ward & Bed</a></li>
-                    <li><a href="#" onclick="loadPage('diet-health', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">restaurant_menu</span> Diet & Health</a></li>
-                    <li><a href="#" onclick="loadPage('ambulance', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">ambulance</span> Ambulance Services </a></li>
-                    
-                    <li class="nav-item mt-3"><small class="text-uppercase text-body-secondary fw-bold ms-3" style="font-size: 0.7rem;">Admin</small></li>
-                    <li><a href="#" onclick="loadPage('billing', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">receipt_long</span> Billing</a></li>
-                    <li><a href="#" onclick="loadPage('reports', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">bar_chart</span> Analytics</a></li>
-                    <li><a href="#" onclick="loadPage('settings', this)" class="nav-link d-flex align-items-center gap-3 py-3 rounded-4"><span class="material-symbols-rounded">settings</span> Settings</a></li>
+                <ul class="nav nav-pills flex-column gap-1">
+                    <li><a href="#" onclick="loadPage('dashboard', this)" class="nav-link active rounded-4 d-flex gap-3"><span class="material-symbols-rounded">dashboard</span> Dashboard</a></li>
+                    <li><a href="#" onclick="loadPage('patients', this)" class="nav-link rounded-4 d-flex gap-3"><span class="material-symbols-rounded">person</span> Patients</a></li>
+                    <li><a href="#" onclick="loadPage('doctors', this)" class="nav-link rounded-4 d-flex gap-3"><span class="material-symbols-rounded">medical_services</span> Doctors</a></li>
+                    <li><a href="#" onclick="loadPage('appointments', this)" class="nav-link rounded-4 d-flex gap-3"><span class="material-symbols-rounded">event</span> Schedule</a></li>
+                    <hr class="my-3 opacity-10">
+                    <li><a href="#" onclick="loadPage('pharmacy', this)" class="nav-link rounded-4 d-flex gap-3"><span class="material-symbols-rounded">pill</span> Pharmacy</a></li>
+                    <li><a href="#" onclick="loadPage('billing', this)" class="nav-link rounded-4 d-flex gap-3"><span class="material-symbols-rounded">payments</span> Billing</a></li>
                 </ul>
 
-                <div class="mt-auto pt-4">
-                    <a href="#" class="nav-link text-danger bg-danger-subtle d-flex align-items-center gap-3 py-3 rounded-4 justify-content-center" onclick="openModal('logout')">
+                <div class="mt-auto">
+                    <button class="btn btn-danger-subtle text-danger w-100 rounded-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2" onclick="openModal('logout')">
                         <span class="material-symbols-rounded">logout</span> Logout
-                    </a>
+                    </button>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <main class="flex-grow-1 p-3 p-lg-5" style="min-height: 100vh;">
-            
-            <header class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
+        <main class="flex-grow-1 p-3 p-lg-5">
+            <header class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h3 class="fw-bold mb-1" id="pageTitle">Dashboard Overview</h3>
-                    <p class="text-body-secondary mb-0">Welcome back, <span class="fw-bold text-primary">Dr. Alex</span></p>
+                    <h2 class="fw-bold mb-0" id="pageTitle">Dashboard</h2>
+                    <p class="text-secondary small">Welcome back, <span class="text-primary fw-bold">Venkatesh</span></p>
                 </div>
-                <div class="d-flex align-items-center gap-3 mt-3 mt-md-0 bg-body p-2 rounded-pill shadow-sm pe-4">
+                <div class="d-flex align-items-center gap-3 bg-body p-2 rounded-pill shadow-sm pe-4">
                     <div class="form-check form-switch ms-3">
-                        <input class="form-check-input" type="checkbox" id="themeToggle" style="cursor: pointer;">
-                        <span class="material-symbols-rounded fs-5 align-middle text-secondary">dark_mode</span>
+                        <input class="form-check-input" type="checkbox" id="themeToggle">
+                        <span class="material-symbols-rounded fs-5 text-secondary">dark_mode</span>
                     </div>
                     <div class="vr"></div>
-                    <input type="date" id="datePicker" class="form-control border-0 bg-transparent py-0 shadow-none" style="width: 130px; font-size:0.9rem;">
-                    <img src="https://i.pravatar.cc/150?img=11" class="rounded-circle border" width="35" height="35">
+                    <img src="https://i.pravatar.cc/150?u=venkatesh" class="rounded-circle" width="38">
                 </div>
             </header>
 
-            <div id="dynamicContent" class="fade-in">
-                
-                <div class="row g-4">
-                    <div class="col-xl-8">
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="icon-circle bg-primary bg-opacity-10 text-primary"><span class="material-symbols-rounded fs-3">group</span></div>
-                                        <span class="badge bg-success-subtle text-success rounded-pill">+12%</span>
-                                    </div>
-                                    <h2 class="fw-bold mt-3 mb-0">142</h2>
-                                    <p class="text-secondary small mb-0">Total Patients</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="icon-circle bg-success bg-opacity-10 text-success"><span class="material-symbols-rounded fs-3">stethoscope</span></div>
-                                        <span class="badge bg-primary-subtle text-primary rounded-pill">Active</span>
-                                    </div>
-                                    <h2 class="fw-bold mt-3 mb-0">24</h2>
-                                    <p class="text-secondary small mb-0">Doctors On Duty</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="icon-circle bg-danger bg-opacity-10 text-danger"><span class="material-symbols-rounded fs-3">calendar_month</span></div>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">Today</span>
-                                    </div>
-                                    <h2 class="fw-bold mt-3 mb-0">86</h2>
-                                    <p class="text-secondary small mb-0">Appointments</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card border-0 shadow-sm rounded-4 mb-4">
-                            <div class="card-header bg-white border-0 pt-4 px-4 pb-0"><h6 class="fw-bold">Quick Actions</h6></div>
-                            <div class="card-body p-4">
-                                <div class="row g-3">
-                                    <div class="col-6 col-md-3"><div onclick="openModal('addPatient')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-primary fs-2">person_add</span><div class="fw-bold mt-2 text-body">Add Patient</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('bookAppt')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-danger fs-2">event</span><div class="fw-bold mt-2 text-body">Book Visit</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('createBill')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-success fs-2">receipt_long</span><div class="fw-bold mt-2 text-body">New Bill</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('labTest')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-warning fs-2">science</span><div class="fw-bold mt-2 text-body">Lab Test</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('addStock')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-primary fs-2">local_pharmacy</span><div class="fw-bold mt-2 text-body">Pharmacy</div></div></div>
-                                    <div class="col-6 col-md-3"><div onclick="openModal('addDoctor')" class="p-3 border rounded-4 text-center cursor-pointer hover-lift bg-body-tertiary"><span class="material-symbols-rounded text-info fs-2">person_add_alt</span><div class="fw-bold mt-2 text-body">New Doc</div></div></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                            <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                                <h6 class="fw-bold mb-0">Recent Admissions</h6>
-                                <a href="#" onclick="loadPage('patients', null)" class="text-decoration-none text-primary fw-bold small">View All</a>
-                            </div>
-                            <div class="table-responsive px-3">
-                                <table class="table table-hover align-middle">
-                                    <thead class="text-secondary small"><tr><th>Patient</th><th>Dept</th><th>Doctor</th><th>Status</th></tr></thead>
-                                    <tbody>
-                                        <tr><td><span class="fw-bold">John Doe</span></td><td>Cardiology</td><td>Dr. Sarah</td><td><span class="badge bg-warning-subtle text-warning-emphasis">Pending</span></td></tr>
-                                        <tr><td><span class="fw-bold">Jane Smith</span></td><td>Neurology</td><td>Dr. Mike</td><td><span class="badge bg-success-subtle text-success">Admitted</span></td></tr>
-                                        <tr><td><span class="fw-bold">Michael Johnson</span></td><td>Orthopedics</td><td>Dr. Emily</td><td><span class="badge bg-primary-subtle text-primary">Discharged</span></td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4">
-                        <div class="card border-0 shadow-sm rounded-4 h-100">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold mb-4">Activity Log</h5>
-                                <div class="d-flex gap-3 mb-4">
-                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px; height:45px;"><span class="material-symbols-rounded">surgical</span></div>
-                                    <div><h6 class="mb-1 fw-bold">Surgery Completed</h6><p class="text-secondary small mb-0">Dr. Mike finished Room 302.</p><small class="text-muted">2 mins ago</small></div>
-                                </div>
-                                <div class="d-flex gap-3 mb-4">
-                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px; height:45px;"><span class="material-symbols-rounded">emergency</span></div>
-                                    <div><h6 class="mb-1 fw-bold">Emergency Alert</h6><p class="text-secondary small mb-0">ICU Unit 4 needs attention.</p><small class="text-muted">10 mins ago</small></div>
-                                </div>
-                                <div class="d-flex gap-3">
-                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px; height:45px;"><span class="material-symbols-rounded">inventory</span></div>
-                                    <div><h6 class="mb-1 fw-bold">Stock Update</h6><p class="text-secondary small mb-0">Antibiotics restocked.</p><small class="text-muted">1 hour ago</small></div>
-                                </div>
-                                
-                                <div class="mt-5 p-4 bg-body-tertiary rounded-4 text-center border">
-                                    <h6 class="fw-bold">Need Help?</h6>
-                                    <p class="text-secondary small">Contact IT support for issues.</p>
-                                    <button class="btn btn-dark rounded-pill w-100 btn-sm" onclick="showToast('Support ticket created')">Contact Support</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div id="dynamicContent">
                 </div>
-            </div>
-
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // --- 1. VIEW CONTENT TEMPLATES ---
         const views = {
-            dashboard: document.getElementById('dynamicContent').innerHTML,
-            
-            patients: `
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="fw-bold mb-0">Patient Directory</h4>
-                            <button class="btn btn-primary rounded-pill px-4 hover-lift" onclick="openModal('addPatient')"><span class="material-symbols-rounded align-middle me-1">add</span> Add Patient</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light"><tr><th>ID</th><th>Name</th><th>Age</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
-                                <tbody>
-                                    <tr><td>#P-101</td><td><div class="d-flex align-items-center gap-3"><div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:35px;height:35px">JD</div><strong>John Doe</strong></div></td><td>35</td><td>+1 234 567</td><td><span class="badge bg-warning-subtle text-warning-emphasis">Pending</span></td><td><button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openModal('viewPatient')">View</button></td></tr>
-                                    <tr><td>#P-102</td><td><div class="d-flex align-items-center gap-3"><div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:35px;height:35px">JS</div><strong>Jane Smith</strong></div></td><td>42</td><td>+1 987 654</td><td><span class="badge bg-success-subtle text-success">Admitted</span></td><td><button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openModal('viewPatient')">View</button></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            dashboard: `
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4"><div class="card border-0 shadow-sm rounded-4 p-4 hover-lift">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary mb-3"><span class="material-symbols-rounded">group</span></div>
+                        <h3 class="fw-bold">1,284</h3><p class="text-secondary mb-0">Total Patients</p>
+                    </div></div>
+                    <div class="col-md-4"><div class="card border-0 shadow-sm rounded-4 p-4 hover-lift">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success mb-3"><span class="material-symbols-rounded">check_circle</span></div>
+                        <h3 class="fw-bold">42</h3><p class="text-secondary mb-0">Available Doctors</p>
+                    </div></div>
+                    <div class="col-md-4"><div class="card border-0 shadow-sm rounded-4 p-4 hover-lift">
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning mb-3"><span class="material-symbols-rounded">pending_actions</span></div>
+                        <h3 class="fw-bold">18</h3><p class="text-secondary mb-0">Pending Appointments</p>
+                    </div></div>
                 </div>
-            `,
-            doctors: `
-                <div class="row g-4">
-                    <div class="col-12 text-end"><button class="btn btn-success rounded-pill px-4 hover-lift" onclick="openModal('addDoctor')"><span class="material-symbols-rounded align-middle me-1">person_add</span> Add Doctor</button></div>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 text-center hover-lift">
-                            <img src="https://i.pravatar.cc/150?img=68" class="rounded-circle mb-3 shadow-sm mx-auto" width="80">
-                            <h5 class="fw-bold">Dr. Sarah Wilson</h5>
-                            <p class="text-secondary small">Cardiologist</p>
-                            <span class="badge bg-success-subtle text-success rounded-pill mb-3">Available</span>
-                            <button class="btn btn-primary w-100 rounded-pill" onclick="openModal('doctorSchedule')">View Schedule</button>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 text-center hover-lift">
-                            <img src="https://i.pravatar.cc/150?img=53" class="rounded-circle mb-3 shadow-sm mx-auto" width="80">
-                            <h5 class="fw-bold">Dr. James Carter</h5>
-                            <p class="text-secondary small">Neurologist</p>
-                            <span class="badge bg-danger-subtle text-danger rounded-pill mb-3">In Surgery</span>
-                            <button class="btn btn-outline-secondary w-100 rounded-pill" disabled>Busy</button>
-                        </div>
-                    </div>
-                </div>
-            `,
-            appointments: `
                 <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-bold mb-0">Appointments</h4><button class="btn btn-danger rounded-pill px-4 hover-lift" onclick="openModal('bookAppt')">Book New</button></div>
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex align-items-center gap-3 py-3 border-bottom-0 border-start border-4 border-primary bg-body-tertiary mb-2 rounded-end hover-lift">
-                            <div class="text-center px-3"><h5 class="mb-0 fw-bold">09:00</h5><small class="text-muted">AM</small></div>
-                            <div><h6 class="mb-0 fw-bold">General Checkup - John Doe</h6><small class="text-muted">Dr. Sarah Wilson • Room 302</small></div>
-                            <button class="btn btn-sm btn-light ms-auto rounded-circle" onclick="showToast('Edit mode')"><span class="material-symbols-rounded fs-6">edit</span></button>
-                        </div>
-                        <div class="list-group-item d-flex align-items-center gap-3 py-3 border-bottom-0 border-start border-4 border-warning bg-body-tertiary rounded-end hover-lift">
-                            <div class="text-center px-3"><h5 class="mb-0 fw-bold">10:30</h5><small class="text-muted">AM</small></div>
-                            <div><h6 class="mb-0 fw-bold">MRI Scan - Emily Blunt</h6><small class="text-muted">Radiology Dept • Room 104</small></div>
-                            <button class="btn btn-sm btn-light ms-auto rounded-circle" onclick="showToast('Edit mode')"><span class="material-symbols-rounded fs-6">edit</span></button>
-                        </div>
-                    </div>
+                    <h5 class="fw-bold mb-4">Patient Admission Trends</h5>
+                    <canvas id="statsChart" height="100"></canvas>
                 </div>
             `,
-            medscan: `
-                <div class="card border-0 shadow-sm rounded-4 text-center p-5">
-                    <div class="mb-4"><span class="material-symbols-rounded text-primary" style="font-size: 4rem;">qr_code_scanner</span></div>
-                    <h3 class="fw-bold">MedScan AI</h3>
-                    <p class="text-secondary col-lg-8 mx-auto">Scan medicine barcodes to identify drugs, verify dosage, and check warehouse inventory instantly.</p>
-                    <div id="scanArea" class="border-2 border-dashed border-secondary-subtle rounded-4 p-5 mt-4 bg-body-tertiary cursor-pointer hover-lift" onclick="simulateScan()">
-                        <span class="material-symbols-rounded fs-1 text-muted" id="scanIcon">center_focus_strong</span>
-                        <p class="mb-0 mt-2 fw-bold text-muted" id="scanText">Click to Activate Scanner</p>
-                    </div>
-                </div>
-            `,
-            pharmacy: `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-bold mb-0">Pharmacy Inventory</h4><button class="btn btn-success rounded-pill px-4" onclick="openModal('addStock')">Add Stock</button></div>
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light"><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody>
-                            <tr><td>Paracetamol</td><td>Pain Relief</td><td>1,200</td><td><span class="badge bg-success">In Stock</span></td><td><button class="btn btn-sm btn-light" onclick="this.innerHTML='Ordered'; this.classList.add('text-success'); showToast('Order Placed')">Order</button></td></tr>
-                            <tr><td>Amoxicillin</td><td>Antibiotic</td><td>45</td><td><span class="badge bg-warning text-dark">Low</span></td><td><button class="btn btn-sm btn-light" onclick="this.innerHTML='Ordered'; this.classList.add('text-success'); showToast('Order Placed')">Order</button></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            `,
-            lab: `
-                <div class="row g-4">
-                    <div class="col-md-8">
-                        <div class="card border-0 shadow-sm rounded-4 p-4">
-                            <div class="d-flex justify-content-between mb-4"><h4 class="fw-bold">Lab Tests</h4><button class="btn btn-warning rounded-pill px-4 text-dark" onclick="openModal('labTest')">New Test</button></div>
-                            <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action border-0 bg-body-tertiary rounded-3 mb-2 p-3 d-flex justify-content-between align-items-center">
-                                    <div><h6 class="mb-0 fw-bold">Blood Test (CBC)</h6><small class="text-muted">John Doe • Ref: #992</small></div>
-                                    <span class="badge bg-danger">Urgent</span>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action border-0 bg-body-tertiary rounded-3 mb-2 p-3 d-flex justify-content-between align-items-center">
-                                    <div><h6 class="mb-0 fw-bold">Urinalysis</h6><small class="text-muted">Jane Smith • Ref: #993</small></div>
-                                    <span class="badge bg-info text-dark">Processing</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-primary text-white h-100">
-                            <span class="material-symbols-rounded fs-1 mb-2">science</span><h4>Lab Stats</h4><h2 class="display-4 fw-bold">128</h2><p>Tests Today</p>
-                        </div>
-                    </div>
-                </div>
-            `,
-            'ward-bed': `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Ward & Bed Management</h4>
-                        <button class="btn btn-primary rounded-pill px-4">View Ward Map</button>
-                    </div>
-                    
-                    <div class="row g-3 mb-4">
-                         <div class="col-md-4"><div class="p-3 bg-success-subtle text-success rounded-4 text-center border border-success-subtle h-100"><h3 class="fw-bold mb-0">12</h3><small>Available Beds</small></div></div>
-                         <div class="col-md-4"><div class="p-3 bg-danger-subtle text-danger rounded-4 text-center border border-danger-subtle h-100"><h3 class="fw-bold mb-0">45</h3><small>Occupied Beds</small></div></div>
-                         <div class="col-md-4"><div class="p-3 bg-warning-subtle text-warning-emphasis rounded-4 text-center border border-warning-subtle h-100"><h3 class="fw-bold mb-0">3</h3><small>Cleaning / Maintenance</small></div></div>
-                    </div>
-
-                    <h6 class="fw-bold text-secondary mb-3">General Ward (G-Wing)</h6>
-                    <div class="row g-3 mb-4">
-                        <div class="col-6 col-md-4 col-lg-2">
-                            <div class="card p-3 text-center border border-2 border-success bg-success-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-01 Selected')">
-                                <span class="material-symbols-rounded text-success fs-1 mb-2">bed</span>
-                                <h6 class="fw-bold mb-0">G-01</h6>
-                                <small class="text-success-emphasis">Available</small>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4 col-lg-2">
-                            <div class="card p-3 text-center border border-2 border-danger bg-danger-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-02 Details: John Doe')">
-                                <span class="material-symbols-rounded text-danger fs-1 mb-2">patient_list</span>
-                                <h6 class="fw-bold mb-0">G-02</h6>
-                                <small class="text-danger-emphasis">Occupied</small>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4 col-lg-2">
-                            <div class="card p-3 text-center border border-2 border-success bg-success-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Bed G-03 Selected')">
-                                <span class="material-symbols-rounded text-success fs-1 mb-2">bed</span>
-                                <h6 class="fw-bold mb-0">G-03</h6>
-                                <small class="text-success-emphasis">Available</small>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4 col-lg-2">
-                            <div class="card p-3 text-center border border-2 border-warning bg-warning-subtle rounded-3 h-100 hover-lift cursor-pointer" onclick="showToast('Maintenance Requested')">
-                                <span class="material-symbols-rounded text-warning-emphasis fs-1 mb-2">cleaning_services</span>
-                                <h6 class="fw-bold mb-0">G-04</h6>
-                                <small class="text-warning-emphasis">Cleaning</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            'diet-health': `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <h4 class="fw-bold mb-4">Diet & Health Plans</h4>
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
-                                <div class="card-body text-center p-4">
-                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
-                                        <span class="material-symbols-rounded fs-1">egg_alt</span>
-                                    </div>
-                                    <h5 class="fw-bold">Diabetic Plan</h5>
-                                    <p class="text-secondary small">Low sugar, high fiber diet designed for managing blood glucose levels effectively.</p>
-                                    <button class="btn btn-outline-primary rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
-                                <div class="card-body text-center p-4">
-                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
-                                        <span class="material-symbols-rounded fs-1">favorite</span>
-                                    </div>
-                                    <h5 class="fw-bold">Cardiac Care</h5>
-                                    <p class="text-secondary small">Heart-healthy diet low in sodium and saturated fats to improve cardiovascular health.</p>
-                                    <button class="btn btn-outline-danger rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 bg-body-tertiary rounded-4 hover-lift">
-                                <div class="card-body text-center p-4">
-                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex p-3 mb-3">
-                                        <span class="material-symbols-rounded fs-1">spa</span>
-                                    </div>
-                                    <h5 class="fw-bold">Renal Diet</h5>
-                                    <p class="text-secondary small">Specialized nutrition plan limiting potassium and phosphorus for kidney health.</p>
-                                    <button class="btn btn-outline-success rounded-pill btn-sm px-4" onclick="showToast('Plan Assigned')">Assign Plan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            ambulance: `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Ambulance Services</h4>
-                        <button class="btn btn-danger rounded-pill px-4 hover-lift" onclick="showToast('Emergency Dispatch Initiated')">
-                            <span class="material-symbols-rounded align-middle me-2">emergency_share</span>Dispatch Emergency
-                        </button>
-                    </div>
-                    
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-8">
-                            <div class="bg-body-tertiary rounded-4 p-5 text-center border d-flex flex-column justify-content-center align-items-center" style="min-height: 300px;">
-                                <span class="material-symbols-rounded fs-1 text-secondary mb-3">map</span>
-                                <h5 class="text-secondary">Live GPS Map View</h5>
-                                <p class="text-secondary small">Map integration requires API Key</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-0 bg-primary text-white rounded-4 p-4 h-100">
-                                <span class="material-symbols-rounded fs-1 mb-2">ambulance</span>
-                                <h2 class="display-4 fw-bold mb-0">08</h2>
-                                <p class="opacity-75">Active Ambulances</p>
-                                <hr class="border-white opacity-25">
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>On Mission</span>
-                                        <span class="fw-bold">3</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span>Available</span>
-                                        <span class="fw-bold">5</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h6 class="fw-bold mb-3">Fleet Status</h6>
-                    <div class="table-responsive">
-                        <table class="table align-middle table-hover">
-                            <thead class="table-light"><tr><th>ID</th><th>Driver</th><th>Status</th><th>Location</th><th>Action</th></tr></thead>
-                            <tbody>
-                                <tr><td><span class="badge bg-secondary">AMB-01</span></td><td>Robert Fox</td><td><span class="badge bg-success">Available</span></td><td>Hospital Base</td><td><button class="btn btn-sm btn-light rounded-pill" onclick="showToast('Tracking AMB-01')">Track</button></td></tr>
-                                <tr><td><span class="badge bg-secondary">AMB-02</span></td><td>Cody Fisher</td><td><span class="badge bg-danger">On Mission</span></td><td>Route 66, North</td><td><button class="btn btn-sm btn-light rounded-pill" onclick="showToast('Tracking AMB-02')">Track</button></td></tr>
-                                <tr><td><span class="badge bg-secondary">AMB-03</span></td><td>Esther Howard</td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td>Workshop</td><td><button class="btn btn-sm btn-light rounded-pill" disabled>Track</button></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `,
-            billing: `
-                <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
-                    <div class="mb-3"><span class="material-symbols-rounded text-success" style="font-size: 4rem;">receipt_long</span></div>
-                    <h3>Billing & Invoices</h3>
-                    <p class="text-secondary mb-4">Manage patient invoices and insurance claims.</p>
-                    <div class="d-flex justify-content-center gap-3"><button class="btn btn-success rounded-pill px-4" onclick="openModal('createBill')">Create Invoice</button><button class="btn btn-outline-secondary rounded-pill px-4">View History</button></div>
-                </div>
-            `,
-            reports: `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <h4 class="fw-bold mb-4">Analytics & Reports</h4>
-                    <div class="alert alert-info border-0 bg-info-subtle text-info-emphasis d-flex align-items-center mb-4"><span class="material-symbols-rounded me-2">info</span> Monthly Performance Report is ready.</div>
-                    <div class="row g-3">
-                        <div class="col-md-6"><div class="p-4 bg-body-tertiary rounded-4 text-center border h-100"><h5>Revenue</h5><h3 class="fw-bold text-success">$45,200</h3><small>+5% from last month</small></div></div>
-                        <div class="col-md-6"><div class="p-4 bg-body-tertiary rounded-4 text-center border h-100"><h5>New Patients</h5><h3 class="fw-bold text-primary">340</h3><small>+12% from last month</small></div></div>
-                    </div>
-                </div>
-            `,
-            settings: `
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <h4 class="fw-bold mb-4">System Settings</h4>
-                    <form onsubmit="event.preventDefault(); showToast('Settings Saved')">
-                        <div class="mb-3"><label class="form-label">Hospital Name</label><input type="text" class="form-control" value="MediSync Hospital"></div>
-                        <div class="mb-3"><label class="form-label">Admin Email</label><input type="email" class="form-control" value="admin@medisync.com"></div>
-                        <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Enable Email Notifications</label></div>
-                        <div class="form-check form-switch mb-4"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Dark Mode Auto-Switch</label></div>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
-                    </form>
-                </div>
-            `
+            patients: `<div class="card border-0 shadow-sm rounded-4 p-4"><h3>Patient Management</h3><p>Manage records here.</p></div>`,
+            doctors: `<div class="card border-0 shadow-sm rounded-4 p-4"><h3>Doctor Directory</h3><p>Staff availability and shifts.</p></div>`,
+            appointments: `<div class="card border-0 shadow-sm rounded-4 p-4"><h3>Weekly Schedule</h3><p>Appointment booking system.</p></div>`,
+            pharmacy: `<div class="card border-0 shadow-sm rounded-4 p-4"><h3>Pharmacy Inventory</h3><p>Track medicine stock.</p></div>`,
+            billing: `<div class="card border-0 shadow-sm rounded-4 p-4"><h3>Financial Records</h3><p>Invoices and payments.</p></div>`
         };
 
-        // --- 2. CORE SPA LOGIC ---
-        function loadPage(pageId, element) {
-            const contentDiv = document.getElementById('dynamicContent');
-            const pageTitle = document.getElementById('pageTitle');
-            
-            // Sidebar Active State
-            if (element) {
-                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-                element.classList.add('active');
-                
-                // Close Mobile Offcanvas
-                const offcanvasEl = document.getElementById('sidebarOffcanvas');
-                const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
-                if(offcanvas && window.innerWidth < 992) offcanvas.hide();
-            }
-
-            // Animation
-            contentDiv.style.opacity = '0';
-            contentDiv.style.transform = 'translateY(10px)';
-            contentDiv.style.transition = 'all 0.2s ease-out';
-
+        function performLogin(e) {
+            e.preventDefault();
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.remove('active');
             setTimeout(() => {
-                // Load View or Default Error
-                contentDiv.innerHTML = views[pageId] || `<div class="alert alert-warning">Content for ${pageId} not found.</div>`;
-                
-                // Update Title
-                pageTitle.textContent = pageId.charAt(0).toUpperCase() + pageId.slice(1) + (pageId === 'dashboard' ? ' Overview' : '');
-                
-                // Fade In
-                contentDiv.style.opacity = '1';
-                contentDiv.style.transform = 'translateY(0)';
-            }, 200);
-        }
-
-        // --- 3. MODAL LOGIC (Form Injection) ---
-        function openModal(type) {
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            const actionBtn = document.getElementById('modalActionBtn');
-            const modalInstance = new bootstrap.Modal(document.getElementById('universalModal'));
-
-            // RESET BUTTON DEFAULTS
-            actionBtn.innerText = 'Save';
-            actionBtn.className = 'btn btn-primary rounded-pill px-4';
-            actionBtn.setAttribute('onclick', 'handleFormSubmit()');
-
-            let html = '';
-            if (type === 'addPatient') {
-                modalTitle.innerText = 'Add New Patient';
-                html = `<form><div class="mb-3"><label class="form-label">Full Name</label><input type="text" class="form-control" placeholder="e.g. John Doe"></div><div class="row"><div class="col-6 mb-3"><label class="form-label">Age</label><input type="number" class="form-control"></div><div class="col-6 mb-3"><label class="form-label">Gender</label><select class="form-select"><option>Male</option><option>Female</option></select></div></div><div class="mb-3"><label class="form-label">Condition</label><input type="text" class="form-control"></div></form>`;
-            } else if (type === 'bookAppt' || type === 'appointment') {
-                modalTitle.innerText = 'Book Appointment';
-                html = `<form><div class="mb-3"><label class="form-label">Patient Name</label><input type="text" class="form-control"></div><div class="mb-3"><label class="form-label">Doctor</label><select class="form-select"><option>Dr. Sarah Wilson (Cardio)</option><option>Dr. James Carter (Neuro)</option></select></div><div class="mb-3"><label class="form-label">Date</label><input type="date" class="form-control"></div></form>`;
-            } else if (type === 'createBill' || type === 'bill') {
-                modalTitle.innerText = 'Create Invoice';
-                html = `<form><div class="mb-3"><label class="form-label">Patient ID</label><input type="text" class="form-control" placeholder="#P-..."></div><div class="mb-3"><label class="form-label">Description</label><input type="text" class="form-control" placeholder="Consultation fee"></div><div class="mb-3"><label class="form-label">Amount ($)</label><input type="number" class="form-control"></div></form>`;
-            } else if (type === 'addStock') {
-                modalTitle.innerText = 'Add Pharmacy Stock';
-                html = `<form><div class="mb-3"><label class="form-label">Medicine Name</label><input type="text" class="form-control"></div><div class="mb-3"><label class="form-label">Category</label><input type="text" class="form-control"></div><div class="mb-3"><label class="form-label">Quantity</label><input type="number" class="form-control"></div></form>`;
-            } else if (type === 'labTest' || type === 'lab') {
-                modalTitle.innerText = 'New Lab Test';
-                html = `<form><div class="mb-3"><label class="form-label">Patient Name</label><input type="text" class="form-control"></div><div class="mb-3"><label class="form-label">Test Type</label><select class="form-select"><option>Blood Test (CBC)</option><option>Urinalysis</option><option>X-Ray</option><option>MRI Scan</option></select></div><div class="form-check"><input class="form-check-input" type="checkbox" id="urgent"><label class="form-check-label" for="urgent">Mark as Urgent</label></div></form>`;
-            } else if (type === 'viewPatient') {
-                modalTitle.innerText = 'Patient Profile';
-                html = `<div class="text-center"><div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3"><span class="material-symbols-rounded fs-1">person</span></div><h5>John Doe</h5><p class="text-secondary small">ID: #P-101 • Age: 35 • Blood: O+</p></div><hr><div class="d-flex justify-content-between"><span>Status:</span><span class="badge bg-warning-subtle text-warning-emphasis">Pending</span></div><div class="d-flex justify-content-between mt-2"><span>Last Visit:</span><span>Oct 20, 2023</span></div>`;
-            } else if (type === 'doctorSchedule') {
-                modalTitle.innerText = 'Doctor Schedule';
-                html = `<div class="list-group"><div class="list-group-item">09:00 AM - Surgery (Room 302)</div><div class="list-group-item">11:00 AM - Ward Rounds</div><div class="list-group-item">02:00 PM - OPD Consultation</div></div>`;
-            } else if (type === 'addDoctor') {
-                modalTitle.innerText = 'Add New Doctor';
-                html = `<form><div class="mb-3"><label>Full Name</label><input type="text" class="form-control"></div><div class="mb-3"><label>Specialization</label><input type="text" class="form-control"></div><div class="mb-3"><label>Email</label><input type="email" class="form-control"></div></form>`;
-            } else if (type === 'logout') {
-                modalTitle.innerText = 'Confirm Logout';
-                html = `<div class="text-center py-3"><span class="material-symbols-rounded text-danger fs-1 mb-3">logout</span><h5 class="fw-bold">Ready to Leave?</h5><p class="text-secondary mb-0">You are about to sign out of your account.</p></div>`;
-                actionBtn.innerText = 'Yes, Logout';
-                actionBtn.className = 'btn btn-danger rounded-pill px-4';
-                actionBtn.setAttribute('onclick', 'performLogout()');
-            }
-
-            modalBody.innerHTML = html;
-            modalInstance.show();
-        }
-
-        function handleFormSubmit() {
-            const el = document.getElementById('universalModal');
-            const modal = bootstrap.Modal.getInstance(el);
-            modal.hide();
-            showToast('Saved Successfully');
+                overlay.style.display = 'none';
+                document.body.classList.remove('overflow-hidden');
+                loadPage('dashboard');
+                showToast('Authenticated Successfully');
+            }, 500);
         }
 
         function performLogout() {
-            const el = document.getElementById('universalModal');
-            const modal = bootstrap.Modal.getInstance(el);
-            modal.hide();
-            showToast('Securely logging out...');
+            bootstrap.Modal.getInstance(document.getElementById('universalModal')).hide();
+            showToast('Signing out...');
             setTimeout(() => {
-                window.location.reload(); 
-            }, 1500);
+                const overlay = document.getElementById('loginOverlay');
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.classList.add('active'), 10);
+                document.body.classList.add('overflow-hidden');
+            }, 800);
         }
 
-        function showToast(message) {
-            document.getElementById('toastMessage').innerText = message;
-            const toast = new bootstrap.Toast(document.getElementById('liveToast'));
-            toast.show();
-        }
-
-        function simulateScan() {
-            const icon = document.getElementById('scanIcon');
-            const text = document.getElementById('scanText');
-            
-            icon.innerText = 'hourglass_top'; 
-            text.innerText = 'Scanning...';
-            
+        function loadPage(pageId, element) {
+            const content = document.getElementById('dynamicContent');
+            if(element) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                element.classList.add('active');
+            }
+            content.style.opacity = '0';
             setTimeout(() => {
-                icon.innerText = 'check_circle';
-                icon.classList.remove('text-muted');
-                icon.classList.add('text-success');
-                text.innerText = 'Identified: Amoxicillin 500mg';
-                text.classList.add('text-success');
-                showToast('Scan Successful');
-            }, 1500);
+                content.innerHTML = views[pageId];
+                document.getElementById('pageTitle').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+                content.style.opacity = '1';
+                if(pageId === 'dashboard') initChart();
+            }, 300);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById("datePicker").value = new Date().toISOString().split('T')[0];
-            views.dashboard = document.getElementById('dynamicContent').innerHTML;
-        });
+        function initChart() {
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Admissions',
+                        data: [12, 19, 15, 25, 22, 30, 28],
+                        borderColor: '#7380ec',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(115, 128, 236, 0.1)'
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
 
-        document.getElementById('themeToggle').addEventListener('change', function() {
-            document.documentElement.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
-        });
+        function openModal(type) {
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            const btn = document.getElementById('modalActionBtn');
+            const modal = new bootstrap.Modal(document.getElementById('universalModal'));
+
+            if(type === 'logout') {
+                title.innerText = 'Logout Confirmation';
+                body.innerHTML = 'Are you sure you want to exit the system? All unsaved changes will be lost.';
+                btn.innerText = 'Logout Now';
+                btn.className = 'btn btn-danger rounded-pill px-4';
+                btn.onclick = performLogout;
+            }
+            modal.show();
+        }
+
+        function showToast(msg) {
+            document.getElementById('toastMessage').innerText = msg;
+            new bootstrap.Toast(document.getElementById('liveToast')).show();
+        }
+
+        document.getElementById('themeToggle').onclick = function() {
+            const theme = this.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        };
+
+        // Initialize App
+        window.onload = () => {
+            loadPage('dashboard');
+        };
     </script>
 </body>
 </html>
